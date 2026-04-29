@@ -13,7 +13,7 @@ struct PanelSection<Content: View>: View {
     @ViewBuilder let content: () -> Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             content()
         }
         .padding(.horizontal, 12)

@@ -152,6 +152,13 @@ final class KeyLightService: NSObject {
         await apply(s)
     }
 
+    func applyPreset(brightness: Int, temperature: Int) async {
+        guard var s = selectedLight?.state else { return }
+        s.brightness = max(1, min(100, brightness))
+        s.temperature = max(143, min(344, temperature))
+        await apply(s)
+    }
+
     func fetchAccessoryInfo() async {
         guard let (i, url) = indexed("accessory-info") else { return }
         do {

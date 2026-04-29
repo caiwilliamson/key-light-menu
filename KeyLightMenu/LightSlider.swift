@@ -16,6 +16,7 @@ struct LightSlider: View {
     @State private var value: Double
     @State private var lastSent: Date = .distantPast
     @State private var pendingTask: Task<Void, Never>?
+    @State private var isDragging = false
     private static let throttleInterval: TimeInterval = 0.1
 
     init(
@@ -39,7 +40,9 @@ struct LightSlider: View {
                 .frame(width: 20)
                 .foregroundStyle(.secondary)
 
-            Slider(value: $value, in: range)
+            Slider(value: $value, in: range) { editing in
+                isDragging = editing
+            }
 
             Text(label(value))
                 .frame(width: 40, alignment: .trailing)
@@ -62,7 +65,7 @@ struct LightSlider: View {
             }
         }
         .onChange(of: externalValue) { _, new in
-            guard pendingTask?.isCancelled == false else { value = new; return }
+            if !isDragging { value = new }
         }
     }
 }

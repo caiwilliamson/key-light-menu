@@ -9,7 +9,9 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(KeyLightService.self) private var service
+    @Environment(PresetStore.self) private var store
     @State private var showInfo = false
+    @State private var showPresets = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -29,7 +31,12 @@ struct ContentView: View {
                         }
                         .padding()
                     }
+                } else if showPresets {
+                    PresetsPanel()
+                        .environment(service)
+                        .environment(store)
                 } else if let state = light.state {
+                    let hostPresets = store.presets(for: light.host)
                     PanelSection {
                         LightSlider(
                             icon: "sun.max.fill",
@@ -42,8 +49,25 @@ struct ContentView: View {
                             icon: "thermometer.medium",
                             value: Double(state.temperature),
                             range: 143...344,
-                            label: { v in "\(Int(1_000_000 / v))K" }
+                            label: { v in "\(Int(1_000_000 / v.rounded()))K" }
                         ) { v in Task { await service.setTemperature(Int(v)) } }
+
+                        if !hostPresets.isEmpty {
+                            HStack(spacing: 8) {
+                                Image(systemName: "slider.horizontal.3")
+                                    .frame(width: 20)
+                                    .foregroundStyle(.secondary)
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 6) {
+                                        ForEach(hostPresets) { preset in
+                                            PresetButton(preset: preset) {
+                                                Task { await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature) }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 } else if service.isLoading {
                     HStack(spacing: 6) {
@@ -62,7 +86,7 @@ struct ContentView: View {
         .font(.callout)
         .task { service.startDiscovery() }
         .onChange(of: service.selectedLight?.host) { _, new in
-            if new == nil { showInfo = false }
+            if new == nil { showInfo = false; showPresets = false }
         }
     }
 
@@ -98,7 +122,19 @@ struct ContentView: View {
 
                 if service.selectedLight != nil {
                     Button {
+                        showPresets.toggle()
+                        if showPresets { showInfo = false }
+                    } label: {
+                        Image(systemName: showPresets ? "slider.horizontal.3" : "slider.horizontal.3")
+                            .font(.title2)
+                            .foregroundStyle(showPresets ? Color.accentColor : Color.secondary)
+                            .foregroundStyle(showPresets ? Color.accentColor : Color.secondary)
+                    }
+                    .buttonStyle(.plain)
+
+                    Button {
                         showInfo.toggle()
+                        if showInfo { showPresets = false }
                     } label: {
                         Image(systemName: showInfo ? "info.circle.fill" : "info.circle")
                             .font(.title2)
@@ -171,7 +207,7 @@ struct ContentView: View {
 
             PanelSection {
                 HStack {
-                    if !showInfo {
+                    if !showInfo && !showPresets {
                         Button {
                             service.startDiscovery()
                         } label: {
@@ -195,6 +231,17 @@ struct ContentView: View {
 
 }
 
+
+private struct PresetButton: View {
+    let preset: Preset
+    let action: () -> Void
+
+    var body: some View {
+        Button(preset.name, action: action)
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+    }
+}
 
 #Preview {
     ContentView()
