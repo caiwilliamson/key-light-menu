@@ -97,7 +97,7 @@ struct ContentView: View {
         }
         .frame(width: 320)
         .font(.callout)
-        .task { service.startDiscovery() }
+        .task { service.startSession() }
         .onChange(of: service.selectedLight?.host) { _, new in
             if new == nil { showInfo = false; showPresets = false; showSettings = false }
         }

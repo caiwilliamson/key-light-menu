@@ -53,7 +53,7 @@ final class KeyLightService: NSObject {
 
     var isOn: Bool { selectedLight?.state?.isOn ?? false }
 
-    private func startPolling() {
+    func startPolling() {
         pollTask?.cancel()
         pollTask = Task { [weak self] in
             while !Task.isCancelled {
@@ -88,6 +88,21 @@ final class KeyLightService: NSObject {
     }
 
     // MARK: - Discovery
+
+    /// Called on app open. Skips Bonjour scan if we already have cached lights
+    /// and just refreshes state via polling instead.
+    func startSession() {
+        if lights.isEmpty {
+            startDiscovery()
+        } else {
+            Task {
+                await fetchStatus(showSpinner: false)
+                await fetchAccessoryInfo()
+                await fetchSettings()
+            }
+            startPolling()
+        }
+    }
 
     func startDiscovery() {
         stopPolling()
