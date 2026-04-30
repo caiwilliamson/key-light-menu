@@ -267,7 +267,7 @@ extension KeyLightService: NetServiceDelegate {
 
         Task { @MainActor in
             defer { sender.stop(); self.resolving.removeAll { $0 === sender } }
-            guard !self.lights.contains(where: { $0.host == ipAddress }) else { return }
+            guard !self.lights.contains(where: { $0.host == ipAddress && $0.port == port }) else { return }
             self.lights.append(KeyLight(discoveredName: name, host: ipAddress, port: port))
             if self.selectedIndex == nil {
                 self.selectedIndex = self.lights.count - 1
