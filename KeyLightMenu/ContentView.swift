@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Flow
 
 struct ContentView: View {
     @Environment(KeyLightService.self) private var service
@@ -66,16 +67,15 @@ struct ContentView: View {
                         ) { v in Task { await service.setTemperature(Int(v)) } }
 
                         if !hostPresets.isEmpty {
-                            HStack(spacing: 8) {
+                            HStack(alignment: .top, spacing: 8) {
                                 Image(systemName: "slider.horizontal.3")
                                     .frame(width: 20)
                                     .foregroundStyle(.secondary)
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 6) {
-                                        ForEach(hostPresets) { preset in
-                                            PresetButton(preset: preset) {
-                                                Task { await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature) }
-                                            }
+                                    .padding(.top, 4)
+                                HFlow(itemSpacing: 6, rowSpacing: 6) {
+                                    ForEach(hostPresets) { preset in
+                                        PresetButton(preset: preset) {
+                                            Task { await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature) }
                                         }
                                     }
                                 }
