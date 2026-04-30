@@ -26,7 +26,7 @@ struct SettingToggleRow: View {
             if let subtitle {
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(.secondary)
             }
         }
     }

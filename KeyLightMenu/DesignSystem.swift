@@ -17,7 +17,7 @@ struct PanelSection<Content: View>: View {
             content()
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 10)
+        .padding(.vertical, 12)
     }
 }
 

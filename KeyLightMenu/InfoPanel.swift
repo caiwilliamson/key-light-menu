@@ -10,36 +10,8 @@ struct InfoPanel: View {
     let light: KeyLight
     let info: AccessoryInfo
 
-    @State private var displayNameDraft = ""
-
     var body: some View {
         VStack(spacing: 0) {
-
-            // Display Name
-            PanelSection {
-                HStack {
-                    Text("Display Name")
-                        .foregroundStyle(.secondary)
-                    TextField("None", text: $displayNameDraft)
-                        .textFieldStyle(.roundedBorder)
-                        .onSubmit { saveDisplayName() }
-                    if displayNameDraft != info.displayName {
-                        Button("Save", action: saveDisplayName)
-                            .controlSize(.small)
-                            .buttonStyle(.borderedProminent)
-                    }
-                }
-            }
-
-            // Battery Settings
-            if let battery = service.selectedLight?.settings?.battery {
-                SectionDivider()
-                BatteryPanel(battery: battery)
-                    .environment(service)
-            }
-
-            SectionDivider()
-
             // Device Info
             PanelSection {
                 InfoRow("Device", info.shortProductName)
@@ -49,15 +21,12 @@ struct InfoPanel: View {
             }
 
             if let wifi = info.wifiInfo {
-                SectionDivider()
                 PanelSection {
                     InfoRow("Wi-Fi Network", wifi.ssid)
                     InfoRow("Wi-Fi Frequency", wifi.frequencyGHz)
                     InfoRow("Wi-Fi Signal Strength", "\(wifi.signalPercent)%")
                 }
             }
-
-            SectionDivider()
 
             PanelSection {
                 Button {
@@ -69,12 +38,6 @@ struct InfoPanel: View {
                 .controlSize(.regular)
             }
         }
-        .onAppear { displayNameDraft = info.displayName }
-        .onChange(of: info.displayName) { _, new in displayNameDraft = new }
-    }
-
-    private func saveDisplayName() {
-        Task { await service.setDisplayName(displayNameDraft) }
     }
 }
 

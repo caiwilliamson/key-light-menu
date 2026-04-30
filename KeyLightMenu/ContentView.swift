@@ -12,6 +12,7 @@ struct ContentView: View {
     @Environment(PresetStore.self) private var store
     @State private var showInfo = false
     @State private var showPresets = false
+    @State private var showSettings = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -31,10 +32,22 @@ struct ContentView: View {
                         }
                         .padding()
                     }
+                } else if showSettings {
+                    if let info = light.accessoryInfo {
+                        SettingsPanel(light: light, info: info)
+                            .environment(service)
+                    } else {
+                        HStack(spacing: 6) {
+                            ProgressView()
+                            Text("Loading info…").foregroundStyle(.secondary)
+                        }
+                        .padding()
+                    }
                 } else if showPresets {
                     PresetsPanel()
                         .environment(service)
                         .environment(store)
+                        .fixedSize(horizontal: false, vertical: true)
                 } else if let state = light.state {
                     let hostPresets = store.presets(for: light.accessoryInfo?.serialNumber ?? "")
                     PanelSection {
@@ -82,11 +95,11 @@ struct ContentView: View {
 
             footer
         }
-        .frame(width: 280)
+        .frame(width: 320)
         .font(.callout)
         .task { service.startDiscovery() }
         .onChange(of: service.selectedLight?.host) { _, new in
-            if new == nil { showInfo = false; showPresets = false }
+            if new == nil { showInfo = false; showPresets = false; showSettings = false }
         }
     }
 
@@ -94,66 +107,74 @@ struct ContentView: View {
 
     private var header: some View {
         PanelSection {
-            HStack(spacing: 6) {
-                if let light = service.selectedLight {
-                    VStack(alignment: .leading, spacing: 2) {
+            if let light = service.selectedLight {
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 6) {
                         Text(light.name)
                             .font(.headline)
                             .lineLimit(1)
-                        Text(light.state?.isOn == true ? "On" : "Off")
-                            .foregroundStyle(.secondary)
+
+                        Spacer()
+
+                        if service.isLoading && light.state != nil {
+                            ProgressView().scaleEffect(0.7)
+                        }
+
+                        Button {
+                            showPresets.toggle()
+                            if showPresets { showInfo = false; showSettings = false }
+                        } label: {
+                            Image(systemName: "slider.horizontal.3")
+                                .font(.title2)
+                                .foregroundStyle(showPresets ? Color.accentColor : Color.secondary)
+                        }
+                        .buttonStyle(.plain)
+
+                        Button {
+                            showSettings.toggle()
+                            if showSettings { showInfo = false; showPresets = false }
+                        } label: {
+                            Image(systemName: showSettings ? "gearshape.fill" : "gearshape")
+                                .font(.title2)
+                                .foregroundStyle(showSettings ? Color.accentColor : Color.secondary)
+                        }
+                        .buttonStyle(.plain)
+
+                        Button {
+                            showInfo.toggle()
+                            if showInfo { showPresets = false; showSettings = false }
+                        } label: {
+                            Image(systemName: showInfo ? "info.circle.fill" : "info.circle")
+                                .font(.title2)
+                                .foregroundStyle(showInfo ? Color.accentColor : Color.secondary)
+                        }
+                        .buttonStyle(.plain)
+
+                        if let state = light.state {
+                            Button {
+                                Task { await service.toggle() }
+                            } label: {
+                                Image(systemName: state.isOn ? "power.circle.fill" : "power.circle")
+                                    .font(.title2)
+                                    .foregroundStyle(state.isOn ? Color.yellow : Color.secondary)
+                                    .contentTransition(.symbolEffect(.replace))
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
-                } else if service.isDiscovering {
-                    HStack(spacing: 6) {
-                        ProgressView().scaleEffect(0.7)
-                        Text("Scanning…").foregroundStyle(.secondary)
-                    }
-                } else {
-                    Text("Key Light Menu")
-                        .font(.headline)
+
+                    Text(light.state?.isOn == true ? "On" : "Off")
                         .foregroundStyle(.secondary)
                 }
-
-                Spacer()
-
-                if service.isLoading && service.selectedLight?.state != nil {
+            } else if service.isDiscovering {
+                HStack(spacing: 6) {
                     ProgressView().scaleEffect(0.7)
+                    Text("Scanning…").foregroundStyle(.secondary)
                 }
-
-                if service.selectedLight != nil {
-                    Button {
-                        showPresets.toggle()
-                        if showPresets { showInfo = false }
-                    } label: {
-                        Image(systemName: showPresets ? "slider.horizontal.3" : "slider.horizontal.3")
-                            .font(.title2)
-                            .foregroundStyle(showPresets ? Color.accentColor : Color.secondary)
-                            .foregroundStyle(showPresets ? Color.accentColor : Color.secondary)
-                    }
-                    .buttonStyle(.plain)
-
-                    Button {
-                        showInfo.toggle()
-                        if showInfo { showPresets = false }
-                    } label: {
-                        Image(systemName: showInfo ? "info.circle.fill" : "info.circle")
-                            .font(.title2)
-                            .foregroundStyle(showInfo ? Color.accentColor : Color.secondary)
-                    }
-                    .buttonStyle(.plain)
-                }
-
-                if let state = service.selectedLight?.state {
-                    Button {
-                        Task { await service.toggle() }
-                    } label: {
-                        Image(systemName: state.isOn ? "power.circle.fill" : "power.circle")
-                            .font(.title2)
-                            .foregroundStyle(state.isOn ? Color.yellow : Color.secondary)
-                            .contentTransition(.symbolEffect(.replace))
-                    }
-                    .buttonStyle(.plain)
-                }
+            } else {
+                Text("Key Light Menu")
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
             }
         }
     }
@@ -207,7 +228,7 @@ struct ContentView: View {
 
             PanelSection {
                 HStack {
-                    if !showInfo && !showPresets {
+                    if !showInfo && !showPresets && !showSettings {
                         Button {
                             service.startDiscovery()
                         } label: {

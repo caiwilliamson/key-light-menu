@@ -17,6 +17,8 @@ struct PresetsPanel: View {
         return VStack(spacing: 0) {
             if let state = service.selectedLight?.state {
                 PanelSection {
+                    Text("New Preset")
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     LightSlider(
                         icon: "sun.max.fill",
                         value: Double(state.brightness),
@@ -32,6 +34,7 @@ struct PresetsPanel: View {
                     ) { v in Task { await service.setTemperature(Int(v)) } }
 
                     HStack(spacing: 8) {
+                        Color.clear.frame(width: 20)
                         TextField("Preset name", text: $presetName)
                             .textFieldStyle(.roundedBorder)
                         Button("Save") {
@@ -51,15 +54,21 @@ struct PresetsPanel: View {
                 }
             }
 
-            if !hostPresets.isEmpty {
+            if hostPresets.isEmpty {
+                SectionDivider()
+                PanelSection {
+                    Text("No saved presets")
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                }
+            } else {
+                SectionDivider()
                 VStack(spacing: 0) {
                     ForEach(hostPresets) { preset in
-                        SectionDivider()
                         PanelSection {
                             HStack {
                                 Text(preset.name)
-                                    .font(.subheadline)
-                                    .fontWeight(.semibold)
+                                    .foregroundStyle(.secondary)
                                 Spacer()
                                 Button {
                                     store.delete(preset)
@@ -85,7 +94,7 @@ struct PresetsPanel: View {
                 .foregroundStyle(.secondary)
             Slider(value: .constant(value), in: range)
                 .allowsHitTesting(false)
-                .tint(.secondary)
+                .tint(.gray)
             Text(label)
                 .frame(width: 40, alignment: .trailing)
                 .monospacedDigit()

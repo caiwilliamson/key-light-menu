@@ -28,38 +28,42 @@ struct BatteryPanel: View {
     }
 
     var body: some View {
-        PanelSection {
-            Text("Battery")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-            SettingToggleRow(
-                label: "Studio Mode (Bypass Battery)",
-                subtitle: bypass ? "Only works when plugged in" : "Uses battery when unplugged",
-                isOn: $bypass,
-                onChange: send
-            )
+        VStack(spacing: 0) {
+            PanelSection {
+                SettingToggleRow(
+                    label: "Studio Mode (Bypass Battery)",
+                    subtitle: bypass ? "Only works when plugged in" : "Uses battery when unplugged",
+                    isOn: $bypass,
+                    onChange: send
+                )
+            }
 
             if !bypass {
-                SettingToggleRow(label: "Energy Saving Mode", isOn: $energySavingEnabled, onChange: send)
+                PanelSection {
+                    SettingToggleRow(label: "Energy Saving Mode", isOn: $energySavingEnabled, onChange: send)
 
-                if energySavingEnabled {
-                    SettingSliderRow(
-                        label: "When Battery Level Falls Below",
-                        value: $minBatteryLevel,
-                        range: 1...100,
-                        format: { "\(Int($0))%" },
-                        onCommit: send
-                    )
-                    SettingToggleRow(label: "Disable Wi-Fi", isLabelSecondary: true, isOn: $disableWifi, onChange: send)
-                    SettingToggleRow(label: "Adjust Brightness", isLabelSecondary: true, isOn: $adjustBrightnessEnabled, onChange: send)
-                    if adjustBrightnessEnabled {
+                    if energySavingEnabled {
                         SettingSliderRow(
-                            label: "Low Battery Brightness",
-                            value: $adjustBrightnessLevel,
+                            label: "When Battery Level Falls Below",
+                            value: $minBatteryLevel,
                             range: 1...100,
                             format: { "\(Int($0))%" },
                             onCommit: send
                         )
+                        SettingToggleRow(label: "Disable Wi-Fi", isLabelSecondary: true, isOn: $disableWifi, onChange: send)
+                            .padding(.leading, 16)
+                        SettingToggleRow(label: "Adjust Brightness", isLabelSecondary: true, isOn: $adjustBrightnessEnabled, onChange: send)
+                            .padding(.leading, 16)
+                        if adjustBrightnessEnabled {
+                            SettingSliderRow(
+                                label: "Low Battery Brightness",
+                                value: $adjustBrightnessLevel,
+                                range: 1...100,
+                                format: { "\(Int($0))%" },
+                                onCommit: send
+                            )
+                            .padding(.leading, 16)
+                        }
                     }
                 }
             }
