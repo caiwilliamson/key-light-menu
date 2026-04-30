@@ -276,7 +276,6 @@ extension KeyLightService: NetServiceDelegate {
                 await self.fetchSettings()
                 self.startPolling()
             }
-            self.stopDiscovery()
         }
     }
 
