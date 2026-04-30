@@ -86,3 +86,14 @@ struct LightSettings: Codable {
     var colorChangeDurationMs: Int
     var battery: BatteryConfig?
 }
+
+// MARK: - Cache
+
+struct CachedLight: Codable {
+    var host: String
+    var port: Int
+    var discoveredName: String
+    var state: LightState?
+    var accessoryInfo: AccessoryInfo?
+    var settings: LightSettings?
+}

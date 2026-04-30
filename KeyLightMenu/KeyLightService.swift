@@ -19,6 +19,29 @@ final class KeyLightService: NSObject {
     var isLoading = false
     var errorMessage: String? = nil
 
+    private static let cacheKey = "cachedLights"
+
+    override init() {
+        if let data = UserDefaults.standard.data(forKey: Self.cacheKey),
+           let cached = try? JSONDecoder().decode([CachedLight].self, from: data), !cached.isEmpty {
+            lights = cached.map {
+                KeyLight(discoveredName: $0.discoveredName, host: $0.host, port: $0.port,
+                         state: $0.state, accessoryInfo: $0.accessoryInfo, settings: $0.settings)
+            }
+            selectedIndex = 0
+        }
+    }
+
+    private func saveCache() {
+        let cached = lights.map {
+            CachedLight(host: $0.host, port: $0.port, discoveredName: $0.discoveredName,
+                        state: $0.state, accessoryInfo: $0.accessoryInfo, settings: $0.settings)
+        }
+        if let data = try? JSONEncoder().encode(cached) {
+            UserDefaults.standard.set(data, forKey: Self.cacheKey)
+        }
+    }
+
     private var browser: NetServiceBrowser?
     private var resolving: [NetService] = []
     private var pollTask: Task<Void, Never>?
@@ -69,8 +92,8 @@ final class KeyLightService: NSObject {
     func startDiscovery() {
         stopPolling()
         stopDiscovery()
-        lights = []
-        selectedIndex = nil
+        // Don't clear lights/selectedIndex here — cached lights should remain
+        // visible until Bonjour resolves and live data replaces them.
         isDiscovering = true
         errorMessage = nil
 
@@ -110,6 +133,7 @@ final class KeyLightService: NSObject {
             guard lights.indices.contains(i) else { return }
             if let state = try JSONDecoder().decode(LightsResponse.self, from: data).lights.first {
                 lights[i].state = state
+                saveCache()
             }
         } catch {
             errorMessage = error.localizedDescription
@@ -165,6 +189,7 @@ final class KeyLightService: NSObject {
             let (data, _) = try await URLSession.shared.data(from: url)
             guard lights.indices.contains(i) else { return }
             lights[i].accessoryInfo = try JSONDecoder().decode(AccessoryInfo.self, from: data)
+            saveCache()
         } catch {}
     }
 
@@ -199,6 +224,7 @@ final class KeyLightService: NSObject {
             let (data, _) = try await URLSession.shared.data(from: url)
             guard lights.indices.contains(i) else { return }
             lights[i].settings = try JSONDecoder().decode(LightSettings.self, from: data)
+            saveCache()
         } catch {}
     }
 
@@ -267,14 +293,22 @@ extension KeyLightService: NetServiceDelegate {
 
         Task { @MainActor in
             defer { sender.stop(); self.resolving.removeAll { $0 === sender } }
-            guard !self.lights.contains(where: { $0.host == ipAddress && $0.port == port }) else { return }
-            self.lights.append(KeyLight(discoveredName: name, host: ipAddress, port: port))
-            if self.selectedIndex == nil {
-                self.selectedIndex = self.lights.count - 1
+            if let existing = self.lights.firstIndex(where: { $0.host == ipAddress && $0.port == port }) {
+                // Light was already populated from cache — just refresh live data
+                if self.selectedIndex == nil { self.selectedIndex = existing }
                 await self.fetchStatus()
                 await self.fetchAccessoryInfo()
                 await self.fetchSettings()
                 self.startPolling()
+            } else {
+                self.lights.append(KeyLight(discoveredName: name, host: ipAddress, port: port))
+                if self.selectedIndex == nil {
+                    self.selectedIndex = self.lights.count - 1
+                    await self.fetchStatus()
+                    await self.fetchAccessoryInfo()
+                    await self.fetchSettings()
+                    self.startPolling()
+                }
             }
         }
     }

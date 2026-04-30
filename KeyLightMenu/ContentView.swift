@@ -116,10 +116,6 @@ struct ContentView: View {
 
                         Spacer()
 
-                        if service.isLoading && light.state != nil {
-                            ProgressView().scaleEffect(0.7)
-                        }
-
                         Button {
                             showPresets.toggle()
                             if showPresets { showInfo = false; showSettings = false }
