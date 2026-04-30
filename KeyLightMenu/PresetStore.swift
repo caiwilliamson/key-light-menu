@@ -8,7 +8,7 @@ import Foundation
 struct Preset: Codable, Identifiable, Equatable {
     var id = UUID()
     var name: String
-    var lightHost: String
+    var lightSerial: String
     var brightness: Int
     var temperature: Int
 }
@@ -19,12 +19,12 @@ struct Preset: Codable, Identifiable, Equatable {
 
     init() { load() }
 
-    func presets(for host: String) -> [Preset] {
-        presets.filter { $0.lightHost == host }
+    func presets(for serial: String) -> [Preset] {
+        presets.filter { $0.lightSerial == serial }
     }
 
-    func add(name: String, brightness: Int, temperature: Int, lightHost: String) {
-        presets.append(Preset(name: name, lightHost: lightHost, brightness: brightness, temperature: temperature))
+    func add(name: String, brightness: Int, temperature: Int, lightSerial: String) {
+        presets.append(Preset(name: name, lightSerial: lightSerial, brightness: brightness, temperature: temperature))
         save()
     }
 

@@ -12,8 +12,8 @@ struct PresetsPanel: View {
     @State private var presetName = ""
 
     var body: some View {
-        let host = service.selectedLight?.host ?? ""
-        let hostPresets = store.presets(for: host)
+        let serial = service.selectedLight?.accessoryInfo?.serialNumber ?? ""
+        let hostPresets = store.presets(for: serial)
         return VStack(spacing: 0) {
             if let state = service.selectedLight?.state {
                 PanelSection {
@@ -40,7 +40,7 @@ struct PresetsPanel: View {
                                 name: presetName,
                                 brightness: state.brightness,
                                 temperature: state.temperature,
-                                lightHost: host
+                                lightSerial: serial
                             )
                             presetName = ""
                         }

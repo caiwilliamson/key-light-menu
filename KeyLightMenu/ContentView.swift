@@ -36,7 +36,7 @@ struct ContentView: View {
                         .environment(service)
                         .environment(store)
                 } else if let state = light.state {
-                    let hostPresets = store.presets(for: light.host)
+                    let hostPresets = store.presets(for: light.accessoryInfo?.serialNumber ?? "")
                     PanelSection {
                         LightSlider(
                             icon: "sun.max.fill",
