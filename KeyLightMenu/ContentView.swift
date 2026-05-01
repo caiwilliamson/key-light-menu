@@ -151,7 +151,7 @@ struct ContentView: View {
                                 Task { await service.toggle() }
                             } label: {
                                 Image(systemName: state.isOn ? "power.circle.fill" : "power.circle")
-                                    .font(.title2)
+                                    .font(.title)
                                     .foregroundStyle(state.isOn ? Color.yellow : Color.secondary)
                                     .contentTransition(.symbolEffect(.replace))
                             }
@@ -255,8 +255,6 @@ private struct PresetButton: View {
 
     var body: some View {
         Button(preset.name, action: action)
-            .buttonStyle(.bordered)
-            .controlSize(.small)
     }
 }
 
