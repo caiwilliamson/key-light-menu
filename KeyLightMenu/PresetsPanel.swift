@@ -95,6 +95,7 @@ struct PresetsPanel: View {
             Slider(value: .constant(value), in: range)
                 .allowsHitTesting(false)
                 .tint(.gray)
+                .controlSize(.small)
             Text(label)
                 .frame(width: 40, alignment: .trailing)
                 .monospacedDigit()
