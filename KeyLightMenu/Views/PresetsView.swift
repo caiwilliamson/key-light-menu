@@ -78,28 +78,12 @@ struct PresetsView: View {
                 }
                 .buttonStyle(.plain)
               }
-              previewRow(icon: "sun.max.fill", value: Double(preset.brightness), range: 1 ... 100, label: "\(preset.brightness)%")
-              previewRow(icon: "thermometer.medium", value: Double(preset.temperature), range: 143 ... 344, label: "\(Int(1_000_000 / Double(preset.temperature)))K")
+              LightSlider(icon: "sun.max.fill", value: Double(preset.brightness), range: 1 ... 100, label: { "\(Int($0))%" })
+              LightSlider(icon: "thermometer.medium", value: Double(preset.temperature), range: 143 ... 344, label: { "\(Int(1_000_000 / $0.rounded()))K" })
             }
           }
         }
       }
-    }
-  }
-
-  private func previewRow(icon: String, value: Double, range: ClosedRange<Double>, label: String) -> some View {
-    HStack(spacing: 8) {
-      Image(systemName: icon)
-        .frame(width: 20)
-        .foregroundStyle(.secondary)
-      Slider(value: .constant(value), in: range)
-        .allowsHitTesting(false)
-        .tint(.gray)
-        .controlSize(.small)
-      Text(label)
-        .frame(width: 40, alignment: .trailing)
-        .monospacedDigit()
-        .foregroundStyle(.secondary)
     }
   }
 }

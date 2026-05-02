@@ -6,12 +6,13 @@
 import SwiftUI
 
 /// A slider that fires immediately on first move, then throttles to ~100ms during drag.
+/// Pass `nil` for `onCommit` to render a read-only preview slider.
 struct LightSlider: View {
   let icon: String
   let externalValue: Double
   let range: ClosedRange<Double>
   let label: (Double) -> String
-  let onCommit: (Double) -> Void
+  let onCommit: ((Double) -> Void)?
 
   @State private var value: Double
   @State private var lastSent: Date = .distantPast
@@ -24,7 +25,7 @@ struct LightSlider: View {
     value: Double,
     range: ClosedRange<Double>,
     label: @escaping (Double) -> String,
-    onCommit: @escaping (Double) -> Void
+    onCommit: ((Double) -> Void)? = nil
   ) {
     self.icon = icon
     externalValue = value
@@ -40,8 +41,15 @@ struct LightSlider: View {
         .frame(width: 20)
         .foregroundStyle(.secondary)
 
-      Slider(value: $value, in: range) { editing in
-        isDragging = editing
+      if onCommit != nil {
+        Slider(value: $value, in: range) { editing in
+          isDragging = editing
+        }
+      } else {
+        Slider(value: .constant(externalValue), in: range)
+          .allowsHitTesting(false)
+          .tint(.gray)
+          .controlSize(.small)
       }
 
       Text(label(value))
@@ -49,6 +57,7 @@ struct LightSlider: View {
         .monospacedDigit()
     }
     .onChange(of: value) { _, new in
+      guard let onCommit else { return }
       pendingTask?.cancel()
       let elapsed = Date().timeIntervalSince(lastSent)
       if elapsed >= Self.throttleInterval {
