@@ -19,6 +19,7 @@ struct LightSlider: View {
   @State private var pendingTask: Task<Void, Never>?
   @State private var isDragging = false
   private static let throttleInterval: TimeInterval = 0.1
+  private static let settleInterval: TimeInterval = 0.5
 
   init(
     icon: String,
@@ -41,9 +42,14 @@ struct LightSlider: View {
         .frame(width: 20)
         .foregroundStyle(.secondary)
 
-      if onCommit != nil {
+      if let onCommit {
         Slider(value: $value, in: range) { editing in
           isDragging = editing
+          if !editing {
+            pendingTask?.cancel()
+            lastSent = Date()
+            onCommit(value)
+          }
         }
       } else {
         Slider(value: .constant(externalValue), in: range)
@@ -74,7 +80,9 @@ struct LightSlider: View {
       }
     }
     .onChange(of: externalValue) { _, new in
-      if !isDragging { value = new }
+      if !isDragging, Date().timeIntervalSince(lastSent) > Self.settleInterval {
+        value = new
+      }
     }
   }
 }
