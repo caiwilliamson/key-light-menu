@@ -13,6 +13,7 @@ struct KeyLight: Identifiable {
     var state: LightState?
     var accessoryInfo: AccessoryInfo?
     var settings: LightSettings?
+    var isReachable: Bool = true
 
     /// Prefers displayName, then productName, then the Bonjour-discovered name.
     var name: String {

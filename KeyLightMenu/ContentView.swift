@@ -22,7 +22,9 @@ struct ContentView: View {
             SectionDivider()
 
             if let light = service.selectedLight {
-                if showInfo {
+                if !light.isReachable {
+                    disconnectedView
+                } else if showInfo {
                     if let info = light.accessoryInfo {
                         InfoPanel(light: light, info: info)
                             .environment(service)
@@ -159,7 +161,7 @@ struct ContentView: View {
                         }
                     }
 
-                    Text(light.state?.isOn == true ? "On" : "Off")
+                    Text(light.isReachable ? (light.state?.isOn == true ? "On" : "Off") : "Unreachable")
                         .foregroundStyle(.secondary)
                 }
             } else if service.isDiscovering {
@@ -176,6 +178,18 @@ struct ContentView: View {
     }
 
     // MARK: - Empty state
+
+    private var disconnectedView: some View {
+        VStack(spacing: 8) {
+            Image(systemName: "bolt.horizontal.slash")
+                .font(.largeTitle)
+                .foregroundStyle(.secondary)
+            Text("Light unreachable")
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(20)
+    }
 
     private var noLightView: some View {
         VStack(spacing: 8) {

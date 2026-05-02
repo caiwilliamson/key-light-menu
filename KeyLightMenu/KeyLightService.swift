@@ -19,6 +19,14 @@ final class KeyLightService: NSObject {
     var isLoading = false
     var errorMessage: String? = nil
 
+    /// Short-timeout session used for polling — detects disconnections quickly.
+    private let pollSession: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 3
+        config.timeoutIntervalForResource = 3
+        return URLSession(configuration: config)
+    }()
+
     private static let cacheKey = "cachedLights"
 
     override init() {
@@ -29,6 +37,12 @@ final class KeyLightService: NSObject {
                          state: $0.state, accessoryInfo: $0.accessoryInfo, settings: $0.settings)
             }
             selectedIndex = 0
+        }
+        super.init()
+        // Start polling immediately so it runs for the app's lifetime,
+        // independent of whether the popover is open or closed.
+        if !lights.isEmpty {
+            startPolling()
         }
     }
 
@@ -89,8 +103,8 @@ final class KeyLightService: NSObject {
 
     // MARK: - Discovery
 
-    /// Called on app open. Skips Bonjour scan if we already have cached lights
-    /// and just refreshes state via polling instead.
+    /// Called on app open. Skips Bonjour scan if we already have cached lights.
+    /// Polling is already running from init — just do a single immediate refresh.
     func startSession() {
         if lights.isEmpty {
             startDiscovery()
@@ -100,7 +114,6 @@ final class KeyLightService: NSObject {
                 await fetchAccessoryInfo()
                 await fetchSettings()
             }
-            startPolling()
         }
     }
 
@@ -139,8 +152,9 @@ final class KeyLightService: NSObject {
         if showSpinner { isLoading = true }
         errorMessage = nil
         defer { if showSpinner { isLoading = false } }
+        let session = showSpinner ? URLSession.shared : pollSession
         do {
-            let (data, response) = try await URLSession.shared.data(from: url)
+            let (data, response) = try await session.data(from: url)
             guard (response as? HTTPURLResponse)?.statusCode == 200 else {
                 errorMessage = "Unexpected response from device"
                 return
@@ -148,10 +162,12 @@ final class KeyLightService: NSObject {
             guard lights.indices.contains(i) else { return }
             if let state = try JSONDecoder().decode(LightsResponse.self, from: data).lights.first {
                 lights[i].state = state
+                lights[i].isReachable = true
                 saveCache()
             }
         } catch {
-            errorMessage = error.localizedDescription
+            if lights.indices.contains(i) { lights[i].isReachable = false }
+            if showSpinner { errorMessage = error.localizedDescription }
         }
     }
 
@@ -308,8 +324,29 @@ extension KeyLightService: NetServiceDelegate {
 
         Task { @MainActor in
             defer { sender.stop(); self.resolving.removeAll { $0 === sender } }
-            if let existing = self.lights.firstIndex(where: { $0.host == ipAddress && $0.port == port }) {
-                // Light was already populated from cache — just refresh live data
+
+            // Fetch accessory-info from the resolved address to get the serial number,
+            // so we can match against existing lights even if the IP has changed.
+            let tempURL = URL(string: "http://\(ipAddress):\(port)/elgato/accessory-info")
+            var resolvedSerial: String? = nil
+            if let url = tempURL,
+               let (data, _) = try? await URLSession.shared.data(from: url),
+               let info = try? JSONDecoder().decode(AccessoryInfo.self, from: data) {
+                resolvedSerial = info.serialNumber
+            }
+
+            // Match by serial number first, then fall back to host:port.
+            let existing: Int? = {
+                if let serial = resolvedSerial, !serial.isEmpty {
+                    return self.lights.firstIndex { $0.accessoryInfo?.serialNumber == serial }
+                }
+                return self.lights.firstIndex { $0.host == ipAddress && $0.port == port }
+            }()
+
+            if let existing {
+                // Update host/port in case the IP changed (e.g. DHCP reassignment).
+                self.lights[existing].host = ipAddress
+                self.lights[existing].port = port
                 if self.selectedIndex == nil { self.selectedIndex = existing }
                 await self.fetchStatus()
                 await self.fetchAccessoryInfo()
