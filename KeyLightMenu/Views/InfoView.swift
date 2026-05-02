@@ -34,7 +34,6 @@ struct InfoView: View {
           Label("Identify Accessory", systemImage: "light.beacon.max")
             .frame(maxWidth: .infinity)
         }
-        .controlSize(.regular)
       }
     }
   }
@@ -55,10 +54,10 @@ struct InfoRow: View {
     HStack {
       Text(label + ":")
         .foregroundStyle(.secondary)
-        .frame(width: 130, alignment: .leading)
+        .frame(width: 160, alignment: .leading)
       Text(value)
         .textSelection(.enabled)
-        .frame(maxWidth: .infinity, alignment: .trailing)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
   }
 }
