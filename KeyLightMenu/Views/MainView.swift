@@ -1,14 +1,12 @@
 //
-//  ContentView.swift
+//  MainView.swift
 //  KeyLightMenu
-//
-//  Created by Cai Williamson on 27/04/2026.
 //
 
 import SwiftUI
 import Flow
 
-struct ContentView: View {
+struct MainView: View {
     @Environment(KeyLightService.self) private var service
     @Environment(PresetStore.self) private var store
     @State private var showInfo = false
@@ -26,7 +24,7 @@ struct ContentView: View {
                     disconnectedView
                 } else if showInfo {
                     if let info = light.accessoryInfo {
-                        InfoPanel(light: light, info: info)
+                        InfoView(light: light, info: info)
                             .environment(service)
                     } else {
                         HStack(spacing: 6) {
@@ -37,7 +35,7 @@ struct ContentView: View {
                     }
                 } else if showSettings {
                     if let info = light.accessoryInfo {
-                        SettingsPanel(light: light, info: info)
+                        SettingsView(light: light, info: info)
                             .environment(service)
                     } else {
                         HStack(spacing: 6) {
@@ -47,7 +45,7 @@ struct ContentView: View {
                         .padding()
                     }
                 } else if showPresets {
-                    PresetsPanel()
+                    PresetsView()
                         .environment(service)
                         .environment(store)
                         .fixedSize(horizontal: false, vertical: true)
@@ -259,9 +257,7 @@ struct ContentView: View {
             }
         }
     }
-
 }
-
 
 private struct PresetButton: View {
     let preset: Preset
@@ -273,7 +269,6 @@ private struct PresetButton: View {
 }
 
 #Preview {
-    ContentView()
+    MainView()
         .environment(KeyLightService())
 }
-

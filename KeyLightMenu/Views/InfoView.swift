@@ -1,18 +1,17 @@
 //
-//  InfoPanel.swift
+//  InfoView.swift
 //  KeyLightMenu
 //
 
 import SwiftUI
 
-struct InfoPanel: View {
+struct InfoView: View {
     @Environment(KeyLightService.self) private var service
     let light: KeyLight
     let info: AccessoryInfo
 
     var body: some View {
         VStack(spacing: 0) {
-            // Device Info
             PanelSection {
                 InfoRow("Device", info.shortProductName)
                 InfoRow("Firmware Version", "\(info.firmwareVersion) (\(info.firmwareBuildNumber))")

@@ -1,11 +1,11 @@
 //
-//  SettingsPanel.swift
+//  SettingsView.swift
 //  KeyLightMenu
 //
 
 import SwiftUI
 
-struct SettingsPanel: View {
+struct SettingsView: View {
     @Environment(KeyLightService.self) private var service
     let light: KeyLight
     let info: AccessoryInfo
@@ -29,7 +29,7 @@ struct SettingsPanel: View {
             }
 
             if let battery = service.selectedLight?.settings?.battery {
-                BatteryPanel(battery: battery)
+                BatteryView(battery: battery)
                     .environment(service)
             }
         }

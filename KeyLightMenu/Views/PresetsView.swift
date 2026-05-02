@@ -1,11 +1,11 @@
 //
-//  PresetsPanel.swift
+//  PresetsView.swift
 //  KeyLightMenu
 //
 
 import SwiftUI
 
-struct PresetsPanel: View {
+struct PresetsView: View {
     @Environment(KeyLightService.self) private var service
     @Environment(PresetStore.self) private var store
 

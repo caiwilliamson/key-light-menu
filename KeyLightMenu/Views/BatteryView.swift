@@ -1,11 +1,11 @@
 //
-//  BatteryPanel.swift
+//  BatteryView.swift
 //  KeyLightMenu
 //
 
 import SwiftUI
 
-struct BatteryPanel: View {
+struct BatteryView: View {
     @Environment(KeyLightService.self) private var service
     var battery: BatteryConfig
 

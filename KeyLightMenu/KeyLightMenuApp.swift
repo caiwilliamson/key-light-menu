@@ -14,7 +14,7 @@ struct KeyLightMenuApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            ContentView()
+            MainView()
                 .environment(service)
                 .environment(store)
         } label: {

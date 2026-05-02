@@ -5,7 +5,7 @@
 
 import Foundation
 
-// MARK: - Light Models
+// MARK: - Light State
 
 struct LightState: Codable, Equatable {
     var on: Int
@@ -22,6 +22,8 @@ struct LightsResponse: Codable {
     var numberOfLights: Int
     var lights: [LightState]
 }
+
+// MARK: - Accessory Info
 
 struct WifiInfo: Codable {
     var ssid: String
@@ -58,7 +60,7 @@ struct AccessoryInfo: Codable {
     }
 }
 
-// MARK: - Settings Models
+// MARK: - Light Settings
 
 struct AdjustBrightnessConfig: Codable, Equatable {
     var enable: Int
@@ -87,6 +89,29 @@ struct LightSettings: Codable {
     var battery: BatteryConfig?
 }
 
+// MARK: - KeyLight
+
+struct KeyLight: Identifiable {
+    var id = UUID()
+    var discoveredName: String
+    var host: String
+    var port: Int
+    var state: LightState?
+    var accessoryInfo: AccessoryInfo?
+    var settings: LightSettings?
+    var isReachable: Bool = true
+
+    /// Prefers displayName, then productName, then the Bonjour-discovered name.
+    var name: String {
+        guard let info = accessoryInfo else { return discoveredName }
+        return info.displayName.isEmpty ? discoveredName : info.displayName
+    }
+
+    func url(_ path: String) -> URL? {
+        URL(string: "http://\(host):\(port)/elgato/\(path)")
+    }
+}
+
 // MARK: - Cache
 
 struct CachedLight: Codable {
@@ -97,3 +122,4 @@ struct CachedLight: Codable {
     var accessoryInfo: AccessoryInfo?
     var settings: LightSettings?
 }
+
