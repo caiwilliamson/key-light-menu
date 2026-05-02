@@ -5,6 +5,29 @@
 
 import Foundation
 
+// MARK: - KeyLight
+
+struct KeyLight: Identifiable {
+    var id = UUID()
+    var discoveredName: String
+    var host: String
+    var port: Int
+    var state: LightState?
+    var accessoryInfo: AccessoryInfo?
+    var settings: LightSettings?
+    var isReachable: Bool = true
+
+    /// Prefers displayName, then productName, then the Bonjour-discovered name.
+    var name: String {
+        guard let info = accessoryInfo else { return discoveredName }
+        return info.displayName.isEmpty ? discoveredName : info.displayName
+    }
+
+    func url(_ path: String) -> URL? {
+        URL(string: "http://\(host):\(port)/elgato/\(path)")
+    }
+}
+
 // MARK: - Light State
 
 struct LightState: Codable, Equatable {
@@ -24,17 +47,6 @@ struct LightsResponse: Codable {
 }
 
 // MARK: - Accessory Info
-
-struct WifiInfo: Codable {
-    var ssid: String
-    var frequencyMHz: Int
-    var rssi: Int
-
-    /// Maps RSSI to signal quality matching Elgato Control Center (0% at -130 dBm, 100% at -30 dBm).
-    var signalPercent: Int { max(0, min(100, rssi + 130)) }
-
-    var frequencyGHz: String { String(format: "%.1f GHz", Double(frequencyMHz) / 1000.0) }
-}
 
 struct AccessoryInfo: Codable {
     var productName: String
@@ -60,24 +72,18 @@ struct AccessoryInfo: Codable {
     }
 }
 
+struct WifiInfo: Codable {
+    var ssid: String
+    var frequencyMHz: Int
+    var rssi: Int
+
+    /// Maps RSSI to signal quality matching Elgato Control Center (0% at -130 dBm, 100% at -30 dBm).
+    var signalPercent: Int { max(0, min(100, rssi + 130)) }
+
+    var frequencyGHz: String { String(format: "%.1f GHz", Double(frequencyMHz) / 1000.0) }
+}
+
 // MARK: - Light Settings
-
-struct AdjustBrightnessConfig: Codable, Equatable {
-    var enable: Int
-    var brightness: Double
-}
-
-struct EnergySavingConfig: Codable, Equatable {
-    var enable: Int
-    var minimumBatteryLevel: Double
-    var disableWifi: Int
-    var adjustBrightness: AdjustBrightnessConfig
-}
-
-struct BatteryConfig: Codable, Equatable {
-    var energySaving: EnergySavingConfig
-    var bypass: Int
-}
 
 struct LightSettings: Codable {
     var powerOnBehavior: Int
@@ -89,27 +95,21 @@ struct LightSettings: Codable {
     var battery: BatteryConfig?
 }
 
-// MARK: - KeyLight
+struct BatteryConfig: Codable, Equatable {
+    var energySaving: EnergySavingConfig
+    var bypass: Int
+}
 
-struct KeyLight: Identifiable {
-    var id = UUID()
-    var discoveredName: String
-    var host: String
-    var port: Int
-    var state: LightState?
-    var accessoryInfo: AccessoryInfo?
-    var settings: LightSettings?
-    var isReachable: Bool = true
+struct EnergySavingConfig: Codable, Equatable {
+    var enable: Int
+    var minimumBatteryLevel: Double
+    var disableWifi: Int
+    var adjustBrightness: AdjustBrightnessConfig
+}
 
-    /// Prefers displayName, then productName, then the Bonjour-discovered name.
-    var name: String {
-        guard let info = accessoryInfo else { return discoveredName }
-        return info.displayName.isEmpty ? discoveredName : info.displayName
-    }
-
-    func url(_ path: String) -> URL? {
-        URL(string: "http://\(host):\(port)/elgato/\(path)")
-    }
+struct AdjustBrightnessConfig: Codable, Equatable {
+    var enable: Int
+    var brightness: Double
 }
 
 // MARK: - Cache
@@ -122,4 +122,3 @@ struct CachedLight: Codable {
     var accessoryInfo: AccessoryInfo?
     var settings: LightSettings?
 }
-
