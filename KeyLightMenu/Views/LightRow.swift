@@ -36,12 +36,13 @@ struct LightRow: View {
                   await service.toggle()
                 }
               } label: {
-                Image(systemName: state.isOn ? "power.circle.fill" : "power.circle")
+                Image(systemName: light.isReachable && state.isOn ? "power.circle.fill" : "power.circle")
                   .font(.title)
-                  .foregroundStyle(state.isOn ? Color.yellow : Color.secondary)
+                  .foregroundStyle(light.isReachable && state.isOn ? Color.yellow : Color.secondary)
                   .contentTransition(.symbolEffect(.replace))
               }
               .buttonStyle(.plain)
+              .disabled(!light.isReachable)
             }
           }
 
@@ -139,6 +140,7 @@ struct LightRow: View {
         .foregroundStyle(isActive ? Color.accentColor : Color.secondary)
     }
     .buttonStyle(.plain)
+    .disabled(!light.isReachable)
   }
 
   private var loadingView: some View {

@@ -24,6 +24,9 @@ struct MainView: View {
     .onChange(of: service.selectedLight?.host) { _, new in
       if new == nil { activePanel = nil }
     }
+    .onChange(of: service.selectedLight?.isReachable) { _, reachable in
+      if reachable == false { activePanel = nil }
+    }
   }
 
   // MARK: - Header
