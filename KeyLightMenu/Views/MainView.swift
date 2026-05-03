@@ -9,97 +9,22 @@ import SwiftUI
 struct MainView: View {
   @Environment(KeyLightService.self) private var service
   @Environment(PresetStore.self) private var store
-  @State private var showInfo = false
-  @State private var showPresets = false
-  @State private var showSettings = false
+
+  private enum Panel { case info, presets, settings }
+  @State private var activePanel: Panel?
 
   var body: some View {
     VStack(spacing: 0) {
       header
-
       SectionDivider()
-
-      if let light = service.selectedLight {
-        if !light.isReachable {
-          disconnectedView
-        } else if showInfo {
-          if let info = light.accessoryInfo {
-            InfoView(light: light, info: info)
-              .environment(service)
-          } else {
-            HStack(spacing: 6) {
-              ProgressView()
-              Text("Loading info…").foregroundStyle(.secondary)
-            }
-            .padding()
-          }
-        } else if showSettings {
-          if let info = light.accessoryInfo {
-            SettingsView(light: light, info: info)
-              .environment(service)
-          } else {
-            HStack(spacing: 6) {
-              ProgressView()
-              Text("Loading info…").foregroundStyle(.secondary)
-            }
-            .padding()
-          }
-        } else if showPresets {
-          PresetsView()
-            .environment(service)
-            .environment(store)
-            .fixedSize(horizontal: false, vertical: true)
-        } else if let state = light.state {
-          let hostPresets = store.presets(for: light.accessoryInfo?.serialNumber ?? "")
-          PanelSection {
-            LightSlider(
-              icon: "sun.max.fill",
-              value: Double(state.brightness),
-              range: 1 ... 100,
-              label: { v in "\(Int(v))%" }
-            ) { v in Task { await service.setBrightness(Int(v)) } }
-
-            LightSlider(
-              icon: "thermometer.medium",
-              value: Double(state.temperature),
-              range: 143 ... 344,
-              label: { v in "\(Int(1_000_000 / v.rounded()))K" }
-            ) { v in Task { await service.setTemperature(Int(v)) } }
-
-            if !hostPresets.isEmpty {
-              HStack(alignment: .top, spacing: 8) {
-                Image(systemName: "slider.horizontal.3")
-                  .frame(width: 20)
-                  .foregroundStyle(.secondary)
-                  .padding(.top, 4)
-                HFlow(itemSpacing: 6, rowSpacing: 6) {
-                  ForEach(hostPresets) { preset in
-                    PresetButton(preset: preset) {
-                      Task { await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature) }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        } else if service.isLoading {
-          HStack(spacing: 6) {
-            ProgressView()
-            Text("Connecting…").foregroundStyle(.secondary)
-          }
-          .padding()
-        }
-      } else if !service.isDiscovering {
-        noLightView
-      }
-
+      mainContent
       footer
     }
     .frame(width: 320)
     .font(.callout)
     .task { service.startSession() }
     .onChange(of: service.selectedLight?.host) { _, new in
-      if new == nil { showInfo = false; showPresets = false; showSettings = false }
+      if new == nil { activePanel = nil }
     }
   }
 
@@ -116,35 +41,9 @@ struct MainView: View {
 
             Spacer()
 
-            Button {
-              showPresets.toggle()
-              if showPresets { showInfo = false; showSettings = false }
-            } label: {
-              Image(systemName: "slider.horizontal.3")
-                .font(.title2)
-                .foregroundStyle(showPresets ? Color.accentColor : Color.secondary)
-            }
-            .buttonStyle(.plain)
-
-            Button {
-              showSettings.toggle()
-              if showSettings { showInfo = false; showPresets = false }
-            } label: {
-              Image(systemName: showSettings ? "gearshape.fill" : "gearshape")
-                .font(.title2)
-                .foregroundStyle(showSettings ? Color.accentColor : Color.secondary)
-            }
-            .buttonStyle(.plain)
-
-            Button {
-              showInfo.toggle()
-              if showInfo { showPresets = false; showSettings = false }
-            } label: {
-              Image(systemName: showInfo ? "info.circle.fill" : "info.circle")
-                .font(.title2)
-                .foregroundStyle(showInfo ? Color.accentColor : Color.secondary)
-            }
-            .buttonStyle(.plain)
+            panelButton(.presets, active: "slider.horizontal.3", inactive: "slider.horizontal.3")
+            panelButton(.settings, active: "gearshape.fill", inactive: "gearshape")
+            panelButton(.info, active: "info.circle.fill", inactive: "info.circle")
 
             if let state = light.state {
               Button {
@@ -159,13 +58,8 @@ struct MainView: View {
             }
           }
 
-          Text(light.isReachable ? (light.state?.isOn == true ? "On" : "Off") : "Unreachable")
+          Text(light.isReachable ? (light.state?.isOn == true ? "On" : "Off") : "Disconnected")
             .foregroundStyle(.secondary)
-        }
-      } else if service.isDiscovering {
-        HStack(spacing: 6) {
-          ProgressView().scaleEffect(0.7)
-          Text("Scanning…").foregroundStyle(.secondary)
         }
       } else {
         Text("Key Light Menu")
@@ -175,30 +69,95 @@ struct MainView: View {
     }
   }
 
-  // MARK: - Empty state
-
-  private var disconnectedView: some View {
-    VStack(spacing: 8) {
-      Image(systemName: "bolt.horizontal.slash")
-        .font(.largeTitle)
-        .foregroundStyle(.secondary)
-      Text("Light unreachable")
-        .foregroundStyle(.secondary)
+  private func panelButton(_ panel: Panel, active: String, inactive: String) -> some View {
+    Button { activePanel = activePanel == panel ? nil : panel } label: {
+      Image(systemName: activePanel == panel ? active : inactive)
+        .font(.title2)
+        .foregroundStyle(activePanel == panel ? Color.accentColor : Color.secondary)
     }
-    .frame(maxWidth: .infinity)
-    .padding(20)
+    .buttonStyle(.plain)
   }
 
-  private var noLightView: some View {
-    VStack(spacing: 8) {
-      Image(systemName: "lightbulb.slash")
-        .font(.largeTitle)
-        .foregroundStyle(.secondary)
-      Text("No lights found")
-        .foregroundStyle(.secondary)
+  // MARK: - Content
+
+  @ViewBuilder
+  private var mainContent: some View {
+    if let light = service.selectedLight {
+      lightContent(for: light)
+    } else if service.isDiscovering {
+      scanningView
+    } else {
+      noLightView
     }
-    .frame(maxWidth: .infinity)
-    .padding(20)
+  }
+
+  @ViewBuilder
+  private func lightContent(for light: KeyLight) -> some View {
+    if !light.isReachable {
+      disconnectedView
+    } else {
+      switch activePanel {
+      case .info:
+        if let info = light.accessoryInfo {
+          InfoView(light: light, info: info).environment(service)
+        } else {
+          loadingView
+        }
+      case .settings:
+        if let info = light.accessoryInfo {
+          SettingsView(light: light, info: info).environment(service)
+        } else {
+          loadingView
+        }
+      case .presets:
+        PresetsView()
+          .environment(service)
+          .environment(store)
+          .fixedSize(horizontal: false, vertical: true)
+      case nil:
+        if let state = light.state {
+          controlsPanel(state: state, light: light)
+        } else if service.isLoading {
+          loadingView
+        }
+      }
+    }
+  }
+
+  @ViewBuilder
+  private func controlsPanel(state: LightState, light: KeyLight) -> some View {
+    let presets = store.presets(for: light.accessoryInfo?.serialNumber ?? "")
+    PanelSection {
+      LightSlider(
+        icon: "sun.max.fill",
+        value: Double(state.brightness),
+        range: 1 ... 100,
+        label: { "\(Int($0))%" }
+      ) { v in Task { await service.setBrightness(Int(v)) } }
+
+      LightSlider(
+        icon: "thermometer.medium",
+        value: Double(state.temperature),
+        range: 143 ... 344,
+        label: { "\(Int(1_000_000 / $0.rounded()))K" }
+      ) { v in Task { await service.setTemperature(Int(v)) } }
+
+      if !presets.isEmpty {
+        HStack(alignment: .top, spacing: 8) {
+          Image(systemName: "slider.horizontal.3")
+            .frame(width: 20)
+            .foregroundStyle(.secondary)
+            .padding(.top, 4)
+          HFlow(itemSpacing: 6, rowSpacing: 6) {
+            ForEach(presets) { preset in
+              Button(preset.name) {
+                Task { await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature) }
+              }
+            }
+          }
+        }
+      }
+    }
   }
 
   // MARK: - Footer
@@ -209,13 +168,7 @@ struct MainView: View {
 
       if service.lights.count > 1 {
         PanelSection {
-          Picker(
-            "",
-            selection: Binding(
-              get: { service.selectedIndex },
-              set: { service.selectedIndex = $0 }
-            )
-          ) {
+          Picker("", selection: Binding(get: { service.selectedIndex }, set: { service.selectedIndex = $0 })) {
             ForEach(Array(service.lights.enumerated()), id: \.offset) { i, l in
               Text(l.name).tag(Optional(i))
             }
@@ -227,16 +180,14 @@ struct MainView: View {
 
       if let err = service.errorMessage {
         PanelSection {
-          Text(err)
-            .foregroundStyle(.red)
-            .lineLimit(2)
+          Text(err).foregroundStyle(.red).lineLimit(2)
         }
         SectionDivider()
       }
 
       PanelSection {
         HStack {
-          if !showInfo, !showPresets, !showSettings {
+          if activePanel == nil {
             Button {
               service.startDiscovery()
             } label: {
@@ -247,28 +198,34 @@ struct MainView: View {
             }
             .disabled(service.isDiscovering)
           }
-
           Spacer()
-
-          Button("Quit") {
-            NSApplication.shared.terminate(nil)
-          }
+          Button("Quit") { NSApplication.shared.terminate(nil) }
         }
       }
     }
   }
-}
 
-private struct PresetButton: View {
-  let preset: Preset
-  let action: () -> Void
+  // MARK: - State Views
 
-  var body: some View {
-    Button(preset.name, action: action)
+  private var loadingView: some View { stateView(label: "Loading…") }
+  private var scanningView: some View { stateView(label: "Scanning…") }
+  private var disconnectedView: some View { stateView(icon: "bolt.slash", label: "Light disconnected") }
+  private var noLightView: some View { stateView(icon: "lightbulb.slash", label: "No lights found") }
+
+  @ViewBuilder
+  private func stateView(icon: String? = nil, label: String) -> some View {
+    VStack(spacing: 8) {
+      if let icon {
+        Image(systemName: icon)
+          .font(.largeTitle)
+          .foregroundStyle(.secondary)
+      } else {
+        ProgressView()
+      }
+      Text(label)
+        .foregroundStyle(.secondary)
+    }
+    .frame(maxWidth: .infinity)
+    .padding(20)
   }
-}
-
-#Preview {
-  MainView()
-    .environment(KeyLightService())
 }
