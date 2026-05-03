@@ -26,6 +26,14 @@ final class KeyLightService: NSObject {
     return URLSession(configuration: config)
   }()
 
+  /// Short-timeout session used for user-triggered actions — fails fast when a device is unreachable.
+  private let actionSession: URLSession = {
+    let config = URLSessionConfiguration.default
+    config.timeoutIntervalForRequest = 5
+    config.timeoutIntervalForResource = 5
+    return URLSession(configuration: config)
+  }()
+
   private static let cacheKey = "cachedLights"
 
   override init() {
@@ -177,7 +185,7 @@ final class KeyLightService: NSObject {
     guard let (i, url) = indexed("lights") else { return }
     do {
       let req = try putRequest(url: url, body: LightsResponse(numberOfLights: 1, lights: [state]))
-      let (data, response) = try await URLSession.shared.data(for: req)
+      let (data, response) = try await actionSession.data(for: req)
       guard (response as? HTTPURLResponse)?.statusCode == 200 else {
         errorMessage = "Failed to update light"
         return
@@ -187,6 +195,7 @@ final class KeyLightService: NSObject {
         lights[i].state = newState
       }
     } catch {
+      if lights.indices.contains(i) { lights[i].isReachable = false }
       errorMessage = error.localizedDescription
     }
   }
