@@ -120,7 +120,8 @@ final class KeyLightService: NSObject {
     // Fetch accessory info and settings once if not yet cached
     if lights[i].accessoryInfo == nil, let url = lights[i].url("accessory-info") {
       if let (data, _) = try? await URLSession.shared.data(from: url),
-         let info = try? JSONDecoder().decode(AccessoryInfo.self, from: data) {
+         let info = try? JSONDecoder().decode(AccessoryInfo.self, from: data)
+      {
         guard lights.indices.contains(i) else { return }
         lights[i].accessoryInfo = info
         saveCache()
@@ -128,7 +129,8 @@ final class KeyLightService: NSObject {
     }
     if lights[i].settings == nil, let url = lights[i].url("lights/settings") {
       if let (data, _) = try? await URLSession.shared.data(from: url),
-         let settings = try? JSONDecoder().decode(LightSettings.self, from: data) {
+         let settings = try? JSONDecoder().decode(LightSettings.self, from: data)
+      {
         guard lights.indices.contains(i) else { return }
         lights[i].settings = settings
         saveCache()
