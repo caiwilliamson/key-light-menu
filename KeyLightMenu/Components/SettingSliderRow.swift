@@ -5,26 +5,17 @@
 
 import SwiftUI
 
-/// A label + current-value display + slider row.
+/// A settings slider row matching the LightSlider visual style.
 struct SettingSliderRow: View {
-  let label: String
+  let icon: String
   @Binding var value: Double
   let range: ClosedRange<Double>
   let format: (Double) -> String
   let onCommit: () -> Void
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 4) {
-      HStack(spacing: 8) {
-        Text(label)
-          .foregroundStyle(.secondary)
-        Spacer()
-        Text(format(value))
-          .monospacedDigit()
-      }
-      Slider(value: $value, in: range) { editing in
-        if !editing { onCommit() }
-      }
+    SliderRow(icon: icon, value: $value, range: range, label: format) { editing in
+      if !editing { onCommit() }
     }
   }
 }

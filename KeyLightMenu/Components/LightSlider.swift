@@ -38,13 +38,9 @@ struct LightSlider: View {
   }
 
   var body: some View {
-    HStack(spacing: 8) {
-      Image(systemName: icon)
-        .frame(width: 20)
-        .foregroundStyle(.secondary)
-
+    Group {
       if let onCommit {
-        Slider(value: $value, in: range) { editing in
+        SliderRow(icon: icon, value: $value, range: range, label: label) { editing in
           isDragging = editing
           if !editing {
             pendingTask?.cancel()
@@ -54,15 +50,11 @@ struct LightSlider: View {
           }
         }
       } else {
-        Slider(value: .constant(externalValue), in: range)
+        SliderRow(icon: icon, value: .constant(externalValue), range: range, label: label)
           .allowsHitTesting(false)
           .tint(.gray)
           .controlSize(.small)
       }
-
-      Text(label(value))
-        .frame(width: 40, alignment: .trailing)
-        .monospacedDigit()
     }
     .onChange(of: value) { _, new in
       guard let onCommit else { return }

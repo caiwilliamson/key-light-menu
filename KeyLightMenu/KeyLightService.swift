@@ -311,6 +311,22 @@ final class KeyLightService: NSObject {
     } catch {}
   }
 
+  func setPowerOnSettings(behavior: Int, brightness: Int, temperature: Int, at index: Int) async {
+    guard let url = url(for: index, path: "lights/settings"),
+          var settings = lights[index].settings else { return }
+    settings.powerOnBehavior = behavior
+    settings.powerOnBrightness = max(1, min(100, brightness))
+    settings.powerOnTemperature = max(143, min(344, temperature))
+    do {
+      let req = try putRequest(url: url, body: settings)
+      let (data, _) = try await URLSession.shared.data(for: req)
+      guard lights.indices.contains(index) else { return }
+      lights[index].settings = (try? JSONDecoder().decode(LightSettings.self, from: data)) ?? settings
+    } catch {
+      errorMessage = error.localizedDescription
+    }
+  }
+
   func setBatterySettings(_ battery: BatteryConfig, at index: Int) async {
     guard let url = url(for: index, path: "lights/settings"),
           var settings = lights[index].settings else { return }

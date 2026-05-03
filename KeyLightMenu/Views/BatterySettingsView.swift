@@ -1,11 +1,11 @@
 //
-//  BatteryView.swift
+//  BatterySettingsView.swift
 //  KeyLightMenu
 //
 
 import SwiftUI
 
-struct BatteryView: View {
+struct BatterySettingsView: View {
   @Environment(KeyLightService.self) private var service
   var battery: BatteryConfig
   let index: Int
@@ -45,8 +45,10 @@ struct BatteryView: View {
           SettingToggleRow(label: "Energy Saving Mode", isOn: $energySavingEnabled, onChange: send)
 
           if energySavingEnabled {
+            Text("When Battery Level Falls Below")
+              .foregroundStyle(.secondary)
             SettingSliderRow(
-              label: "When Battery Level Falls Below",
+              icon: "battery.25",
               value: $minBatteryLevel,
               range: 1 ... 100,
               format: { "\(Int($0))%" },
@@ -58,7 +60,7 @@ struct BatteryView: View {
               .padding(.leading, 16)
             if adjustBrightnessEnabled {
               SettingSliderRow(
-                label: "Low Battery Brightness",
+                icon: "sun.max.fill",
                 value: $adjustBrightnessLevel,
                 range: 1 ... 100,
                 format: { "\(Int($0))%" },

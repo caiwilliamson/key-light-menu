@@ -30,7 +30,12 @@ struct SettingsView: View {
       }
 
       if let battery = light.settings?.battery {
-        BatteryView(battery: battery, index: index)
+        BatterySettingsView(battery: battery, index: index)
+          .environment(service)
+      }
+
+      if let settings = light.settings {
+        PowerOnSettingsView(settings: settings, index: index)
           .environment(service)
       }
     }

@@ -89,7 +89,7 @@ struct WifiInfo: Codable {
 
 // MARK: - Light Settings
 
-struct LightSettings: Codable {
+struct LightSettings: Codable, Equatable {
   var powerOnBehavior: Int
   var powerOnBrightness: Int
   var powerOnTemperature: Int
