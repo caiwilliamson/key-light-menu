@@ -16,6 +16,7 @@ struct LightSlider: View {
 
   @State private var value: Double
   @State private var lastSent: Date = .distantPast
+  @State private var lastDragEnd: Date = .distantPast
   @State private var pendingTask: Task<Void, Never>?
   @State private var isDragging = false
   private static let throttleInterval: TimeInterval = 0.2
@@ -48,6 +49,7 @@ struct LightSlider: View {
           if !editing {
             pendingTask?.cancel()
             lastSent = Date()
+            lastDragEnd = Date()
             onCommit(value)
           }
         }
@@ -80,7 +82,7 @@ struct LightSlider: View {
       }
     }
     .onChange(of: externalValue) { _, new in
-      if !isDragging, Date().timeIntervalSince(lastSent) > Self.settleInterval {
+      if !isDragging, Date().timeIntervalSince(lastDragEnd) > Self.settleInterval {
         value = new
       }
     }
