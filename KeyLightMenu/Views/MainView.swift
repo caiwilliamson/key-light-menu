@@ -45,9 +45,9 @@ struct MainView: View {
   private var mainContent: some View {
     if service.lights.isEmpty {
       if service.isDiscovering {
-        stateView(label: "Scanning…")
+        LoadingState(label: "Scanning…")
       } else {
-        stateView(icon: "lightbulb.slash", label: "No lights found")
+        noLightsView
       }
     } else {
       ForEach(service.lights.indices, id: \.self) { i in
@@ -89,19 +89,12 @@ struct MainView: View {
     }
   }
 
-  // MARK: - State Views
-
-  @ViewBuilder
-  private func stateView(icon: String? = nil, label: String) -> some View {
+  private var noLightsView: some View {
     VStack(spacing: 8) {
-      if let icon {
-        Image(systemName: icon)
-          .font(.largeTitle)
-          .foregroundStyle(.secondary)
-      } else {
-        ProgressView()
-      }
-      Text(label)
+      Image(systemName: "lightbulb.slash")
+        .font(.largeTitle)
+        .foregroundStyle(.secondary)
+      Text("No lights found")
         .foregroundStyle(.secondary)
     }
     .frame(maxWidth: .infinity)

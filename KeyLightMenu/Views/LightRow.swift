@@ -31,10 +31,7 @@ struct LightRow: View {
 
             if let state = light.state {
               Button {
-                Task {
-                  service.selectedIndex = index
-                  await service.toggle()
-                }
+                Task { await service.toggle(at: index) }
               } label: {
                 Image(systemName: light.isReachable && state.isOn ? "power.circle.fill" : "power.circle")
                   .font(.title)
@@ -62,18 +59,18 @@ struct LightRow: View {
       switch panel {
       case .info:
         if let info = light.accessoryInfo {
-          InfoView(light: light, info: info).environment(service)
+          InfoView(light: light, info: info, index: index).environment(service)
         } else {
           loadingView
         }
       case .settings:
         if let info = light.accessoryInfo {
-          SettingsView(light: light, info: info).environment(service)
+          SettingsView(light: light, info: info, index: index).environment(service)
         } else {
           loadingView
         }
       case .presets:
-        PresetsView()
+        PresetsView(light: light, index: index)
           .environment(service)
           .environment(store)
           .fixedSize(horizontal: false, vertical: true)
@@ -97,8 +94,7 @@ struct LightRow: View {
         range: 1 ... 100,
         label: { "\(Int($0))%" }
       ) { v in
-        service.selectedIndex = index
-        Task { await service.setBrightness(Int(v)) }
+        Task { await service.setBrightness(Int(v), at: index) }
       }
       LightSlider(
         icon: "thermometer.medium",
@@ -106,8 +102,7 @@ struct LightRow: View {
         range: 143 ... 344,
         label: { "\(Int(1_000_000 / $0.rounded()))K" }
       ) { v in
-        service.selectedIndex = index
-        Task { await service.setTemperature(Int(v)) }
+        Task { await service.setTemperature(Int(v), at: index) }
       }
       if !presets.isEmpty {
         HStack(alignment: .top, spacing: 8) {
@@ -118,8 +113,7 @@ struct LightRow: View {
           HFlow(itemSpacing: 6, rowSpacing: 6) {
             ForEach(presets) { preset in
               Button(preset.name) {
-                service.selectedIndex = index
-                Task { await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature) }
+                Task { await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature, at: index) }
               }
               .controlSize(.small)
             }
@@ -144,11 +138,6 @@ struct LightRow: View {
   }
 
   private var loadingView: some View {
-    VStack(spacing: 8) {
-      ProgressView()
-      Text("Loading…").foregroundStyle(.secondary)
-    }
-    .frame(maxWidth: .infinity)
-    .padding(20)
+    LoadingState(label: "Loading…")
   }
 }

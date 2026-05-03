@@ -115,6 +115,24 @@ final class KeyLightService: NSObject {
         lights[i].isReachable = false
         saveCache()
       }
+      return
+    }
+    // Fetch accessory info and settings once if not yet cached
+    if lights[i].accessoryInfo == nil, let url = lights[i].url("accessory-info") {
+      if let (data, _) = try? await URLSession.shared.data(from: url),
+         let info = try? JSONDecoder().decode(AccessoryInfo.self, from: data) {
+        guard lights.indices.contains(i) else { return }
+        lights[i].accessoryInfo = info
+        saveCache()
+      }
+    }
+    if lights[i].settings == nil, let url = lights[i].url("lights/settings") {
+      if let (data, _) = try? await URLSession.shared.data(from: url),
+         let settings = try? JSONDecoder().decode(LightSettings.self, from: data) {
+        guard lights.indices.contains(i) else { return }
+        lights[i].settings = settings
+        saveCache()
+      }
     }
   }
 
@@ -124,10 +142,9 @@ final class KeyLightService: NSObject {
   }
 
   /// Returns the current selected index and a URL for the given API path.
-  private func indexed(_ path: String) -> (Int, URL)? {
-    guard let i = selectedIndex, lights.indices.contains(i),
-          let url = lights[i].url(path) else { return nil }
-    return (i, url)
+  private func url(for index: Int, path: String) -> (Int, URL)? {
+    guard lights.indices.contains(index), let url = lights[index].url(path) else { return nil }
+    return (index, url)
   }
 
   private func putRequest(url: URL, body: some Encodable) throws -> URLRequest {
@@ -181,8 +198,8 @@ final class KeyLightService: NSObject {
 
   // MARK: - API
 
-  func fetchStatus(showSpinner: Bool = true) async {
-    guard let (i, url) = indexed("lights") else { return }
+  func fetchStatus(at index: Int, showSpinner: Bool = true) async {
+    guard let (i, url) = url(for: index, path: "lights") else { return }
     if showSpinner { isLoading = true }
     errorMessage = nil
     defer { if showSpinner { isLoading = false } }
@@ -205,8 +222,8 @@ final class KeyLightService: NSObject {
     }
   }
 
-  private func apply(_ state: LightState) async {
-    guard let (i, url) = indexed("lights") else { return }
+  private func apply(_ state: LightState, at index: Int) async {
+    guard let (i, url) = url(for: index, path: "lights") else { return }
     do {
       let req = try putRequest(url: url, body: LightsResponse(numberOfLights: 1, lights: [state]))
       let (data, response) = try await actionSession.data(for: req)
@@ -224,33 +241,33 @@ final class KeyLightService: NSObject {
     }
   }
 
-  func toggle() async {
-    guard var s = selectedLight?.state else { return }
+  func toggle(at index: Int) async {
+    guard lights.indices.contains(index), var s = lights[index].state else { return }
     s.isOn.toggle()
-    await apply(s)
+    await apply(s, at: index)
   }
 
-  func setBrightness(_ v: Int) async {
-    guard var s = selectedLight?.state else { return }
+  func setBrightness(_ v: Int, at index: Int) async {
+    guard lights.indices.contains(index), var s = lights[index].state else { return }
     s.brightness = max(1, min(100, v))
-    await apply(s)
+    await apply(s, at: index)
   }
 
-  func setTemperature(_ v: Int) async {
-    guard var s = selectedLight?.state else { return }
+  func setTemperature(_ v: Int, at index: Int) async {
+    guard lights.indices.contains(index), var s = lights[index].state else { return }
     s.temperature = max(143, min(344, v))
-    await apply(s)
+    await apply(s, at: index)
   }
 
-  func applyPreset(brightness: Int, temperature: Int) async {
-    guard var s = selectedLight?.state else { return }
+  func applyPreset(brightness: Int, temperature: Int, at index: Int) async {
+    guard lights.indices.contains(index), var s = lights[index].state else { return }
     s.brightness = max(1, min(100, brightness))
     s.temperature = max(143, min(344, temperature))
-    await apply(s)
+    await apply(s, at: index)
   }
 
-  func fetchAccessoryInfo() async {
-    guard let (i, url) = indexed("accessory-info") else { return }
+  func fetchAccessoryInfo(at index: Int) async {
+    guard let (i, url) = url(for: index, path: "accessory-info") else { return }
     do {
       let (data, _) = try await URLSession.shared.data(from: url)
       guard lights.indices.contains(i) else { return }
@@ -259,8 +276,8 @@ final class KeyLightService: NSObject {
     } catch {}
   }
 
-  func setDisplayName(_ name: String) async {
-    guard let (i, url) = indexed("accessory-info") else { return }
+  func setDisplayName(_ name: String, at index: Int) async {
+    guard let (i, url) = url(for: index, path: "accessory-info") else { return }
     struct Payload: Encodable { let displayName: String }
     do {
       let req = try putRequest(url: url, body: Payload(displayName: name))
@@ -276,16 +293,16 @@ final class KeyLightService: NSObject {
     }
   }
 
-  func identify() async {
-    guard let (_, url) = indexed("identify") else { return }
+  func identify(at index: Int) async {
+    guard let (_, url) = url(for: index, path: "identify") else { return }
     var req = URLRequest(url: url)
     req.httpMethod = "POST"
     req.setValue("application/json", forHTTPHeaderField: "Accept")
     try? await URLSession.shared.data(for: req)
   }
 
-  func fetchSettings() async {
-    guard let (i, url) = indexed("lights/settings") else { return }
+  func fetchSettings(at index: Int) async {
+    guard let (i, url) = url(for: index, path: "lights/settings") else { return }
     do {
       let (data, _) = try await URLSession.shared.data(from: url)
       guard lights.indices.contains(i) else { return }
@@ -294,8 +311,8 @@ final class KeyLightService: NSObject {
     } catch {}
   }
 
-  func setBatterySettings(_ battery: BatteryConfig) async {
-    guard let (i, url) = indexed("lights/settings"),
+  func setBatterySettings(_ battery: BatteryConfig, at index: Int) async {
+    guard let (i, url) = url(for: index, path: "lights/settings"),
           var settings = lights[i].settings else { return }
     settings.battery = battery
     do {
@@ -384,19 +401,18 @@ extension KeyLightService: NetServiceDelegate {
         self.lights[existing].host = ipAddress
         self.lights[existing].port = port
         if self.selectedIndex == nil { self.selectedIndex = existing }
-        await self.fetchStatus()
-        await self.fetchAccessoryInfo()
-        await self.fetchSettings()
+        await self.fetchStatus(at: existing)
+        await self.fetchAccessoryInfo(at: existing)
+        await self.fetchSettings(at: existing)
         self.startPolling()
       } else {
         self.lights.append(KeyLight(discoveredName: name, host: ipAddress, port: port))
-        if self.selectedIndex == nil {
-          self.selectedIndex = self.lights.count - 1
-          await self.fetchStatus()
-          await self.fetchAccessoryInfo()
-          await self.fetchSettings()
-          self.startPolling()
-        }
+        let newIndex = self.lights.count - 1
+        if self.selectedIndex == nil { self.selectedIndex = newIndex }
+        await self.fetchStatus(at: newIndex)
+        await self.fetchAccessoryInfo(at: newIndex)
+        await self.fetchSettings(at: newIndex)
+        self.startPolling()
       }
     }
   }

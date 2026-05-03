@@ -9,6 +9,7 @@ struct InfoView: View {
   @Environment(KeyLightService.self) private var service
   let light: KeyLight
   let info: AccessoryInfo
+  let index: Int
 
   var body: some View {
     VStack(spacing: 0) {
@@ -29,7 +30,7 @@ struct InfoView: View {
 
       PanelSection {
         Button {
-          Task { await service.identify() }
+          Task { await service.identify(at: index) }
         } label: {
           Label("Identify Accessory", systemImage: "light.beacon.max")
             .frame(maxWidth: .infinity)

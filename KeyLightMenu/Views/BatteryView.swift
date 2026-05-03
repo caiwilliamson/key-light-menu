@@ -8,6 +8,7 @@ import SwiftUI
 struct BatteryView: View {
   @Environment(KeyLightService.self) private var service
   var battery: BatteryConfig
+  let index: Int
 
   @State private var bypass: Bool
   @State private var energySavingEnabled: Bool
@@ -17,8 +18,9 @@ struct BatteryView: View {
   @State private var adjustBrightnessLevel: Double
   @State private var sendTask: Task<Void, Never>?
 
-  init(battery: BatteryConfig) {
+  init(battery: BatteryConfig, index: Int) {
     self.battery = battery
+    self.index = index
     _bypass = State(initialValue: battery.bypass == 1)
     _energySavingEnabled = State(initialValue: battery.energySaving.enable == 1)
     _minBatteryLevel = State(initialValue: battery.energySaving.minimumBatteryLevel)
@@ -99,6 +101,6 @@ struct BatteryView: View {
     guard updated != battery else { return }
     // Cancel any in-flight request so interleaved responses can't ping-pong the value
     sendTask?.cancel()
-    sendTask = Task { await service.setBatterySettings(updated) }
+    sendTask = Task { await service.setBatterySettings(updated, at: index) }
   }
 }

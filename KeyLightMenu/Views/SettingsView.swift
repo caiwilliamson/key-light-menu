@@ -9,6 +9,7 @@ struct SettingsView: View {
   @Environment(KeyLightService.self) private var service
   let light: KeyLight
   let info: AccessoryInfo
+  let index: Int
 
   @State private var displayNameDraft = ""
 
@@ -28,8 +29,8 @@ struct SettingsView: View {
         }
       }
 
-      if let battery = service.selectedLight?.settings?.battery {
-        BatteryView(battery: battery)
+      if let battery = light.settings?.battery {
+        BatteryView(battery: battery, index: index)
           .environment(service)
       }
     }
@@ -38,6 +39,6 @@ struct SettingsView: View {
   }
 
   private func saveDisplayName() {
-    Task { await service.setDisplayName(displayNameDraft) }
+    Task { await service.setDisplayName(displayNameDraft, at: index) }
   }
 }

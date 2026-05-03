@@ -8,14 +8,16 @@ import SwiftUI
 struct PresetsView: View {
   @Environment(KeyLightService.self) private var service
   @Environment(PresetStore.self) private var store
+  let light: KeyLight
+  let index: Int
 
   @State private var presetName = ""
 
   var body: some View {
-    let serial = service.selectedLight?.accessoryInfo?.serialNumber ?? ""
+    let serial = light.accessoryInfo?.serialNumber ?? ""
     let hostPresets = store.presets(for: serial)
     return VStack(spacing: 0) {
-      if let state = service.selectedLight?.state {
+      if let state = light.state {
         PanelSection {
           Text("New Preset")
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -24,21 +26,21 @@ struct PresetsView: View {
             value: Double(state.brightness),
             range: 1 ... 100,
             label: { v in "\(Int(v))%" }
-          ) { v in Task { await service.setBrightness(Int(v)) } }
+          ) { v in Task { await service.setBrightness(Int(v), at: index) } }
 
           LightSlider(
             icon: "thermometer.medium",
             value: Double(state.temperature),
             range: 143 ... 344,
             label: { v in "\(Int(1_000_000 / v.rounded()))K" }
-          ) { v in Task { await service.setTemperature(Int(v)) } }
+          ) { v in Task { await service.setTemperature(Int(v), at: index) } }
 
           HStack(spacing: 8) {
             Color.clear.frame(width: 20)
             TextField("Preset name", text: $presetName)
               .textFieldStyle(.roundedBorder)
             Button("Save") {
-              guard !presetName.isEmpty, let state = service.selectedLight?.state else { return }
+              guard !presetName.isEmpty else { return }
               store.add(
                 name: presetName,
                 brightness: state.brightness,
@@ -47,7 +49,7 @@ struct PresetsView: View {
               )
               presetName = ""
             }
-            .disabled(presetName.isEmpty || service.selectedLight?.state == nil)
+            .disabled(presetName.isEmpty)
             .buttonStyle(.borderedProminent)
             .controlSize(.small)
           }
