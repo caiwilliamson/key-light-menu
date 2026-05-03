@@ -18,7 +18,7 @@ struct LightSlider: View {
   @State private var lastSent: Date = .distantPast
   @State private var pendingTask: Task<Void, Never>?
   @State private var isDragging = false
-  private static let throttleInterval: TimeInterval = 0.1
+  private static let throttleInterval: TimeInterval = 0.2
   private static let settleInterval: TimeInterval = 0.5
 
   init(
