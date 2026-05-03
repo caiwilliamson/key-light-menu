@@ -42,7 +42,8 @@ final class KeyLightService: NSObject {
     {
       lights = cached.map {
         KeyLight(discoveredName: $0.discoveredName, host: $0.host, port: $0.port,
-                 state: $0.state, accessoryInfo: $0.accessoryInfo, settings: $0.settings)
+                 state: $0.state, accessoryInfo: $0.accessoryInfo, settings: $0.settings,
+                 isReachable: $0.isReachable)
       }
       selectedIndex = 0
     }
@@ -57,7 +58,8 @@ final class KeyLightService: NSObject {
   private func saveCache() {
     let cached = lights.map {
       CachedLight(host: $0.host, port: $0.port, discoveredName: $0.discoveredName,
-                  state: $0.state, accessoryInfo: $0.accessoryInfo, settings: $0.settings)
+                  state: $0.state, accessoryInfo: $0.accessoryInfo, settings: $0.settings,
+                  isReachable: $0.isReachable)
     }
     if let data = try? JSONEncoder().encode(cached) {
       UserDefaults.standard.set(data, forKey: Self.cacheKey)
@@ -83,9 +85,35 @@ final class KeyLightService: NSObject {
       while !Task.isCancelled {
         try? await Task.sleep(for: .seconds(2))
         guard !Task.isCancelled else { break }
-        await self?.fetchStatus(showSpinner: false)
-        await self?.fetchAccessoryInfo()
-        await self?.fetchSettings()
+        await self?.pollAllLights()
+      }
+    }
+  }
+
+  private func pollAllLights() async {
+    guard !lights.isEmpty else { return }
+    await withTaskGroup(of: Void.self) { group in
+      for i in lights.indices {
+        group.addTask { await self.pollLight(at: i) }
+      }
+    }
+  }
+
+  private func pollLight(at i: Int) async {
+    guard lights.indices.contains(i), let url = lights[i].url("lights") else { return }
+    do {
+      let (data, response) = try await pollSession.data(from: url)
+      guard (response as? HTTPURLResponse)?.statusCode == 200 else { return }
+      guard lights.indices.contains(i) else { return }
+      if let state = try? JSONDecoder().decode(LightsResponse.self, from: data).lights.first {
+        lights[i].state = state
+        lights[i].isReachable = true
+        saveCache()
+      }
+    } catch {
+      if lights.indices.contains(i) {
+        lights[i].isReachable = false
+        saveCache()
       }
     }
   }
@@ -119,11 +147,7 @@ final class KeyLightService: NSObject {
     if lights.isEmpty {
       startDiscovery()
     } else {
-      Task {
-        await fetchStatus(showSpinner: false)
-        await fetchAccessoryInfo()
-        await fetchSettings()
-      }
+      Task { await pollAllLights() }
     }
   }
 

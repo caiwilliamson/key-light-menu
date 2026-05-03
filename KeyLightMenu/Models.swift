@@ -125,4 +125,5 @@ struct CachedLight: Codable {
   var state: LightState?
   var accessoryInfo: AccessoryInfo?
   var settings: LightSettings?
+  var isReachable: Bool
 }
