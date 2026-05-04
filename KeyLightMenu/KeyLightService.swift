@@ -136,6 +136,10 @@ final class KeyLightService: NSObject {
         saveCache()
       }
     }
+    // Fetch battery info whenever light has a battery
+    if lights[i].settings?.battery != nil || lights[i].batteryInfo != nil {
+      await fetchBatteryInfo(at: i)
+    }
   }
 
   private func stopPolling() {
@@ -325,6 +329,16 @@ final class KeyLightService: NSObject {
     } catch {
       errorMessage = error.localizedDescription
     }
+  }
+
+  func fetchBatteryInfo(at index: Int) async {
+    guard let url = url(for: index, path: "battery-info") else { return }
+    guard let (data, response) = try? await pollSession.data(from: url),
+          (response as? HTTPURLResponse)?.statusCode == 200,
+          let info = try? JSONDecoder().decode(BatteryInfo.self, from: data)
+    else { return }
+    guard lights.indices.contains(index) else { return }
+    lights[index].batteryInfo = info
   }
 
   func setBatterySettings(_ battery: BatteryConfig, at index: Int) async {

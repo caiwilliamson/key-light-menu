@@ -43,8 +43,13 @@ struct LightRow: View {
             }
           }
 
-          Text(light.isReachable ? (light.state?.isOn == true ? "On" : "Off") : "Disconnected")
-            .foregroundStyle(.secondary)
+          HStack(spacing: 8) {
+            Text(light.isReachable ? (light.state?.isOn == true ? "On" : "Off") : "Disconnected")
+              .foregroundStyle(.secondary)
+            if let battery = light.batteryInfo {
+              batteryIndicator(battery)
+            }
+          }
         }
       }
 
@@ -141,5 +146,34 @@ struct LightRow: View {
 
   private var loadingView: some View {
     LoadingState(label: "Loading…")
+  }
+
+  @ViewBuilder
+  private func batteryIndicator(_ battery: BatteryInfo) -> some View {
+    let level = battery.level
+    // Plugged in but not charging = bypass mode, battery level is meaningless
+    if battery.isPluggedIn && !battery.isCharging {
+      Image(systemName: "powerplug.fill")
+        .imageScale(.large)
+        .foregroundStyle(.secondary)
+    } else {
+      let color: Color = level < 20 && !battery.isPluggedIn ? .red : .secondary
+      let suffix = battery.isCharging ? ".bolt" : ""
+      let icon: String = {
+        switch level {
+        case ..<10: return "battery.0\(suffix)"
+        case ..<35: return "battery.25\(suffix)"
+        case ..<60: return "battery.50\(suffix)"
+        case ..<85: return "battery.75\(suffix)"
+        default:    return "battery.100\(suffix)"
+        }
+      }()
+      HStack(spacing: 2) {
+        Image(systemName: icon)
+          .imageScale(.large)
+        Text("\(Int(level.rounded()))%")
+      }
+      .foregroundStyle(color)
+    }
   }
 }
