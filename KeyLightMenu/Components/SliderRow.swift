@@ -11,16 +11,34 @@ struct SliderRow: View {
   @Binding var value: Double
   let range: ClosedRange<Double>
   let label: (Double) -> String
+  let gradient: TrackGradient
+  var isActive: Bool = true
   var onEditingChanged: ((Bool) -> Void)?
+
+  init(
+    icon: String,
+    value: Binding<Double>,
+    range: ClosedRange<Double>,
+    label: @escaping (Double) -> String,
+    gradient: TrackGradient,
+    isActive: Bool = true,
+    onEditingChanged: ((Bool) -> Void)? = nil
+  ) {
+    self.icon = icon
+    _value = value
+    self.range = range
+    self.label = label
+    self.gradient = gradient
+    self.isActive = isActive
+    self.onEditingChanged = onEditingChanged
+  }
 
   var body: some View {
     HStack(spacing: 8) {
       Image(systemName: icon)
         .frame(width: 20)
         .foregroundStyle(.secondary)
-      Slider(value: $value, in: range) { editing in
-        onEditingChanged?(editing)
-      }
+      GradientSlider(value: $value, range: range, gradient: gradient, isActive: isActive, onEditingChanged: onEditingChanged)
       Text(label(value))
         .frame(width: 40, alignment: .trailing)
         .monospacedDigit()

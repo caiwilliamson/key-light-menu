@@ -38,20 +38,20 @@ struct PowerOnSettingsView: View {
       }
 
       if behavior == 2 {
-        SettingSliderRow(
+        SliderRow(
           icon: "sun.max.fill",
           value: $brightness,
           range: 1 ... 100,
-          format: { "\(Int($0))%" },
-          onCommit: send
-        )
-        SettingSliderRow(
+          label: { "\(Int($0))%" },
+          gradient: .brightness
+        ) { editing in if !editing { send() } }
+        SliderRow(
           icon: "thermometer.medium",
           value: $temperature,
           range: 143 ... 344,
-          format: { "\(Int(1_000_000 / $0.rounded()))K" },
-          onCommit: send
-        )
+          label: { "\(Int(1_000_000 / $0.rounded()))K" },
+          gradient: .temperature
+        ) { editing in if !editing { send() } }
       }
     }
     .onChange(of: settings) { _, new in

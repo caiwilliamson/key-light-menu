@@ -12,6 +12,7 @@ struct LightSlider: View {
   let externalValue: Double
   let range: ClosedRange<Double>
   let label: (Double) -> String
+  let gradient: TrackGradient
   let onCommit: ((Double) -> Void)?
 
   @State private var value: Double
@@ -27,12 +28,14 @@ struct LightSlider: View {
     value: Double,
     range: ClosedRange<Double>,
     label: @escaping (Double) -> String,
+    gradient: TrackGradient,
     onCommit: ((Double) -> Void)? = nil
   ) {
     self.icon = icon
     externalValue = value
     self.range = range
     self.label = label
+    self.gradient = gradient
     self.onCommit = onCommit
     _value = State(initialValue: value)
   }
@@ -40,7 +43,7 @@ struct LightSlider: View {
   var body: some View {
     Group {
       if let onCommit {
-        SliderRow(icon: icon, value: $value, range: range, label: label) { editing in
+        SliderRow(icon: icon, value: $value, range: range, label: label, gradient: gradient) { editing in
           isDragging = editing
           if !editing {
             pendingTask?.cancel()
@@ -50,10 +53,8 @@ struct LightSlider: View {
           }
         }
       } else {
-        SliderRow(icon: icon, value: .constant(externalValue), range: range, label: label)
+        SliderRow(icon: icon, value: .constant(externalValue), range: range, label: label, gradient: gradient, isActive: false)
           .allowsHitTesting(false)
-          .tint(.gray)
-          .controlSize(.small)
       }
     }
     .onChange(of: value) { _, new in

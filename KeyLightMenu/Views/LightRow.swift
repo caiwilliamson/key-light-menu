@@ -18,7 +18,7 @@ struct LightRow: View {
     VStack(spacing: 0) {
       PanelSection {
         VStack(alignment: .leading, spacing: 2) {
-          HStack(spacing: 6) {
+          HStack(spacing: 4) {
             Text(light.name)
               .font(.headline)
               .lineLimit(1)
@@ -92,7 +92,8 @@ struct LightRow: View {
         icon: "sun.max.fill",
         value: Double(state.brightness),
         range: 1 ... 100,
-        label: { "\(Int($0))%" }
+        label: { "\(Int($0))%" },
+        gradient: .brightness
       ) { v in
         Task { await service.setBrightness(Int(v), at: index) }
       }
@@ -100,7 +101,8 @@ struct LightRow: View {
         icon: "thermometer.medium",
         value: Double(state.temperature),
         range: 143 ... 344,
-        label: { "\(Int(1_000_000 / $0.rounded()))K" }
+        label: { "\(Int(1_000_000 / $0.rounded()))K" },
+        gradient: .temperature
       ) { v in
         Task { await service.setTemperature(Int(v), at: index) }
       }

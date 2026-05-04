@@ -23,7 +23,7 @@ struct BatterySettingsView: View {
     self.index = index
     _bypass = State(initialValue: battery.bypass == 1)
     _energySavingEnabled = State(initialValue: battery.energySaving.enable == 1)
-    _minBatteryLevel = State(initialValue: battery.energySaving.minimumBatteryLevel)
+    _minBatteryLevel = State(initialValue: Self.clampBatteryLevel(battery.energySaving.minimumBatteryLevel))
     _disableWifi = State(initialValue: battery.energySaving.disableWifi == 1)
     _adjustBrightnessEnabled = State(initialValue: battery.energySaving.adjustBrightness.enable == 1)
     _adjustBrightnessLevel = State(initialValue: battery.energySaving.adjustBrightness.brightness)
@@ -45,27 +45,31 @@ struct BatterySettingsView: View {
           SettingToggleRow(label: "Energy Saving Mode", isOn: $energySavingEnabled, onChange: send)
 
           if energySavingEnabled {
-            Text("When Battery Level Falls Below")
-              .foregroundStyle(.secondary)
-            SettingSliderRow(
-              icon: "battery.25",
-              value: $minBatteryLevel,
-              range: 1 ... 100,
-              format: { "\(Int($0))%" },
-              onCommit: send
-            )
+            HStack {
+              Text("When Battery Level Falls Below")
+                .foregroundStyle(.secondary)
+              Spacer()
+              Picker("", selection: $minBatteryLevel) {
+                ForEach(stride(from: 5.0, through: 50.0, by: 5.0).map { $0 }, id: \.self) { v in
+                  Text("\(Int(v))%").tag(v)
+                }
+              }
+              .labelsHidden()
+              .fixedSize()
+              .onChange(of: minBatteryLevel) { _, _ in send() }
+            }
             SettingToggleRow(label: "Disable Wi-Fi", isLabelSecondary: true, isOn: $disableWifi, onChange: send)
               .padding(.leading, 16)
             SettingToggleRow(label: "Adjust Brightness", isLabelSecondary: true, isOn: $adjustBrightnessEnabled, onChange: send)
               .padding(.leading, 16)
             if adjustBrightnessEnabled {
-              SettingSliderRow(
+              SliderRow(
                 icon: "sun.max.fill",
                 value: $adjustBrightnessLevel,
                 range: 1 ... 100,
-                format: { "\(Int($0))%" },
-                onCommit: send
-              )
+                label: { "\(Int($0))%" },
+                gradient: .brightness
+              ) { editing in if !editing { send() } }
               .padding(.leading, 16)
             }
           }
@@ -75,7 +79,7 @@ struct BatterySettingsView: View {
     .onChange(of: battery) { _, new in
       bypass = new.bypass == 1
       energySavingEnabled = new.energySaving.enable == 1
-      minBatteryLevel = new.energySaving.minimumBatteryLevel
+      minBatteryLevel = Self.clampBatteryLevel(new.energySaving.minimumBatteryLevel)
       disableWifi = new.energySaving.disableWifi == 1
       adjustBrightnessEnabled = new.energySaving.adjustBrightness.enable == 1
       adjustBrightnessLevel = new.energySaving.adjustBrightness.brightness
@@ -95,6 +99,11 @@ struct BatterySettingsView: View {
       ),
       bypass: bypass ? 1 : 0
     )
+  }
+
+  private static func clampBatteryLevel(_ v: Double) -> Double {
+    let clamped = max(5, min(50, v))
+    return (clamped / 5).rounded() * 5
   }
 
   private func send() {

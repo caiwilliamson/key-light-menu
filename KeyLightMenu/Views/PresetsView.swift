@@ -25,21 +25,23 @@ struct PresetsView: View {
             icon: "sun.max.fill",
             value: Double(state.brightness),
             range: 1 ... 100,
-            label: { v in "\(Int(v))%" }
+            label: { v in "\(Int(v))%" },
+            gradient: .brightness
           ) { v in Task { await service.setBrightness(Int(v), at: index) } }
 
           LightSlider(
             icon: "thermometer.medium",
             value: Double(state.temperature),
             range: 143 ... 344,
-            label: { v in "\(Int(1_000_000 / v.rounded()))K" }
+            label: { v in "\(Int(1_000_000 / v.rounded()))K" },
+            gradient: .temperature
           ) { v in Task { await service.setTemperature(Int(v), at: index) } }
 
           HStack(spacing: 8) {
             Color.clear.frame(width: 20)
             TextField("Preset name", text: $presetName)
               .textFieldStyle(.roundedBorder)
-            Button("Save") {
+            Button("Save Preset") {
               guard !presetName.isEmpty else { return }
               store.add(
                 name: presetName,
@@ -80,8 +82,8 @@ struct PresetsView: View {
                 }
                 .buttonStyle(.plain)
               }
-              LightSlider(icon: "sun.max.fill", value: Double(preset.brightness), range: 1 ... 100, label: { "\(Int($0))%" })
-              LightSlider(icon: "thermometer.medium", value: Double(preset.temperature), range: 143 ... 344, label: { "\(Int(1_000_000 / $0.rounded()))K" })
+              LightSlider(icon: "sun.max.fill", value: Double(preset.brightness), range: 1 ... 100, label: { "\(Int($0))%" }, gradient: .brightness)
+              LightSlider(icon: "thermometer.medium", value: Double(preset.temperature), range: 143 ... 344, label: { "\(Int(1_000_000 / $0.rounded()))K" }, gradient: .temperature)
             }
           }
         }
