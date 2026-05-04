@@ -68,7 +68,7 @@ struct BatterySettingsView: View {
                 value: $adjustBrightnessLevel,
                 range: 1 ... 100,
                 label: { "\(Int($0))%" },
-                gradient: .brightness
+                gradient: .brightness(for: service.lights[index].state?.temperature ?? 200)
               ) { editing in if !editing { send() } }
                 .padding(.leading, 16)
             }

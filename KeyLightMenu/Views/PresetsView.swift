@@ -26,7 +26,7 @@ struct PresetsView: View {
             value: Double(state.brightness),
             range: 1 ... 100,
             label: { v in "\(Int(v))%" },
-            gradient: .brightness
+            gradient: .brightness(for: state.temperature)
           ) { v in Task { await service.setBrightness(Int(v), at: index) } }
 
           LightSlider(
@@ -117,7 +117,7 @@ private struct PresetRow: View {
         }
         .buttonStyle(.plain)
       }
-      LightSlider(icon: "sun.max.fill", value: Double(preset.brightness), range: 1 ... 100, label: { "\(Int($0))%" }, gradient: .brightness)
+      LightSlider(icon: "sun.max.fill", value: Double(preset.brightness), range: 1 ... 100, label: { "\(Int($0))%" }, gradient: .brightness(for: preset.temperature))
       LightSlider(icon: "thermometer.medium", value: Double(preset.temperature), range: 143 ... 344, label: { "\(Int(1_000_000 / $0.rounded()))K" }, gradient: .temperature)
     }
   }

@@ -102,4 +102,17 @@ struct TrackGradient {
     Stop(r: 0.6, g: 0.78, b: 1.0),
     Stop(r: 1.0, g: 0.7, b: 0.3),
   ])
+
+  /// Brightness gradient from near-black to the colour at the given temperature (in mireds).
+  static func brightness(for temperature: Int) -> TrackGradient {
+    let fraction = max(0, min(1, (Double(temperature) - 143) / (344 - 143)))
+    let s = Self.temperature.stops
+    let scaled = fraction * Double(s.count - 1)
+    let low = Int(scaled), high = min(low + 1, s.count - 1)
+    let t = scaled - Double(low)
+    let r = s[low].r + (s[high].r - s[low].r) * t
+    let g = s[low].g + (s[high].g - s[low].g) * t
+    let b = s[low].b + (s[high].b - s[low].b) * t
+    return TrackGradient(stops: [Stop(r: r * 0.06, g: g * 0.06, b: b * 0.06), Stop(r: r, g: g, b: b)])
+  }
 }

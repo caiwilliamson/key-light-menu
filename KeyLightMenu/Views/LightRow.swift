@@ -92,13 +92,14 @@ struct LightRow: View {
   @ViewBuilder
   private func controlsSection(state: LightState) -> some View {
     let presets = store.presets(for: light.accessoryInfo?.serialNumber ?? "")
+    let brightnessGradient = TrackGradient.brightness(for: state.temperature)
     PanelSection {
       LightSlider(
         icon: "sun.max.fill",
         value: Double(state.brightness),
         range: 1 ... 100,
         label: { "\(Int($0))%" },
-        gradient: .brightness
+        gradient: brightnessGradient
       ) { v in
         Task { await service.setBrightness(Int(v), at: index) }
       }
