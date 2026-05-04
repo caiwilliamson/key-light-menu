@@ -120,15 +120,20 @@ struct AdjustBrightnessConfig: Codable, Equatable {
 // MARK: - Battery Info
 
 struct BatteryInfo: Codable {
-  var powerSource: Int           // 1 = plugged-in, 2 = on battery
-  var level: Double              // 0–100
+  var powerSource: Int // 1 = plugged-in, 2 = on battery
+  var level: Double // 0–100
   var status: Int
   var currentBatteryVoltage: Int
   var inputChargeVoltage: Int
   var inputChargeCurrent: Int
 
-  var isPluggedIn: Bool { powerSource == 1 }
-  var isCharging: Bool { isPluggedIn && currentBatteryVoltage > 0 }
+  var isPluggedIn: Bool {
+    powerSource == 1
+  }
+
+  var isCharging: Bool {
+    isPluggedIn && currentBatteryVoltage > 0
+  }
 }
 
 // MARK: - Cache

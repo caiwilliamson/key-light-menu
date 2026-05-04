@@ -11,7 +11,7 @@ struct GradientSlider: View {
   let range: ClosedRange<Double>
   let gradient: TrackGradient
   var isActive: Bool = true
-  var onEditingChanged: ((Bool) -> Void)? = nil
+  var onEditingChanged: ((Bool) -> Void)?
 
   private static let thumbSize: CGFloat = 20
   private static let trackHeight: CGFloat = 9
@@ -67,7 +67,9 @@ struct GradientSlider: View {
 struct TrackGradient {
   struct Stop {
     let r, g, b: Double
-    var color: Color { Color(red: r, green: g, blue: b) }
+    var color: Color {
+      Color(red: r, green: g, blue: b)
+    }
   }
 
   let stops: [Stop]
@@ -85,19 +87,19 @@ struct TrackGradient {
     let t = scaled - Double(low)
     let a = stops[low], b = stops[high]
     return Color(
-      red:   a.r + (b.r - a.r) * t,
+      red: a.r + (b.r - a.r) * t,
       green: a.g + (b.g - a.g) * t,
-      blue:  a.b + (b.b - a.b) * t
+      blue: a.b + (b.b - a.b) * t
     )
   }
 
   static let brightness = TrackGradient(stops: [
     Stop(r: 0.45, g: 0.45, b: 0.45),
-    Stop(r: 0.97, g: 0.97, b: 0.97)
+    Stop(r: 0.97, g: 0.97, b: 0.97),
   ])
   /// 143 mireds ≈ 7000K (cool/blue) → 344 mireds ≈ 2900K (warm/amber)
   static let temperature = TrackGradient(stops: [
-    Stop(r: 0.6,  g: 0.78, b: 1.0),
-    Stop(r: 1.0,  g: 0.7,  b: 0.3)
+    Stop(r: 0.6, g: 0.78, b: 1.0),
+    Stop(r: 1.0, g: 0.7, b: 0.3),
   ])
 }

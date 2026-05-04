@@ -70,7 +70,7 @@ struct BatterySettingsView: View {
                 label: { "\(Int($0))%" },
                 gradient: .brightness
               ) { editing in if !editing { send() } }
-              .padding(.leading, 16)
+                .padding(.leading, 16)
             }
           }
         }
