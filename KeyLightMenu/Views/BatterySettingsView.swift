@@ -34,7 +34,7 @@ struct BatterySettingsView: View {
       PanelSection {
         SettingToggleRow(
           label: "Studio Mode (Bypass Battery)",
-          subtitle: bypass ? "Only works when plugged in" : "Uses battery when unplugged",
+          subtitle: "Studio Mode bypasses the battery, meaning the light will only function when connected to power.",
           isOn: $bypass,
           onChange: send
         )

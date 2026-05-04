@@ -14,7 +14,7 @@ struct SettingToggleRow: View {
   let onChange: () -> Void
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 4) {
+    VStack(alignment: .leading, spacing: 6) {
       HStack(spacing: 8) {
         Text(label)
           .foregroundStyle(isLabelSecondary ? Color.secondary : Color.primary)
@@ -27,6 +27,7 @@ struct SettingToggleRow: View {
         Text(subtitle)
           .font(.caption)
           .foregroundStyle(.secondary)
+          .fixedSize(horizontal: false, vertical: true)
       }
     }
   }
