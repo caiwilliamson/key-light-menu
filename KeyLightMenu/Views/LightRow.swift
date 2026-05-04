@@ -25,9 +25,9 @@ struct LightRow: View {
 
             Spacer()
 
-            panelButton(.presets, active: "slider.horizontal.3", inactive: "slider.horizontal.3")
-            panelButton(.settings, active: "gearshape.fill", inactive: "gearshape")
-            panelButton(.info, active: "info.circle.fill", inactive: "info.circle")
+            panelButton(.presets, active: "slider.horizontal.3", inactive: "slider.horizontal.3", label: "Presets")
+            panelButton(.settings, active: "gearshape.fill", inactive: "gearshape", label: "Settings")
+            panelButton(.info, active: "info.circle.fill", inactive: "info.circle", label: "Info")
 
             if let state = light.state {
               Button {
@@ -130,7 +130,7 @@ struct LightRow: View {
     }
   }
 
-  private func panelButton(_ panel: Panel, active: String, inactive: String) -> some View {
+  private func panelButton(_ panel: Panel, active: String, inactive: String, label: String) -> some View {
     let isActive = service.selectedIndex == index && activePanel == panel
     return Button {
       service.selectedIndex = index
@@ -142,6 +142,7 @@ struct LightRow: View {
     }
     .buttonStyle(.plain)
     .disabled(!light.isReachable)
+    .help(label)
   }
 
   private var loadingView: some View {
