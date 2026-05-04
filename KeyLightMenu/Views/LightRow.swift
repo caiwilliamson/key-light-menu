@@ -109,7 +109,7 @@ struct LightRow: View {
         label: { "\(Int(1_000_000 / $0.rounded()))K" },
         gradient: .temperature
       ) { v in
-        Task { await service.setTemperature(Int(v), at: index) }
+        Task { await service.setTemperature(Int(v.rounded()), at: index) }
       }
       if !presets.isEmpty {
         HStack(alignment: .top, spacing: 8) {
@@ -119,10 +119,20 @@ struct LightRow: View {
             .padding(.top, 4)
           HFlow(itemSpacing: 6, rowSpacing: 6) {
             ForEach(presets) { preset in
-              Button(preset.name) {
-                Task { await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature, at: index) }
+              let active = preset.brightness == state.brightness && preset.temperature == state.temperature
+              if active {
+                Button(preset.name) {
+                  Task { await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature, at: index) }
+                }
+                .controlSize(.small)
+                .buttonStyle(.borderedProminent)
+              } else {
+                Button(preset.name) {
+                  Task { await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature, at: index) }
+                }
+                .controlSize(.small)
+                .buttonStyle(.bordered)
               }
-              .controlSize(.small)
             }
           }
         }
