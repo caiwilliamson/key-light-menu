@@ -35,6 +35,14 @@ struct Preset: Codable, Identifiable, Equatable {
     save()
   }
 
+  func move(_ preset: Preset, by offset: Int) {
+    guard let i = presets.firstIndex(where: { $0.id == preset.id }) else { return }
+    let j = i + offset
+    guard presets.indices.contains(j) else { return }
+    presets.swapAt(i, j)
+    save()
+  }
+
   private func save() {
     guard let data = try? JSONEncoder().encode(presets) else { return }
     UserDefaults.standard.set(data, forKey: storageKey)

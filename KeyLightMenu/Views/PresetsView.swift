@@ -70,22 +70,11 @@ struct PresetsView: View {
         ScrollView {
           VStack(spacing: 0) {
             ForEach(hostPresets) { preset in
-              PanelSection {
-                HStack {
-                  Text(preset.name)
-                    .foregroundStyle(.secondary)
-                  Spacer()
-                  Button {
-                    store.delete(preset)
-                  } label: {
-                    Image(systemName: "trash")
-                      .foregroundStyle(.secondary)
-                  }
-                  .buttonStyle(.plain)
-                }
-                LightSlider(icon: "sun.max.fill", value: Double(preset.brightness), range: 1 ... 100, label: { "\(Int($0))%" }, gradient: .brightness)
-                LightSlider(icon: "thermometer.medium", value: Double(preset.temperature), range: 143 ... 344, label: { "\(Int(1_000_000 / $0.rounded()))K" }, gradient: .temperature)
-              }
+              PresetRow(
+                preset: preset,
+                isFirst: preset.id == hostPresets.first?.id,
+                isLast: preset.id == hostPresets.last?.id
+              )
               if preset.id != hostPresets.last?.id {
                 SectionDivider()
               }
@@ -94,6 +83,42 @@ struct PresetsView: View {
         }
         .frame(maxHeight: 310)
       }
+    }
+  }
+}
+
+private struct PresetRow: View {
+  @Environment(PresetStore.self) private var store
+  let preset: Preset
+  let isFirst: Bool
+  let isLast: Bool
+
+  var body: some View {
+    PanelSection {
+      HStack {
+        Text(preset.name)
+          .foregroundStyle(.secondary)
+        Spacer()
+        Button { store.move(preset, by: -1) } label: {
+          Image(systemName: "chevron.up")
+            .foregroundStyle(isFirst ? Color.secondary.opacity(0.3) : Color.secondary)
+        }
+        .buttonStyle(.plain)
+        .disabled(isFirst)
+        Button { store.move(preset, by: 1) } label: {
+          Image(systemName: "chevron.down")
+            .foregroundStyle(isLast ? Color.secondary.opacity(0.3) : Color.secondary)
+        }
+        .buttonStyle(.plain)
+        .disabled(isLast)
+        Button { store.delete(preset) } label: {
+          Image(systemName: "trash")
+            .foregroundStyle(.secondary)
+        }
+        .buttonStyle(.plain)
+      }
+      LightSlider(icon: "sun.max.fill", value: Double(preset.brightness), range: 1 ... 100, label: { "\(Int($0))%" }, gradient: .brightness)
+      LightSlider(icon: "thermometer.medium", value: Double(preset.temperature), range: 143 ... 344, label: { "\(Int(1_000_000 / $0.rounded()))K" }, gradient: .temperature)
     }
   }
 }
