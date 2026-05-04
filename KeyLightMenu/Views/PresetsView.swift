@@ -39,7 +39,7 @@ struct PresetsView: View {
 
           HStack(spacing: 8) {
             Color.clear.frame(width: 20)
-            TextField("Preset name", text: $presetName)
+            TextField("Preset Name", text: $presetName)
               .textFieldStyle(.roundedBorder)
             Button("Save Preset") {
               guard !presetName.isEmpty else { return }
@@ -67,26 +67,32 @@ struct PresetsView: View {
         }
       } else {
         SectionDivider()
-        VStack(spacing: 0) {
-          ForEach(hostPresets) { preset in
-            PanelSection {
-              HStack {
-                Text(preset.name)
-                  .foregroundStyle(.secondary)
-                Spacer()
-                Button {
-                  store.delete(preset)
-                } label: {
-                  Image(systemName: "trash")
+        ScrollView {
+          VStack(spacing: 0) {
+            ForEach(hostPresets) { preset in
+              PanelSection {
+                HStack {
+                  Text(preset.name)
                     .foregroundStyle(.secondary)
+                  Spacer()
+                  Button {
+                    store.delete(preset)
+                  } label: {
+                    Image(systemName: "trash")
+                      .foregroundStyle(.secondary)
+                  }
+                  .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
+                LightSlider(icon: "sun.max.fill", value: Double(preset.brightness), range: 1 ... 100, label: { "\(Int($0))%" }, gradient: .brightness)
+                LightSlider(icon: "thermometer.medium", value: Double(preset.temperature), range: 143 ... 344, label: { "\(Int(1_000_000 / $0.rounded()))K" }, gradient: .temperature)
               }
-              LightSlider(icon: "sun.max.fill", value: Double(preset.brightness), range: 1 ... 100, label: { "\(Int($0))%" }, gradient: .brightness)
-              LightSlider(icon: "thermometer.medium", value: Double(preset.temperature), range: 143 ... 344, label: { "\(Int(1_000_000 / $0.rounded()))K" }, gradient: .temperature)
+              if preset.id != hostPresets.last?.id {
+                SectionDivider()
+              }
             }
           }
         }
+        .frame(maxHeight: 310)
       }
     }
   }
