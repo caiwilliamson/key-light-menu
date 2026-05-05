@@ -35,6 +35,7 @@ struct BatterySettingsView: View {
         SettingToggleRow(
           label: "Studio Mode (Bypass Battery)",
           subtitle: "Studio Mode bypasses the battery, meaning the light will only function when connected to power.",
+          icon: "powerplug.fill",
           isOn: $bypass,
           onChange: send
         )
@@ -42,7 +43,7 @@ struct BatterySettingsView: View {
 
       if !bypass {
         PanelSection {
-          SettingToggleRow(label: "Energy Saving Mode", isOn: $energySavingEnabled, onChange: send)
+          SettingToggleRow(label: "Energy Saving Mode", icon: "leaf.fill", isOn: $energySavingEnabled, onChange: send)
 
           if energySavingEnabled {
             HStack {
