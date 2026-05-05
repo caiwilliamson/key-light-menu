@@ -43,11 +43,16 @@ struct LightRow: View {
             }
           }
 
-          HStack(spacing: 8) {
+          HStack(spacing: 10) {
             Text(light.isReachable ? (light.state?.isOn == true ? "On" : "Off") : "Disconnected")
               .foregroundStyle(.secondary)
-            if let battery = light.batteryInfo {
-              batteryIndicator(battery)
+            if light.isReachable {
+              if let battery = light.batteryInfo {
+                batteryIndicator(battery)
+              }
+              if let wifi = light.accessoryInfo?.wifiInfo {
+                wifiIndicator(wifi)
+              }
             }
           }
         }
@@ -149,15 +154,30 @@ struct LightRow: View {
   }
 
   @ViewBuilder
+  private func wifiIndicator(_ wifi: WifiInfo) -> some View {
+    let rssi = wifi.rssi
+    let strength = Double(wifi.signalPercent) / 100.0
+    let color: Color = rssi < -80 ? .orange : .secondary
+    HStack(spacing: 2) {
+      Image(systemName: "wifi", variableValue: strength)
+        .imageScale(.medium)
+    }
+    .foregroundStyle(color)
+    .frame(height: 16)
+    .help("\(wifi.signalPercent)%")
+  }
+
+  @ViewBuilder
   private func batteryIndicator(_ battery: BatteryInfo) -> some View {
     let level = battery.level
     // Plugged in but not charging = bypass mode, battery level is meaningless
     if battery.isPluggedIn, !battery.isCharging {
       Image(systemName: "powerplug.fill")
-        .imageScale(.large)
+        .imageScale(.medium)
         .foregroundStyle(.secondary)
+        .frame(height: 16)
     } else {
-      let color: Color = level < 20 && !battery.isPluggedIn ? .red : .secondary
+      let color: Color = level < 20 && !battery.isPluggedIn ? .orange : .secondary
       let suffix = battery.isCharging ? ".bolt" : ""
       let icon = switch level {
       case ..<10: "battery.0\(suffix)"
@@ -172,6 +192,7 @@ struct LightRow: View {
         Text("\(Int(level.rounded()))%")
       }
       .foregroundStyle(color)
+      .frame(height: 16)
     }
   }
 }
