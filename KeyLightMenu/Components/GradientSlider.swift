@@ -13,8 +13,8 @@ struct GradientSlider: View {
   var isActive: Bool = true
   var onEditingChanged: ((Bool) -> Void)?
 
-  private static let thumbSize: CGFloat = 20
-  private static let trackHeight: CGFloat = 9
+  private static let thumbSize: CGFloat = 18
+  private static let trackHeight: CGFloat = 8
   private var fraction: Double {
     (value - range.lowerBound) / (range.upperBound - range.lowerBound)
   }
