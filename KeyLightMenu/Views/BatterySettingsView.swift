@@ -43,7 +43,7 @@ struct BatterySettingsView: View {
 
       if !bypass {
         PanelSection {
-          SettingToggleRow(label: "Energy Saving Mode", icon: "leaf.fill", isOn: $energySavingEnabled, onChange: send)
+          SettingToggleRow(label: "Energy Saving Mode", isOn: $energySavingEnabled, onChange: send)
 
           if energySavingEnabled {
             HStack {
