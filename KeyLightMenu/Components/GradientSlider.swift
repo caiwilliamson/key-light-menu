@@ -113,6 +113,6 @@ struct TrackGradient {
     let r = s[low].r + (s[high].r - s[low].r) * t
     let g = s[low].g + (s[high].g - s[low].g) * t
     let b = s[low].b + (s[high].b - s[low].b) * t
-    return TrackGradient(stops: [Stop(r: r * 0.06, g: g * 0.06, b: b * 0.06), Stop(r: r, g: g, b: b)])
+    return TrackGradient(stops: [Stop(r: r * 0.40, g: g * 0.40, b: b * 0.40), Stop(r: r, g: g, b: b)])
   }
 }
