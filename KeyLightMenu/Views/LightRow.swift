@@ -18,7 +18,7 @@ struct LightRow: View {
     VStack(spacing: 0) {
       PanelSection {
         VStack(alignment: .leading, spacing: 2) {
-          HStack(spacing: 4) {
+          HStack(spacing: 3) {
             Text(light.name)
               .font(.headline)
               .lineLimit(1)
