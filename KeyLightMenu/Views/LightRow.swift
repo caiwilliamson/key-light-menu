@@ -36,7 +36,7 @@ struct LightRow: View {
                 Image(systemName: light.isReachable && state.isOn ? "power.circle.fill" : "power.circle")
                   .font(.title)
                   .foregroundStyle(light.isReachable && state.isOn ? Color.yellow : Color.secondary)
-                  .contentTransition(.symbolEffect(.replace))
+                  .contentTransition(.symbolEffect(.replace, options: .speed(3)))
               }
               .buttonStyle(.plain)
               .disabled(!light.isReachable)
