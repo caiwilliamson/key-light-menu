@@ -30,15 +30,18 @@ struct BatterySettingsView: View {
   }
 
   var body: some View {
+    let isPluggedIn = service.lights[index].batteryInfo?.isPluggedIn ?? true
     VStack(spacing: 0) {
       PanelSection {
         SettingToggleRow(
           label: "Studio Mode (Bypass Battery)",
-          subtitle: "Studio Mode bypasses the battery, meaning the light will only function when connected to power.",
+          subtitle: "Studio Mode bypasses the battery, meaning the light will only function when connected to power."
+            + (isPluggedIn ? "" : " Please connect to a power source to enable Studio Mode."),
           icon: "powerplug.fill",
           isOn: $bypass,
           onChange: send
         )
+        .disabled(!isPluggedIn)
       }
 
       if !bypass {
