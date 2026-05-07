@@ -177,21 +177,12 @@ struct LightRow: View {
         .foregroundStyle(.secondary)
         .frame(height: 16)
     } else {
-      let color: Color = level < 20 && !battery.isPluggedIn ? .orange : .secondary
-      let suffix = battery.isCharging ? ".bolt" : ""
-      let icon = switch level {
-      case ..<10: "battery.0\(suffix)"
-      case ..<35: "battery.25\(suffix)"
-      case ..<60: "battery.50\(suffix)"
-      case ..<85: "battery.75\(suffix)"
-      default: "battery.100\(suffix)"
-      }
-      HStack(spacing: 2) {
-        Image(systemName: icon)
-          .imageScale(.large)
+      HStack(spacing: 4) {
         Text("\(Int(level.rounded()))%")
+          .foregroundStyle(.secondary)
+        Battery(level: Float(level / 100), isCharging: battery.isCharging)
+          .frame(height: 11)
       }
-      .foregroundStyle(color)
       .frame(height: 16)
     }
   }
