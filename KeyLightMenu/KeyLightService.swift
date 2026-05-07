@@ -76,7 +76,7 @@ final class KeyLightService: NSObject {
   }
 
   var isOn: Bool {
-    selectedLight?.state?.isOn ?? false
+    lights.contains { $0.state?.isOn == true }
   }
 
   func startPolling() {
