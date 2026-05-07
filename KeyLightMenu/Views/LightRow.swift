@@ -155,16 +155,11 @@ struct LightRow: View {
 
   @ViewBuilder
   private func wifiIndicator(_ wifi: WifiInfo) -> some View {
-    let rssi = wifi.rssi
     let strength = Double(wifi.signalPercent) / 100.0
-    let color: Color = rssi < -80 ? .orange : .secondary
-    HStack(spacing: 2) {
-      Image(systemName: "wifi", variableValue: strength)
-        .imageScale(.medium)
-    }
-    .foregroundStyle(color)
-    .frame(height: 16)
-    .help("\(wifi.signalPercent)%")
+    Image(systemName: "wifi", variableValue: strength)
+      .imageScale(.medium)
+      .foregroundStyle(.secondary)
+      .frame(height: 16)
   }
 
   @ViewBuilder
