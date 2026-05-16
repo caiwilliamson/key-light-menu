@@ -52,31 +52,42 @@ struct LightRow: View {
             }
           }
           HStack(spacing: 3) {
-            if service.selectedIndex == index {
-              Group {
-                panelButton(.presets, active: "slider.horizontal.3", inactive: "slider.horizontal.3", label: "Presets")
-                panelButton(.settings, active: "gearshape.fill", inactive: "gearshape", label: "Settings")
-                panelButton(.info, active: "info.circle.fill", inactive: "info.circle", label: "Info")
+            if light.isReachable {
+              if service.selectedIndex == index {
+                Group {
+                  panelButton(.presets, active: "slider.horizontal.3", inactive: "slider.horizontal.3", label: "Presets")
+                  panelButton(.settings, active: "gearshape.fill", inactive: "gearshape", label: "Settings")
+                  panelButton(.info, active: "info.circle.fill", inactive: "info.circle", label: "Info")
+                }
+                .transition(.rowContent)
               }
-              .transition(.rowContent)
-            }
-            if let state = light.state {
+              if let state = light.state {
+                Button {
+                  Task { await service.toggle(at: index) }
+                } label: {
+                  Image(systemName: state.isOn ? "power.circle.fill" : "power.circle")
+                    .font(.title)
+                    .foregroundStyle(state.isOn ? Color.yellow : Color.secondary)
+                    .contentTransition(.opacity)
+                }
+                .buttonStyle(.plain)
+              }
+            } else {
               Button {
-                Task { await service.toggle(at: index) }
+                service.selectedIndex = index
+                activePanel = .remove
               } label: {
-                Image(systemName: light.isReachable && state.isOn ? "power.circle.fill" : "power.circle")
-                  .font(.title)
-                  .foregroundStyle(light.isReachable && state.isOn ? Color.yellow : Color.secondary)
+                Image(systemName: "trash")
+                  .foregroundStyle(activePanel == .remove && service.selectedIndex == index ? Color.red : Color.secondary)
               }
               .buttonStyle(.plain)
-              .disabled(!light.isReachable)
             }
           }
           .padding(.top, -4)
         }
       }
       .background(Color.primary.opacity(isHovered && service.selectedIndex != index ? 0.05 : 0))
-      if service.selectedIndex == index, light.isReachable {
+      if service.selectedIndex == index, light.isReachable || activePanel == .remove {
         panelContent
           .transition(.rowContent)
       }
@@ -104,6 +115,10 @@ struct LightRow: View {
           .environment(service)
           .environment(store)
           .fixedSize(horizontal: false, vertical: true)
+      case .remove:
+        RemoveLightView(light: light, index: index, activePanel: $activePanel)
+          .environment(service)
+          .environment(store)
       }
     } else if light.isReachable, let state = light.state {
       controlsSection(state: state)

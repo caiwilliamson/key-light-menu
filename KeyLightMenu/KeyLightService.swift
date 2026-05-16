@@ -270,6 +270,20 @@ final class KeyLightService: NSObject {
     await apply(s, at: index)
   }
 
+  func remove(at index: Int, store: PresetStore) {
+    guard lights.indices.contains(index) else { return }
+    if let serial = lights[index].accessoryInfo?.serialNumber {
+      store.deleteAll(for: serial)
+    }
+    lights.remove(at: index)
+    if selectedIndex == index {
+      selectedIndex = lights.isEmpty ? nil : max(0, index - 1)
+    } else if let sel = selectedIndex, sel > index {
+      selectedIndex = sel - 1
+    }
+    saveCache()
+  }
+
   func fetchAccessoryInfo(at index: Int) async {
     guard let url = url(for: index, path: "accessory-info") else { return }
     do {

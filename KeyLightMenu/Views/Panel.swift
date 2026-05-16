@@ -3,4 +3,4 @@
 //  KeyLightMenu
 //
 
-enum Panel { case info, presets, settings }
+enum Panel { case info, presets, settings, remove }

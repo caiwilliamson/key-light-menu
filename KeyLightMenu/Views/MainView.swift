@@ -26,7 +26,7 @@ struct MainView: View {
       if new == nil { activePanel = nil }
     }
     .onChange(of: service.selectedLight?.isReachable) { _, reachable in
-      if reachable == false { activePanel = nil }
+      if reachable == false, activePanel != .remove { activePanel = nil }
     }
   }
 
