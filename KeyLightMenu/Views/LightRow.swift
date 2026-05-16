@@ -98,7 +98,7 @@ struct LightRow: View {
   private func controlsSection(state: LightState) -> some View {
     let presets = store.presets(for: light.accessoryInfo?.serialNumber ?? "")
     let brightnessGradient = TrackGradient.brightness(for: state.temperature)
-    VStack(spacing: 10) {
+    VStack(alignment: .leading, spacing: 10) {
       LightSlider(
         icon: "sun.max.fill",
         value: Double(state.brightness),
