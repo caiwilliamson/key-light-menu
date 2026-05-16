@@ -28,11 +28,11 @@ struct LightRow: View {
               Text(light.isReachable ? (light.state?.isOn == true ? "On" : "Off") : "Disconnected")
                 .foregroundStyle(.secondary)
               if light.isReachable {
-                if let battery = light.batteryInfo {
-                  batteryIndicator(battery)
-                }
                 if let wifi = light.accessoryInfo?.wifiInfo {
                   wifiIndicator(wifi)
+                }
+                if let battery = light.batteryInfo {
+                  batteryIndicator(battery)
                 }
               }
             }
