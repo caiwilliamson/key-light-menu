@@ -19,6 +19,8 @@ struct MainView: View {
       footer
     }
     .frame(width: 320)
+    .animation(.rowSpring, value: service.selectedIndex)
+    .animation(.rowSpring, value: activePanel)
     .task { service.startSession() }
     .onChange(of: service.selectedLight?.host) { _, new in
       if new == nil { activePanel = nil }
@@ -55,7 +57,6 @@ struct MainView: View {
           .grayscale(activePanel != nil && service.selectedIndex != i ? 1 : 0)
           .opacity(activePanel != nil && service.selectedIndex != i ? 0.4 : 1)
           .allowsHitTesting(activePanel == nil || service.selectedIndex == i)
-          .animation(.easeInOut(duration: 0.1), value: activePanel)
       }
     }
   }
@@ -80,6 +81,7 @@ struct MainView: View {
               Label(service.isDiscovering ? "Scanning…" : "Scan", systemImage: "antenna.radiowaves.left.and.right")
             }
             .disabled(service.isDiscovering)
+            .transition(.rowContent)
           }
           Spacer()
           Button("Quit") { NSApplication.shared.terminate(nil) }

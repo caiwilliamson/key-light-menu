@@ -53,9 +53,12 @@ struct LightRow: View {
           }
           HStack(spacing: 3) {
             if service.selectedIndex == index {
-              panelButton(.presets, active: "slider.horizontal.3", inactive: "slider.horizontal.3", label: "Presets")
-              panelButton(.settings, active: "gearshape.fill", inactive: "gearshape", label: "Settings")
-              panelButton(.info, active: "info.circle.fill", inactive: "info.circle", label: "Info")
+              Group {
+                panelButton(.presets, active: "slider.horizontal.3", inactive: "slider.horizontal.3", label: "Presets")
+                panelButton(.settings, active: "gearshape.fill", inactive: "gearshape", label: "Settings")
+                panelButton(.info, active: "info.circle.fill", inactive: "info.circle", label: "Info")
+              }
+              .transition(.rowContent)
             }
             if let state = light.state {
               Button {
@@ -76,6 +79,7 @@ struct LightRow: View {
       .background(Color.primary.opacity(isHovered && service.selectedIndex != index ? 0.05 : 0))
       if service.selectedIndex == index, light.isReachable {
         panelContent
+          .transition(.rowContent)
       }
     }
   }
