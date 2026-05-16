@@ -14,21 +14,48 @@ struct LightRow: View {
   let index: Int
   @Binding var activePanel: Panel?
 
+  @State private var isHovered = false
+
   var body: some View {
     VStack(spacing: 0) {
       PanelSection {
-        VStack(alignment: .leading, spacing: 2) {
-          HStack(spacing: 3) {
+        HStack(alignment: .top, spacing: 3) {
+          VStack(alignment: .leading, spacing: 2) {
             Text(light.name)
               .font(.headline)
               .lineLimit(1)
-
-            Spacer()
-
-            panelButton(.presets, active: "slider.horizontal.3", inactive: "slider.horizontal.3", label: "Presets")
-            panelButton(.settings, active: "gearshape.fill", inactive: "gearshape", label: "Settings")
-            panelButton(.info, active: "info.circle.fill", inactive: "info.circle", label: "Info")
-
+            HStack(spacing: 10) {
+              Text(light.isReachable ? (light.state?.isOn == true ? "On" : "Off") : "Disconnected")
+                .foregroundStyle(.secondary)
+              if light.isReachable {
+                if let battery = light.batteryInfo {
+                  batteryIndicator(battery)
+                }
+                if let wifi = light.accessoryInfo?.wifiInfo {
+                  wifiIndicator(wifi)
+                }
+              }
+            }
+            .font(.callout)
+          }
+          .frame(maxWidth: .infinity, alignment: .leading)
+          .contentShape(Rectangle())
+          .onHover { isHovered = $0 }
+          .onTapGesture {
+            if service.selectedIndex == index {
+              service.selectedIndex = nil
+              activePanel = nil
+            } else {
+              service.selectedIndex = index
+              activePanel = nil
+            }
+          }
+          HStack(spacing: 3) {
+            if service.selectedIndex == index {
+              panelButton(.presets, active: "slider.horizontal.3", inactive: "slider.horizontal.3", label: "Presets")
+              panelButton(.settings, active: "gearshape.fill", inactive: "gearshape", label: "Settings")
+              panelButton(.info, active: "info.circle.fill", inactive: "info.circle", label: "Info")
+            }
             if let state = light.state {
               Button {
                 Task { await service.toggle(at: index) }
@@ -43,30 +70,18 @@ struct LightRow: View {
             }
           }
           .padding(.top, -4)
-
-          HStack(spacing: 10) {
-            Text(light.isReachable ? (light.state?.isOn == true ? "On" : "Off") : "Disconnected")
-              .foregroundStyle(.secondary)
-            if light.isReachable {
-              if let battery = light.batteryInfo {
-                batteryIndicator(battery)
-              }
-              if let wifi = light.accessoryInfo?.wifiInfo {
-                wifiIndicator(wifi)
-              }
-            }
-          }
-          .font(.callout)
         }
       }
-      panelContent
+      .background(Color.primary.opacity(isHovered && service.selectedIndex != index ? 0.05 : 0))
+      if service.selectedIndex == index {
+        panelContent
+      }
     }
   }
 
   @ViewBuilder
   private var panelContent: some View {
-    let isSelected = service.selectedIndex == index
-    if let panel = activePanel, isSelected {
+    if let panel = activePanel {
       switch panel {
       case .info:
         if let info = light.accessoryInfo {
@@ -86,12 +101,10 @@ struct LightRow: View {
           .environment(store)
           .fixedSize(horizontal: false, vertical: true)
       }
-    } else if !isSelected || activePanel == nil {
-      if light.isReachable, let state = light.state {
-        controlsSection(state: state)
-      } else if light.state == nil, service.isLoading, isSelected {
-        loadingView
-      }
+    } else if light.isReachable, let state = light.state {
+      controlsSection(state: state)
+    } else if light.state == nil, service.isLoading {
+      loadingView
     }
   }
 
