@@ -40,8 +40,9 @@ struct LightRow: View {
           }
           .frame(maxWidth: .infinity, alignment: .leading)
           .contentShape(Rectangle())
-          .onHover { isHovered = $0 }
+          .onHover { if light.isReachable { isHovered = $0 } }
           .onTapGesture {
+            guard light.isReachable else { return }
             if service.selectedIndex == index {
               service.selectedIndex = nil
               activePanel = nil
@@ -73,7 +74,7 @@ struct LightRow: View {
         }
       }
       .background(Color.primary.opacity(isHovered && service.selectedIndex != index ? 0.05 : 0))
-      if service.selectedIndex == index {
+      if service.selectedIndex == index, light.isReachable {
         panelContent
       }
     }
