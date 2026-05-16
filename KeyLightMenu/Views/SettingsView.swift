@@ -23,7 +23,6 @@ struct SettingsView: View {
             .onSubmit { saveDisplayName() }
           if displayNameDraft != info.displayName {
             Button("Save", action: saveDisplayName)
-              .controlSize(.small)
               .buttonStyle(.borderedProminent)
           }
         }

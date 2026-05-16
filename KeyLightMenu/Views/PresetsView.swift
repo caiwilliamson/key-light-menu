@@ -53,7 +53,6 @@ struct PresetsView: View {
             }
             .disabled(presetName.isEmpty)
             .buttonStyle(.borderedProminent)
-            .controlSize(.small)
           }
           .padding(.top, 4)
         }
@@ -65,6 +64,7 @@ struct PresetsView: View {
           Text("No saved presets")
             .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity, alignment: .center)
+            .font(.callout)
         }
       } else {
         SectionDivider()
