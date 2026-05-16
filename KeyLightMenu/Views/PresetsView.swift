@@ -55,6 +55,7 @@ struct PresetsView: View {
             .buttonStyle(.borderedProminent)
             .controlSize(.small)
           }
+          .padding(.top, 4)
         }
       }
 

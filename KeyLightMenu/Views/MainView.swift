@@ -19,7 +19,6 @@ struct MainView: View {
       footer
     }
     .frame(width: 320)
-    .font(.callout)
     .task { service.startSession() }
     .onChange(of: service.selectedLight?.host) { _, new in
       if new == nil { activePanel = nil }

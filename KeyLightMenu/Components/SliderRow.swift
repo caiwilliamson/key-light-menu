@@ -42,6 +42,7 @@ struct SliderRow: View {
       Text(label(value))
         .frame(width: 40, alignment: .trailing)
         .monospacedDigit()
+        .font(.callout)
     }
   }
 }

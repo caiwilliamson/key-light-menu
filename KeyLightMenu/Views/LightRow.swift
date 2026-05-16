@@ -42,6 +42,7 @@ struct LightRow: View {
               .disabled(!light.isReachable)
             }
           }
+          .padding(.top, -4)
 
           HStack(spacing: 10) {
             Text(light.isReachable ? (light.state?.isOn == true ? "On" : "Off") : "Disconnected")
@@ -57,7 +58,6 @@ struct LightRow: View {
           }
         }
       }
-
       panelContent
     }
   }
@@ -98,7 +98,7 @@ struct LightRow: View {
   private func controlsSection(state: LightState) -> some View {
     let presets = store.presets(for: light.accessoryInfo?.serialNumber ?? "")
     let brightnessGradient = TrackGradient.brightness(for: state.temperature)
-    PanelSection {
+    VStack(spacing: 10) {
       LightSlider(
         icon: "sun.max.fill",
         value: Double(state.brightness),
@@ -130,8 +130,12 @@ struct LightRow: View {
             }
           }
         }
+        .padding(.top, 6)
       }
     }
+    .padding(.horizontal, 12)
+    .padding(.bottom, 12)
+    .padding(.top, 4)
   }
 
   private func panelButton(_ panel: Panel, active: String, inactive: String, label: String) -> some View {

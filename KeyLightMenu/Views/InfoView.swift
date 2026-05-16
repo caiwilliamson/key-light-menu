@@ -13,7 +13,7 @@ struct InfoView: View {
 
   var body: some View {
     VStack(spacing: 0) {
-      PanelSection {
+      PanelSection(spacing: 6) {
         InfoRow("Device", info.shortProductName)
         InfoRow("Firmware Version", "\(info.firmwareVersion) (\(info.firmwareBuildNumber))")
         InfoRow("Serial Number", info.serialNumber)
@@ -21,14 +21,14 @@ struct InfoView: View {
       }
 
       if let wifi = info.wifiInfo {
-        PanelSection {
+        PanelSection(spacing: 6) {
           InfoRow("Wi-Fi Network", wifi.ssid)
           InfoRow("Wi-Fi Frequency", wifi.frequencyGHz)
           InfoRow("Wi-Fi Signal Strength", "\(wifi.signalPercent)%")
         }
       }
 
-      PanelSection {
+      PanelSection(spacing: 6) {
         Button {
           Task { await service.identify(at: index) }
         } label: {
@@ -55,7 +55,7 @@ struct InfoRow: View {
     HStack {
       Text(label + ":")
         .foregroundStyle(.secondary)
-        .frame(width: 160, alignment: .leading)
+        .frame(width: 140, alignment: .leading)
       Text(value)
         .textSelection(.enabled)
         .frame(maxWidth: .infinity, alignment: .leading)
