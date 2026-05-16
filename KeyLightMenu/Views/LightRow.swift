@@ -56,6 +56,7 @@ struct LightRow: View {
               }
             }
           }
+          .font(.callout)
         }
       }
       panelContent
@@ -203,6 +204,7 @@ private struct PresetChip: View {
         .background(isActive ? Color.accentColor : Color.clear, in: Capsule())
         .overlay(Capsule().strokeBorder(isActive ? Color.clear : Color.secondary.opacity(0.4), lineWidth: 1))
         .foregroundStyle(isActive ? Color.white : Color.secondary)
+        .font(.callout)
     }
     .buttonStyle(.plain)
   }

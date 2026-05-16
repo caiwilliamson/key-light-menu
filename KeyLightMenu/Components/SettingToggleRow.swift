@@ -30,7 +30,7 @@ struct SettingToggleRow: View {
       }
       if let subtitle {
         Text(subtitle)
-          .font(.caption)
+          .font(.callout)
           .foregroundStyle(.secondary)
           .fixedSize(horizontal: false, vertical: true)
       }
