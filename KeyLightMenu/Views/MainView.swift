@@ -52,8 +52,8 @@ struct MainView: View {
       ForEach(service.lights.indices, id: \.self) { i in
         if i > 0 { Divider() }
         LightRow(light: service.lights[i], index: i, activePanel: $activePanel)
-          .opacity(activePanel != nil && service.selectedIndex != i ? 0.2 : 1)
-          .overlay(activePanel != nil && service.selectedIndex != i ? Color.black.opacity(0.15) : Color.clear)
+          .grayscale(activePanel != nil && service.selectedIndex != i ? 1 : 0)
+          .opacity(activePanel != nil && service.selectedIndex != i ? 0.4 : 1)
           .allowsHitTesting(activePanel == nil || service.selectedIndex == i)
           .animation(.easeInOut(duration: 0.1), value: activePanel)
       }
