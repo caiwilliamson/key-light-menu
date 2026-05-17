@@ -82,6 +82,7 @@ struct LightRow: View {
                   .foregroundStyle(activePanel == .remove && service.selectedIndex == index ? Color.red : Color.secondary)
               }
               .buttonStyle(.plain)
+              .transition(.rowContent)
             }
           }
           .padding(.top, -4)
@@ -198,6 +199,7 @@ struct LightRow: View {
           }
         }
         .padding(.top, 6)
+        .transition(.rowContent)
       }
     }
     .padding(.horizontal, 12)
