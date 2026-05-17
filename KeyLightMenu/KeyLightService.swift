@@ -7,6 +7,10 @@ import Darwin
 import Foundation
 import Observation
 
+/// Wraps a non-Sendable value for safe transfer across concurrency boundaries
+/// when the caller guarantees the access is serialised (e.g. moved to @MainActor).
+private struct Unchecked<T>: @unchecked Sendable { let value: T }
+
 // MARK: - Service
 
 @Observable
@@ -378,10 +382,11 @@ extension KeyLightService: NetServiceBrowserDelegate {
     didFind service: NetService,
     moreComing _: Bool
   ) {
+    let box = Unchecked(value: service)
     Task { @MainActor in
-      self.resolving.append(service)
-      service.delegate = self
-      service.resolve(withTimeout: 5)
+      self.resolving.append(box.value)
+      box.value.delegate = self
+      box.value.resolve(withTimeout: 5)
     }
   }
 
@@ -466,8 +471,9 @@ extension KeyLightService: NetServiceDelegate {
   }
 
   nonisolated func netService(_ sender: NetService, didNotResolve _: [String: NSNumber]) {
+    let id = ObjectIdentifier(sender)
     Task { @MainActor in
-      self.resolving.removeAll { $0 === sender }
+      self.resolving.removeAll { ObjectIdentifier($0) == id }
     }
   }
 }
