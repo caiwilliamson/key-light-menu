@@ -16,8 +16,8 @@ final class SyncCoordinator {
   var syncedTemperatures: [Double] = []
 
   // Which row is currently driving each slider type
-  var brightnessSourceIndex: Int? = nil
-  var temperatureSourceIndex: Int? = nil
+  var brightnessSourceIndex: Int?
+  var temperatureSourceIndex: Int?
 
   private var startBrightnesses: [Int] = []
   private var startTemperatures: [Int] = []

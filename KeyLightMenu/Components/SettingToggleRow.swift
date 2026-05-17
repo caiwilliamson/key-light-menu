@@ -9,7 +9,7 @@ import SwiftUI
 struct SettingToggleRow: View {
   let label: String
   var subtitle: String?
-  var icon: String? = nil
+  var icon: String?
   var isLabelSecondary: Bool = false
   @Binding var isOn: Bool
   let onChange: () -> Void

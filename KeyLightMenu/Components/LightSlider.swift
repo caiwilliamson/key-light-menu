@@ -50,7 +50,7 @@ struct LightSlider: View {
     Group {
       if let onCommit {
         SliderRow(icon: icon, value: $value, range: range, label: label, gradient: gradient) { editing in
-          if editing && !isDragging { onDragStart?() }
+          if editing, !isDragging { onDragStart?() }
           isDragging = editing
           if !editing {
             onDragChange?(value)

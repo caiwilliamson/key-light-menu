@@ -1,5 +1,5 @@
 //
-//  CustomBattery.swift
+//  Battery.swift
 //  KeyLightMenu
 //
 

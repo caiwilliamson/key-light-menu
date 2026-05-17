@@ -30,8 +30,8 @@ struct MainView: View {
       sync.isOptionHeld = NSEvent.modifierFlags.contains(.option) && activePanel == nil
       eventMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { event in
         let held = event.modifierFlags.contains(.option)
-        self.sync.isOptionHeld = held && self.activePanel == nil
-        if !held { self.sync.reset() }
+        sync.isOptionHeld = held && activePanel == nil
+        if !held { sync.reset() }
         return event
       }
     }

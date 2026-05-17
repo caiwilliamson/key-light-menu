@@ -89,7 +89,7 @@ struct LightRow: View {
         }
       }
       .background(Color.primary.opacity(isHovered && service.selectedIndex != index && !sync.isOptionHeld ? 0.05 : 0))
-      if (service.selectedIndex == index || sync.isOptionHeld), light.isReachable || activePanel == .remove {
+      if service.selectedIndex == index || sync.isOptionHeld, light.isReachable || activePanel == .remove {
         if activePanel == .remove || service.selectedIndex == index {
           panelContent
             .transition(.rowContent)
@@ -185,7 +185,7 @@ struct LightRow: View {
           }
         }
       }
-      if !sync.isOptionHeld && !presets.isEmpty {
+      if !sync.isOptionHeld, !presets.isEmpty {
         HStack(alignment: .top, spacing: 8) {
           Image(systemName: "slider.horizontal.3")
             .frame(width: 20)
