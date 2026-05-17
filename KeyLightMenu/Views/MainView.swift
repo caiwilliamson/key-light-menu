@@ -9,6 +9,8 @@ struct MainView: View {
   @Environment(KeyLightService.self) private var service
 
   @State private var activePanel: Panel?
+  @State private var sync = SyncCoordinator()
+  @State private var eventMonitor: Any?
 
   var body: some View {
     VStack(spacing: 0) {
@@ -18,10 +20,27 @@ struct MainView: View {
       Divider()
       footer
     }
+    .environment(sync)
     .frame(width: 320)
     .animation(.rowSpring, value: service.selectedIndex)
     .animation(.rowSpring, value: activePanel)
+    .animation(.rowSpring, value: sync.isOptionHeld)
     .task { service.startSession() }
+    .onAppear {
+      sync.isOptionHeld = NSEvent.modifierFlags.contains(.option)
+      eventMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { event in
+        let held = event.modifierFlags.contains(.option)
+        self.sync.isOptionHeld = held
+        if !held { self.sync.reset() }
+        return event
+      }
+    }
+    .onDisappear {
+      if let monitor = eventMonitor {
+        NSEvent.removeMonitor(monitor)
+        eventMonitor = nil
+      }
+    }
     .onChange(of: service.selectedLight?.host) { _, new in
       if new == nil { activePanel = nil }
     }
@@ -54,9 +73,9 @@ struct MainView: View {
       ForEach(service.lights.indices, id: \.self) { i in
         if i > 0 { Divider() }
         LightRow(light: service.lights[i], index: i, activePanel: $activePanel)
-          .grayscale(activePanel != nil && service.selectedIndex != i ? 1 : 0)
-          .opacity(activePanel != nil && service.selectedIndex != i ? 0.4 : 1)
-          .allowsHitTesting(activePanel == nil || service.selectedIndex == i)
+          .grayscale(!sync.isOptionHeld && activePanel != nil && service.selectedIndex != i ? 1 : 0)
+          .opacity(!sync.isOptionHeld && activePanel != nil && service.selectedIndex != i ? 0.4 : 1)
+          .allowsHitTesting(sync.isOptionHeld || activePanel == nil || service.selectedIndex == i)
       }
     }
   }

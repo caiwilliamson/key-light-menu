@@ -9,6 +9,7 @@ import SwiftUI
 struct LightRow: View {
   @Environment(KeyLightService.self) private var service
   @Environment(PresetStore.self) private var store
+  @Environment(SyncCoordinator.self) private var sync
 
   let light: KeyLight
   let index: Int
@@ -86,10 +87,20 @@ struct LightRow: View {
           .padding(.top, -4)
         }
       }
-      .background(Color.primary.opacity(isHovered && service.selectedIndex != index ? 0.05 : 0))
-      if service.selectedIndex == index, light.isReachable || activePanel == .remove {
-        panelContent
-          .transition(.rowContent)
+      .background(Color.primary.opacity(isHovered && service.selectedIndex != index && !sync.isOptionHeld ? 0.05 : 0))
+      if (service.selectedIndex == index || sync.isOptionHeld), light.isReachable || activePanel == .remove {
+        if activePanel == .remove {
+          panelContent
+            .transition(.rowContent)
+        } else if sync.isOptionHeld {
+          if light.isReachable, let state = light.state {
+            controlsSection(state: state)
+              .transition(.rowContent)
+          }
+        } else {
+          panelContent
+            .transition(.rowContent)
+        }
       }
     }
   }
@@ -131,24 +142,52 @@ struct LightRow: View {
   private func controlsSection(state: LightState) -> some View {
     let presets = store.presets(for: light.accessoryInfo?.serialNumber ?? "")
     let brightnessGradient = TrackGradient.brightness(for: state.temperature)
+    let brightnessValue = sync.isOptionHeld && sync.syncedBrightnesses.indices.contains(index)
+      ? sync.syncedBrightnesses[index] : Double(state.brightness)
+    let temperatureValue = sync.isOptionHeld && sync.syncedTemperatures.indices.contains(index)
+      ? sync.syncedTemperatures[index] : Double(state.temperature)
     VStack(alignment: .leading, spacing: 10) {
       LightSlider(
         icon: "sun.max.fill",
-        value: Double(state.brightness),
+        value: brightnessValue,
         range: 1 ... 100,
         label: { "\(Int($0))%" },
-        gradient: brightnessGradient
+        gradient: brightnessGradient,
+        onDragStart: sync.isOptionHeld ? {
+          sync.brightnessSourceIndex = index
+          sync.captureBrightnessStart(lights: service.lights)
+        } : nil,
+        onDragChange: sync.isOptionHeld ? { v in
+          sync.updateBrightnessSync(fromIndex: index, value: v)
+        } : nil
       ) { v in
         Task { await service.setBrightness(Int(v), at: index) }
+        if sync.isOptionHeld, sync.brightnessSourceIndex == index {
+          for j in sync.syncedBrightnesses.indices where j != index {
+            Task { await service.setBrightness(Int(sync.syncedBrightnesses[j].rounded()), at: j) }
+          }
+        }
       }
       LightSlider(
         icon: "thermometer.medium",
-        value: Double(state.temperature),
+        value: temperatureValue,
         range: 143 ... 344,
         label: { "\(Int(1_000_000 / $0.rounded()))K" },
-        gradient: .temperature
+        gradient: .temperature,
+        onDragStart: sync.isOptionHeld ? {
+          sync.temperatureSourceIndex = index
+          sync.captureTemperatureStart(lights: service.lights)
+        } : nil,
+        onDragChange: sync.isOptionHeld ? { v in
+          sync.updateTemperatureSync(fromIndex: index, value: v)
+        } : nil
       ) { v in
         Task { await service.setTemperature(Int(v.rounded()), at: index) }
+        if sync.isOptionHeld, sync.temperatureSourceIndex == index {
+          for j in sync.syncedTemperatures.indices where j != index {
+            Task { await service.setTemperature(Int(sync.syncedTemperatures[j].rounded()), at: j) }
+          }
+        }
       }
       if !presets.isEmpty {
         HStack(alignment: .top, spacing: 8) {

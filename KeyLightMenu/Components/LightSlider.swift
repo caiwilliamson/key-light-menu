@@ -13,6 +13,8 @@ struct LightSlider: View {
   let range: ClosedRange<Double>
   let label: (Double) -> String
   let gradient: TrackGradient
+  let onDragStart: (() -> Void)?
+  let onDragChange: ((Double) -> Void)?
   let onCommit: ((Double) -> Void)?
 
   @State private var value: Double
@@ -29,6 +31,8 @@ struct LightSlider: View {
     range: ClosedRange<Double>,
     label: @escaping (Double) -> String,
     gradient: TrackGradient,
+    onDragStart: (() -> Void)? = nil,
+    onDragChange: ((Double) -> Void)? = nil,
     onCommit: ((Double) -> Void)? = nil
   ) {
     self.icon = icon
@@ -36,6 +40,8 @@ struct LightSlider: View {
     self.range = range
     self.label = label
     self.gradient = gradient
+    self.onDragStart = onDragStart
+    self.onDragChange = onDragChange
     self.onCommit = onCommit
     _value = State(initialValue: value)
   }
@@ -44,8 +50,10 @@ struct LightSlider: View {
     Group {
       if let onCommit {
         SliderRow(icon: icon, value: $value, range: range, label: label, gradient: gradient) { editing in
+          if editing && !isDragging { onDragStart?() }
           isDragging = editing
           if !editing {
+            onDragChange?(value)
             pendingTask?.cancel()
             lastSent = Date()
             lastDragEnd = Date()
@@ -59,6 +67,7 @@ struct LightSlider: View {
     }
     .onChange(of: value) { _, new in
       guard let onCommit else { return }
+      if isDragging { onDragChange?(new) }
       pendingTask?.cancel()
       let elapsed = Date().timeIntervalSince(lastSent)
       if elapsed >= Self.throttleInterval {
