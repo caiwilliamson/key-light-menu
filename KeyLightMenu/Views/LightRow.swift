@@ -43,7 +43,7 @@ struct LightRow: View {
           .contentShape(Rectangle())
           .onHover { if light.isReachable { isHovered = $0 } }
           .onTapGesture {
-            guard light.isReachable else { return }
+            guard light.isReachable, !sync.isOptionHeld else { return }
             if service.selectedIndex == index {
               service.selectedIndex = nil
               activePanel = nil
