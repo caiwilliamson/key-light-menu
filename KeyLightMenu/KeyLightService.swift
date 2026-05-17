@@ -316,7 +316,7 @@ final class KeyLightService: NSObject {
     var req = URLRequest(url: url)
     req.httpMethod = "POST"
     req.setValue("application/json", forHTTPHeaderField: "Accept")
-    try? await URLSession.shared.data(for: req)
+    _ = try? await URLSession.shared.data(for: req)
   }
 
   func fetchSettings(at index: Int) async {

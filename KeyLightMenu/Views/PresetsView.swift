@@ -26,16 +26,18 @@ struct PresetsView: View {
             value: Double(state.brightness),
             range: 1 ... 100,
             label: { v in "\(Int(v))%" },
-            gradient: .brightness(for: state.temperature)
-          ) { v in Task { await service.setBrightness(Int(v), at: index) } }
+            gradient: .brightness(for: state.temperature),
+            onCommit: { v in Task { await service.setBrightness(Int(v), at: index) } }
+          )
 
           LightSlider(
             icon: "thermometer.medium",
             value: Double(state.temperature),
             range: 143 ... 344,
             label: { v in "\(Int(1_000_000 / v.rounded()))K" },
-            gradient: .temperature
-          ) { v in Task { await service.setTemperature(Int(v), at: index) } }
+            gradient: .temperature,
+            onCommit: { v in Task { await service.setTemperature(Int(v), at: index) } }
+          )
 
           HStack(spacing: 8) {
             Color.clear.frame(width: 20)
