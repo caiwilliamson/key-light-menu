@@ -27,10 +27,10 @@ struct MainView: View {
     .animation(.rowSpring, value: sync.isOptionHeld)
     .task { service.startSession() }
     .onAppear {
-      sync.isOptionHeld = NSEvent.modifierFlags.contains(.option)
+      sync.isOptionHeld = NSEvent.modifierFlags.contains(.option) && activePanel == nil
       eventMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { event in
         let held = event.modifierFlags.contains(.option)
-        self.sync.isOptionHeld = held
+        self.sync.isOptionHeld = held && self.activePanel == nil
         if !held { self.sync.reset() }
         return event
       }

@@ -54,7 +54,7 @@ struct LightRow: View {
           }
           HStack(spacing: 3) {
             if light.isReachable {
-              if service.selectedIndex == index {
+              if service.selectedIndex == index, !sync.isOptionHeld {
                 Group {
                   panelButton(.presets, active: "slider.horizontal.3", inactive: "slider.horizontal.3", label: "Presets")
                   panelButton(.settings, active: "gearshape.fill", inactive: "gearshape", label: "Settings")
@@ -73,7 +73,7 @@ struct LightRow: View {
                 }
                 .buttonStyle(.plain)
               }
-            } else {
+            } else if !sync.isOptionHeld {
               Button {
                 service.selectedIndex = index
                 activePanel = .remove
@@ -189,7 +189,7 @@ struct LightRow: View {
           }
         }
       }
-      if !presets.isEmpty {
+      if !sync.isOptionHeld && !presets.isEmpty {
         HStack(alignment: .top, spacing: 8) {
           Image(systemName: "slider.horizontal.3")
             .frame(width: 20)
