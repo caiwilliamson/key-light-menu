@@ -9,6 +9,7 @@ struct MainView: View {
   @Environment(KeyLightService.self) private var service
 
   @State private var activePanel: Panel?
+  @State private var showGlobalSettings = false
   @State private var sync = SyncCoordinator()
   @State private var eventMonitor: Any?
 
@@ -25,12 +26,13 @@ struct MainView: View {
     .animation(.rowSpring, value: service.selectedIndex)
     .animation(.rowSpring, value: activePanel)
     .animation(.rowSpring, value: sync.isOptionHeld)
+    .animation(.rowSpring, value: showGlobalSettings)
     .task { service.startSession() }
     .onAppear {
-      sync.isOptionHeld = NSEvent.modifierFlags.contains(.option) && activePanel == nil
+      sync.isOptionHeld = NSEvent.modifierFlags.contains(.option) && activePanel == nil && !showGlobalSettings
       eventMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { event in
         let held = event.modifierFlags.contains(.option)
-        sync.isOptionHeld = held && activePanel == nil
+        sync.isOptionHeld = held && activePanel == nil && !showGlobalSettings
         if !held { sync.reset() }
         return event
       }
@@ -53,9 +55,21 @@ struct MainView: View {
 
   private var header: some View {
     PanelSection {
-      Text("Key Light Menu")
-        .font(.headline)
-        .foregroundStyle(.secondary)
+      HStack {
+        Text("Key Light Menu")
+          .font(.headline)
+          .foregroundStyle(.secondary)
+        Spacer()
+        Button {
+          showGlobalSettings.toggle()
+        } label: {
+          Image(systemName: showGlobalSettings ? "gearshape.fill" : "gearshape")
+            .foregroundStyle(showGlobalSettings ? Color.accentColor : Color.secondary)
+            .font(.title2)
+            .help("App Settings")
+        }
+        .buttonStyle(.plain)
+      }
     }
   }
 
@@ -63,7 +77,10 @@ struct MainView: View {
 
   @ViewBuilder
   private var mainContent: some View {
-    if service.lights.isEmpty {
+    if showGlobalSettings {
+      GlobalSettingsView()
+        .transition(.rowContent)
+    } else if service.lights.isEmpty {
       if service.isDiscovering {
         LoadingState(label: "Scanning…")
       } else {
@@ -93,7 +110,7 @@ struct MainView: View {
 
       PanelSection {
         HStack {
-          if activePanel == nil {
+          if activePanel == nil && !showGlobalSettings {
             Button {
               service.startDiscovery()
             } label: {
