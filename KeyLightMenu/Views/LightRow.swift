@@ -89,16 +89,11 @@ struct LightRow: View {
       }
       .background(Color.primary.opacity(isHovered && service.selectedIndex != index && !sync.isOptionHeld ? 0.05 : 0))
       if (service.selectedIndex == index || sync.isOptionHeld), light.isReachable || activePanel == .remove {
-        if activePanel == .remove {
+        if activePanel == .remove || service.selectedIndex == index {
           panelContent
             .transition(.rowContent)
-        } else if sync.isOptionHeld {
-          if light.isReachable, let state = light.state {
-            controlsSection(state: state)
-              .transition(.rowContent)
-          }
-        } else {
-          panelContent
+        } else if sync.isOptionHeld, light.isReachable, let state = light.state {
+          controlsSection(state: state)
             .transition(.rowContent)
         }
       }
