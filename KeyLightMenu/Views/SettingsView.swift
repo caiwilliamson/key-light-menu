@@ -37,6 +37,19 @@ struct SettingsView: View {
         PowerOnSettingsView(settings: settings, index: index)
           .environment(service)
       }
+
+      PanelSection {
+        let serial = info.serialNumber
+        SettingToggleRow(
+          label: "Sleep Mode",
+          subtitle: "Sleep Mode turns the light off when your Mac sleeps or locks, and restores it on wake.",
+          isOn: Binding(
+            get: { service.lightPrefs.isEnabled(for: serial) },
+            set: { service.lightPrefs.setEnabled($0, for: serial) }
+          ),
+          onChange: {}
+        )
+      }
     }
     .onAppear { displayNameDraft = info.displayName }
     .onChange(of: info.displayName) { _, new in displayNameDraft = new }

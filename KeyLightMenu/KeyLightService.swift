@@ -3,6 +3,7 @@
 //  KeyLightMenu
 //
 
+import AppKit
 import Darwin
 import Foundation
 import Observation
@@ -21,6 +22,10 @@ final class KeyLightService: NSObject {
   var isDiscovering = false
   var isLoading = false
   var errorMessage: String?
+
+  let lightPrefs = LightPrefStore()
+  private var lightsToRestore: Set<String> = []
+  private var sleepWakeObservers: [Any] = []
 
   /// Short-timeout session used for polling — detects disconnections quickly.
   private let pollSession: URLSession = {
@@ -57,6 +62,7 @@ final class KeyLightService: NSObject {
     if !lights.isEmpty {
       startPolling()
     }
+    startSleepWakeMonitoring()
   }
 
   private func saveCache() {
@@ -255,6 +261,12 @@ final class KeyLightService: NSObject {
     await apply(s, at: index)
   }
 
+  func setOn(_ on: Bool, at index: Int) async {
+    guard lights.indices.contains(index), var s = lights[index].state else { return }
+    s.isOn = on
+    await apply(s, at: index)
+  }
+
   func setBrightness(_ v: Int, at index: Int) async {
     guard lights.indices.contains(index), var s = lights[index].state else { return }
     s.brightness = max(1, min(100, v))
@@ -370,6 +382,58 @@ final class KeyLightService: NSObject {
       lights[index].settings = (try? JSONDecoder().decode(LightSettings.self, from: data)) ?? settings
     } catch {
       errorMessage = error.localizedDescription
+    }
+  }
+}
+
+// MARK: - Sleep / Wake / Lock Monitoring
+
+extension KeyLightService {
+  private func startSleepWakeMonitoring() {
+    let ws = NSWorkspace.shared.notificationCenter
+    let dc = DistributedNotificationCenter.default()
+
+    sleepWakeObservers.append(
+      ws.addObserver(forName: NSWorkspace.willSleepNotification, object: nil, queue: .main) { [weak self] _ in
+        Task { @MainActor [weak self] in self?.handleSleepOrLock() }
+      }
+    )
+    sleepWakeObservers.append(
+      ws.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: .main) { [weak self] _ in
+        Task { @MainActor [weak self] in self?.handleWakeOrUnlock() }
+      }
+    )
+    sleepWakeObservers.append(
+      dc.addObserver(forName: NSNotification.Name("com.apple.screenIsLocked"), object: nil, queue: .main) { [weak self] _ in
+        Task { @MainActor [weak self] in self?.handleSleepOrLock() }
+      }
+    )
+    sleepWakeObservers.append(
+      dc.addObserver(forName: NSNotification.Name("com.apple.screenIsUnlocked"), object: nil, queue: .main) { [weak self] _ in
+        Task { @MainActor [weak self] in self?.handleWakeOrUnlock() }
+      }
+    )
+  }
+
+  private func handleSleepOrLock() {
+    // Guard prevents double-recording when both lock and sleep events fire together.
+    guard lightsToRestore.isEmpty else { return }
+    for (i, light) in lights.enumerated() {
+      guard let serial = light.accessoryInfo?.serialNumber,
+            lightPrefs.isEnabled(for: serial),
+            light.state?.isOn == true else { continue }
+      lightsToRestore.insert(serial)
+      Task { await self.setOn(false, at: i) }
+    }
+  }
+
+  private func handleWakeOrUnlock() {
+    let toRestore = lightsToRestore
+    lightsToRestore = []
+    for (i, light) in lights.enumerated() {
+      guard let serial = light.accessoryInfo?.serialNumber,
+            toRestore.contains(serial) else { continue }
+      Task { await self.setOn(true, at: i) }
     }
   }
 }
