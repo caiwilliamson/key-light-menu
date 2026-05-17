@@ -248,6 +248,7 @@ struct LightRow: View {
       HStack(spacing: 4) {
         Text("\(Int(level.rounded()))%")
           .foregroundStyle(.secondary)
+          .font(.callout)
         Battery(level: Float(level / 100), isCharging: battery.isCharging)
           .frame(height: 11)
       }
