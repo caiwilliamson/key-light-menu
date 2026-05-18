@@ -28,18 +28,18 @@ struct SettingsView: View {
         }
       }
 
-      Divider().padding(.horizontal, 12)
+      SectionDivider()
 
       if let battery = light.settings?.battery {
         BatterySettingsView(battery: battery, index: index)
           .environment(service)
-        Divider().padding(.horizontal, 12)
+        SectionDivider()
       }
 
       if let settings = light.settings {
         PowerOnSettingsView(settings: settings, index: index)
           .environment(service)
-        Divider().padding(.horizontal, 12)
+        SectionDivider()
       }
 
       PanelSection {
