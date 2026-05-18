@@ -3,13 +3,16 @@
 //  KeyLightMenu
 //
 
+import Flow
 import SwiftUI
 
 struct MainView: View {
   @Environment(KeyLightService.self) private var service
+  @Environment(SceneStore.self) private var sceneStore
 
   @State private var activePanel: Panel?
   @State private var showGlobalSettings = false
+  @State private var showScenes = false
   @State private var sync = SyncCoordinator()
   @State private var eventMonitor: Any?
 
@@ -27,12 +30,14 @@ struct MainView: View {
     .animation(.rowSpring, value: activePanel)
     .animation(.rowSpring, value: sync.isOptionHeld)
     .animation(.rowSpring, value: showGlobalSettings)
+    .animation(.rowSpring, value: showScenes)
+    .animation(.rowSpring, value: sceneStore.scenes.isEmpty)
     .task { service.startSession() }
     .onAppear {
-      sync.isOptionHeld = NSEvent.modifierFlags.contains(.option) && activePanel == nil && !showGlobalSettings
+      sync.isOptionHeld = NSEvent.modifierFlags.contains(.option) && activePanel == nil && !showGlobalSettings && !showScenes
       eventMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { event in
         let held = event.modifierFlags.contains(.option)
-        sync.isOptionHeld = held && activePanel == nil && !showGlobalSettings
+        sync.isOptionHeld = held && activePanel == nil && !showGlobalSettings && !showScenes
         if !held { sync.reset() }
         return event
       }
@@ -61,7 +66,18 @@ struct MainView: View {
           .foregroundStyle(.secondary)
         Spacer()
         Button {
+          showScenes.toggle()
+          if showScenes { showGlobalSettings = false }
+        } label: {
+          Image(systemName: "sparkles")
+            .foregroundStyle(showScenes ? Color.accentColor : Color.secondary)
+            .font(.title2)
+            .help("Scenes")
+        }
+        .buttonStyle(.plain)
+        Button {
           showGlobalSettings.toggle()
+          if showGlobalSettings { showScenes = false }
         } label: {
           Image(systemName: showGlobalSettings ? "gearshape.fill" : "gearshape")
             .foregroundStyle(showGlobalSettings ? Color.accentColor : Color.secondary)
@@ -77,22 +93,42 @@ struct MainView: View {
 
   @ViewBuilder
   private var mainContent: some View {
-    if showGlobalSettings {
+    if showScenes {
+      ScenesView()
+        .transition(.rowContent)
+        .fixedSize(horizontal: false, vertical: true)
+    } else if showGlobalSettings {
       GlobalSettingsView()
         .transition(.rowContent)
-    } else if service.lights.isEmpty {
-      if service.isDiscovering {
-        LoadingState(label: "Scanning…")
-      } else {
-        noLightsView
-      }
     } else {
-      ForEach(service.lights.indices, id: \.self) { i in
-        if i > 0 { Divider() }
-        LightRow(light: service.lights[i], index: i, activePanel: $activePanel)
-          .grayscale(!sync.isOptionHeld && activePanel != nil && service.selectedIndex != i ? 1 : 0)
-          .opacity(!sync.isOptionHeld && activePanel != nil && service.selectedIndex != i ? 0.4 : 1)
-          .allowsHitTesting(sync.isOptionHeld || activePanel == nil || service.selectedIndex == i)
+      if !sceneStore.scenes.isEmpty {
+        scenesPanel
+        Divider()
+      }
+      if service.lights.isEmpty {
+        if service.isDiscovering {
+          LoadingState(label: "Scanning…")
+        } else {
+          noLightsView
+        }
+      } else {
+        ForEach(service.lights.indices, id: \.self) { i in
+          if i > 0 { Divider() }
+          LightRow(light: service.lights[i], index: i, activePanel: $activePanel)
+            .grayscale(!sync.isOptionHeld && activePanel != nil && service.selectedIndex != i ? 1 : 0)
+            .opacity(!sync.isOptionHeld && activePanel != nil && service.selectedIndex != i ? 0.4 : 1)
+            .allowsHitTesting(sync.isOptionHeld || activePanel == nil || service.selectedIndex == i)
+        }
+      }
+    }
+  }
+
+  private var scenesPanel: some View {
+    PanelSection(spacing: 6) {
+      HFlow(itemSpacing: 6, rowSpacing: 6) {
+        ForEach(sceneStore.scenes) { scene in
+          SceneChip(scene: scene)
+        }
       }
     }
   }
@@ -110,7 +146,7 @@ struct MainView: View {
 
       PanelSection {
         HStack {
-          if activePanel == nil && !showGlobalSettings {
+          if activePanel == nil && !showGlobalSettings && !showScenes {
             Button {
               service.startDiscovery()
             } label: {
