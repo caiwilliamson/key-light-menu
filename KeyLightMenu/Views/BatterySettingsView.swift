@@ -45,6 +45,8 @@ struct BatterySettingsView: View {
       }
 
       if !bypass {
+        Divider().padding(.horizontal, 12)
+
         PanelSection {
           SettingToggleRow(label: "Energy Saving Mode", isOn: $energySavingEnabled, onChange: send)
 
