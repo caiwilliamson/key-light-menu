@@ -16,11 +16,15 @@ struct PresetsView: View {
   var body: some View {
     let serial = light.accessoryInfo?.serialNumber ?? ""
     let hostPresets = store.presets(for: serial)
-    return VStack(spacing: 0) {
+    return VStack(alignment: .leading, spacing: 0) {
       if let state = light.state {
         PanelSection {
-          Text("New Preset")
-            .frame(maxWidth: .infinity, alignment: .leading)
+          VStack(alignment: .leading, spacing: 4) {
+            Text("New Preset")
+            Text("Set the sliders to your desired values, enter a name, and save it as a preset.")
+              .font(.callout)
+              .foregroundStyle(.secondary)
+          }
           LightSlider(
             icon: "sun.max.fill",
             value: Double(state.brightness),
@@ -43,7 +47,7 @@ struct PresetsView: View {
             Color.clear.frame(width: 20)
             TextField("Preset Name", text: $presetName)
               .textFieldStyle(.roundedBorder)
-            Button("Save Preset") {
+            Button("Save") {
               guard !presetName.isEmpty else { return }
               store.add(
                 name: presetName,
@@ -64,11 +68,20 @@ struct PresetsView: View {
         SectionDivider()
         PanelSection {
           Text("No saved presets")
-            .foregroundStyle(.secondary)
+            .foregroundStyle(.tertiary)
             .frame(maxWidth: .infinity, alignment: .center)
             .font(.callout)
+            .padding(.vertical, 30)
         }
       } else {
+        PanelSection {
+          VStack(alignment: .leading, spacing: 4) {
+            Text("Manage Presets")
+            Text("Reorder or delete your saved presets.")
+              .font(.callout)
+              .foregroundStyle(.secondary)
+          }
+        }
         SectionDivider()
         ScrollView {
           VStack(spacing: 0) {
@@ -84,7 +97,7 @@ struct PresetsView: View {
             }
           }
         }
-        .frame(maxHeight: 310)
+        .frame(maxHeight: 250)
       }
     }
   }
