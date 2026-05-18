@@ -13,7 +13,7 @@ struct GradientSlider: View {
   var isActive: Bool = true
   var onEditingChanged: ((Bool) -> Void)?
 
-  private static let thumbSize: CGFloat = 18
+  private static let thumbSize: CGFloat = 16
   private static let trackHeight: CGFloat = 8
   private var fraction: Double {
     (value - range.lowerBound) / (range.upperBound - range.lowerBound)
@@ -36,7 +36,7 @@ struct GradientSlider: View {
           Circle()
             .fill(gradient.color(at: fraction))
           Circle()
-            .strokeBorder(.white, lineWidth: 2)
+            .strokeBorder(.white, lineWidth: 1)
         }
         .shadow(color: .black.opacity(0.3), radius: 1.5, y: 1)
         .frame(width: Self.thumbSize, height: Self.thumbSize)
