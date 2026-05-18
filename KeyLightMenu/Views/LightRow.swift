@@ -99,6 +99,7 @@ struct LightRow: View {
         }
       }
     }
+    .background(Color.primary.opacity(service.selectedIndex == index && !sync.isOptionHeld ? 0.05 : 0))
   }
 
   @ViewBuilder
