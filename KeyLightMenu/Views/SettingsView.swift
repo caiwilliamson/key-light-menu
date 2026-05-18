@@ -41,8 +41,8 @@ struct SettingsView: View {
       PanelSection {
         let serial = info.serialNumber
         SettingToggleRow(
-          label: "Sleep Mode",
-          subtitle: "Sleep Mode turns the light off when your Mac sleeps or locks, and restores it on wake.",
+          label: "Turn Off Automatically",
+          subtitle: "Turn the light off when your Mac sleeps or locks, and restore it on wake.",
           isOn: Binding(
             get: { service.lightPrefs.isEnabled(for: serial) },
             set: { service.lightPrefs.setEnabled($0, for: serial) }

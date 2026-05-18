@@ -34,9 +34,9 @@ struct BatterySettingsView: View {
     VStack(spacing: 0) {
       PanelSection {
         SettingToggleRow(
-          label: "Studio Mode (Bypass Battery)",
-          subtitle: "Studio Mode bypasses the battery, meaning the light will only function when connected to power."
-            + (isPluggedIn ? "" : " Please connect to a power source to enable Studio Mode."),
+          label: "Bypass Battery",
+          subtitle: "Bypass the battery so the light only works when connected to power."
+            + (isPluggedIn ? "" : " Please connect to a power source to enable."),
           icon: "powerplug.fill",
           isOn: $bypass,
           onChange: send
