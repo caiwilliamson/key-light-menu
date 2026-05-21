@@ -3,7 +3,6 @@
 //  KeyLightMenu
 //
 
-import Flow
 import SwiftUI
 
 struct LightRow: View {
@@ -19,55 +18,34 @@ struct LightRow: View {
 
   var body: some View {
     VStack(spacing: 0) {
-      VStack(spacing: 0) {
-        VStack(alignment: .leading, spacing: 2) {
-          HStack(alignment: .center, spacing: 3) {
-            Text(light.name)
-              .font(.headline)
-              .lineLimit(1)
-              .frame(maxWidth: .infinity, alignment: .leading)
-            HStack(spacing: 2) {
-              if light.isReachable {
-                if service.selectedIndex == index, !sync.isOptionHeld {
-                  HStack(spacing: 0) {
-                    panelButton(.presets, active: "slider.horizontal.3", inactive: "slider.horizontal.3", label: "Presets")
-                    panelButton(.settings, active: "gearshape.fill", inactive: "gearshape", label: "Settings")
-                    panelButton(.info, active: "info.circle.fill", inactive: "info.circle", label: "Info")
-                  }
-                  .transition(.rowContent)
-                }
-                if let state = light.state {
-                  Button {
-                    Task { await service.toggle(at: index) }
-                  } label: {
-                    Image(systemName: state.isOn ? "power.circle.fill" : "power.circle")
-                      .font(.system(size: 22))
-                      .foregroundStyle(state.isOn ? Color.yellow : Color.secondary)
-                  }
-                  .buttonStyle(.plain)
-                }
-              } else if !sync.isOptionHeld {
-                Button {
-                  service.selectedIndex = index
-                  activePanel = .remove
-                } label: {
-                  Image(systemName: "trash")
-                    .foregroundStyle(activePanel == .remove && service.selectedIndex == index ? Color.red : Color.secondary)
-                }
-                .buttonStyle(.plain)
-                .transition(.rowContent)
+      LightRowHeader(light: light, showsIndicators: !sync.isOptionHeld) {
+        EmptyView()
+      } trailingActions: {
+        HStack(spacing: 2) {
+          if light.isReachable {
+            if service.selectedIndex == index, !sync.isOptionHeld {
+              HStack(spacing: 0) {
+                panelButton(.presets, active: "slider.horizontal.3", inactive: "slider.horizontal.3", label: "Presets")
+                panelButton(.settings, active: "gearshape.fill", inactive: "gearshape", label: "Settings")
+                panelButton(.info, active: "info.circle.fill", inactive: "info.circle", label: "Info")
+              }
+              .transition(.rowContent)
+            }
+            if let state = light.state {
+              LightPowerButton(isOn: state.isOn) {
+                Task { await service.toggle(at: index) }
               }
             }
-          }
-          HStack(spacing: 8) {
-            if light.isReachable {
-              if let wifi = light.accessoryInfo?.wifiInfo {
-                wifiIndicator(wifi)
-              }
-              if let battery = light.batteryInfo {
-                batteryIndicator(battery)
-              }
+          } else if !sync.isOptionHeld {
+            Button {
+              service.selectedIndex = index
+              activePanel = .remove
+            } label: {
+              Image(systemName: "trash")
+                .foregroundStyle(activePanel == .remove && service.selectedIndex == index ? Color.red : Color.secondary)
             }
+            .buttonStyle(.plain)
+            .transition(.rowContent)
           }
         }
       }
@@ -135,48 +113,39 @@ struct LightRow: View {
 
   @ViewBuilder
   private func controlsSection(state: LightState) -> some View {
-    let presets = store.presets(for: light.accessoryInfo?.serialNumber ?? "")
-    let brightnessGradient = TrackGradient.brightness(for: state.temperature)
     let brightnessValue = sync.isOptionHeld && sync.syncedBrightnesses.indices.contains(index)
       ? sync.syncedBrightnesses[index] : Double(state.brightness)
     let temperatureValue = sync.isOptionHeld && sync.syncedTemperatures.indices.contains(index)
       ? sync.syncedTemperatures[index] : Double(state.temperature)
-    VStack(alignment: .leading, spacing: 8) {
-      LightSlider(
-        icon: "sun.max.fill",
-        value: brightnessValue,
-        range: 1 ... 100,
-        label: { "\(Int($0))%" },
-        gradient: brightnessGradient,
-        onDragStart: sync.isOptionHeld ? {
-          sync.brightnessSourceIndex = index
-          sync.captureBrightnessStart(lights: service.lights)
-        } : nil,
-        onDragChange: sync.isOptionHeld ? { v in
-          sync.updateBrightnessSync(fromIndex: index, value: v)
-        } : nil
-      ) { v in
+    LightControlsSection(
+      light: light,
+      index: index,
+      state: state,
+      brightnessValue: brightnessValue,
+      temperatureValue: temperatureValue,
+      onBrightnessDragStart: sync.isOptionHeld ? {
+        sync.brightnessSourceIndex = index
+        sync.captureBrightnessStart(lights: service.lights)
+      } : nil,
+      onBrightnessDragChange: sync.isOptionHeld ? { v in
+        sync.updateBrightnessSync(fromIndex: index, value: v)
+      } : nil,
+      onBrightnessCommit: { v in
         Task { await service.setBrightness(Int(v), at: index) }
         if sync.isOptionHeld, sync.brightnessSourceIndex == index {
           for j in sync.syncedBrightnesses.indices where j != index {
             Task { await service.setBrightness(Int(sync.syncedBrightnesses[j].rounded()), at: j) }
           }
         }
-      }
-      LightSlider(
-        icon: "thermometer.medium",
-        value: temperatureValue,
-        range: 143 ... 344,
-        label: { "\(Int(1_000_000 / $0.rounded()))K" },
-        gradient: .temperature,
-        onDragStart: sync.isOptionHeld ? {
-          sync.temperatureSourceIndex = index
-          sync.captureTemperatureStart(lights: service.lights)
-        } : nil,
-        onDragChange: sync.isOptionHeld ? { v in
-          sync.updateTemperatureSync(fromIndex: index, value: v)
-        } : nil
-      ) { v in
+      },
+      onTemperatureDragStart: sync.isOptionHeld ? {
+        sync.temperatureSourceIndex = index
+        sync.captureTemperatureStart(lights: service.lights)
+      } : nil,
+      onTemperatureDragChange: sync.isOptionHeld ? { v in
+        sync.updateTemperatureSync(fromIndex: index, value: v)
+      } : nil,
+      onTemperatureCommit: { v in
         Task { await service.setTemperature(Int(v.rounded()), at: index) }
         if sync.isOptionHeld, sync.temperatureSourceIndex == index {
           for j in sync.syncedTemperatures.indices where j != index {
@@ -184,26 +153,7 @@ struct LightRow: View {
           }
         }
       }
-      if !sync.isOptionHeld, !presets.isEmpty {
-        HStack(alignment: .top) {
-          Image(systemName: "slider.horizontal.3")
-            .frame(width: 16)
-            .foregroundStyle(.secondary)
-            .padding(.top, 4)
-          HFlow(itemSpacing: 6, rowSpacing: 6) {
-            ForEach(presets) { preset in
-              let active = preset.brightness == state.brightness && preset.temperature == state.temperature
-              PresetChip(preset: preset, isActive: active, index: index)
-            }
-          }
-        }
-        .padding(.top, 5)
-        .transition(.rowContent)
-      }
-    }
-    .padding(.horizontal, 12)
-    .padding(.bottom, 12)
-    .padding(.top, 6)
+    )
   }
 
   private func panelButton(_ panel: Panel, active: String, inactive: String, label: String) -> some View {
@@ -224,33 +174,4 @@ struct LightRow: View {
   private var loadingView: some View {
     LoadingState(label: "Loading…")
   }
-
-  @ViewBuilder
-  private func wifiIndicator(_ wifi: WifiInfo) -> some View {
-    let strength = Double(wifi.signalPercent) / 100.0
-    Image(systemName: "wifi", variableValue: strength)
-      .foregroundStyle(.secondary)
-      .frame(height: 16)
-  }
-
-  @ViewBuilder
-  private func batteryIndicator(_ battery: BatteryInfo) -> some View {
-    let level = battery.level
-    // Plugged in but not charging = bypass mode, battery level is meaningless
-    if battery.isPluggedIn, !battery.isCharging {
-      Image(systemName: "powerplug.fill")
-        .foregroundStyle(.secondary)
-        .frame(height: 16)
-    } else {
-      HStack(spacing: 4) {
-        Text("\(Int(level.rounded()))%")
-          .foregroundStyle(.secondary)
-          .font(.callout)
-        Battery(level: Float(level / 100), isCharging: battery.isCharging)
-          .frame(height: 11)
-      }
-      .frame(height: 16)
-    }
-  }
 }
-

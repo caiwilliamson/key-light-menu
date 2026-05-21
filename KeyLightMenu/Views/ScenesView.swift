@@ -3,7 +3,6 @@
 //  KeyLightMenu
 //
 
-import Flow
 import SwiftUI
 
 struct ScenesView: View {
@@ -161,7 +160,6 @@ struct ScenesView: View {
 
 private struct SceneLightRow: View {
   @Environment(KeyLightService.self) private var service
-  @Environment(PresetStore.self) private var store
 
   let light: KeyLight
   let index: Int
@@ -170,68 +168,37 @@ private struct SceneLightRow: View {
   var body: some View {
     VStack(spacing: 0) {
       PanelSection {
-        HStack(alignment: .center, spacing: 8) {
+        LightRowHeader(light: light, showsIndicators: false) {
           Toggle("", isOn: $isSelected)
             .labelsHidden()
             .toggleStyle(.checkbox)
-            .padding(.top, 2)
-          Text(light.name)
-            .font(.headline)
-            .lineLimit(1)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.trailing, 5)
+        } trailingActions: {
           if let state = light.state {
-            Button {
+            LightPowerButton(isOn: state.isOn) {
               Task { await service.toggle(at: index) }
-            } label: {
-              Image(systemName: state.isOn ? "power.circle.fill" : "power.circle")
-                .font(.title)
-                .foregroundStyle(state.isOn ? Color.yellow : Color.secondary)
-                .contentTransition(.opacity)
             }
-            .buttonStyle(.plain)
-            .padding(.top, -4)
           }
         }
       }
       if isSelected, let state = light.state {
-        let serial = light.accessoryInfo?.serialNumber ?? ""
-        let presets = store.presets(for: serial)
-        let brightnessGradient = TrackGradient.brightness(for: state.temperature)
-        VStack(alignment: .leading, spacing: 6) {
-          LightSlider(
-            icon: "sun.max.fill",
-            value: Double(state.brightness),
-            range: 1 ... 100,
-            label: { "\(Int($0))%" },
-            gradient: brightnessGradient,
-            onCommit: { v in Task { await service.setBrightness(Int(v), at: index) } }
-          )
-          LightSlider(
-            icon: "thermometer.medium",
-            value: Double(state.temperature),
-            range: 143 ... 344,
-            label: { "\(Int(1_000_000 / $0.rounded()))K" },
-            gradient: .temperature,
-            onCommit: { v in Task { await service.setTemperature(Int(v.rounded()), at: index) } }
-          )
-          if !presets.isEmpty {
-            HStack(alignment: .top) {
-              Image(systemName: "slider.horizontal.3")
-                .frame(width: 20)
-                .foregroundStyle(.secondary)
-                .padding(.top, 3)
-              HFlow(itemSpacing: 6, rowSpacing: 6) {
-                ForEach(presets) { preset in
-                  let active = preset.brightness == state.brightness && preset.temperature == state.temperature
-                  PresetChip(preset: preset, isActive: active, index: index)
-                }
-              }
-            }
-            .padding(.top, 4)
+        LightControlsSection(
+          light: light,
+          index: index,
+          state: state,
+          brightnessValue: Double(state.brightness),
+          temperatureValue: Double(state.temperature),
+          onBrightnessDragStart: nil,
+          onBrightnessDragChange: nil,
+          onBrightnessCommit: { v in
+            Task { await service.setBrightness(Int(v), at: index) }
+          },
+          onTemperatureDragStart: nil,
+          onTemperatureDragChange: nil,
+          onTemperatureCommit: { v in
+            Task { await service.setTemperature(Int(v.rounded()), at: index) }
           }
-        }
-        .padding(.horizontal, 12)
-        .padding(.bottom, 12)
+        )
         .transition(.rowContent)
       }
     }
