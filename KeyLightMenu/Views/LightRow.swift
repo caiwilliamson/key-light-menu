@@ -19,73 +19,71 @@ struct LightRow: View {
 
   var body: some View {
     VStack(spacing: 0) {
-      PanelSection {
-        HStack(alignment: .top, spacing: 3) {
-          VStack(alignment: .leading, spacing: 2) {
+      VStack(spacing: 0) {
+        VStack(alignment: .leading, spacing: 2) {
+          HStack(alignment: .center, spacing: 3) {
             Text(light.name)
               .font(.headline)
               .lineLimit(1)
-            HStack(spacing: 10) {
-              Text(light.isReachable ? (light.state?.isOn == true ? "On" : "Off") : "Disconnected")
-                .foregroundStyle(.secondary)
+              .frame(maxWidth: .infinity, alignment: .leading)
+            HStack(spacing: 2) {
               if light.isReachable {
-                if let wifi = light.accessoryInfo?.wifiInfo {
-                  wifiIndicator(wifi)
+                if service.selectedIndex == index, !sync.isOptionHeld {
+                  HStack(spacing: 0) {
+                    panelButton(.presets, active: "slider.horizontal.3", inactive: "slider.horizontal.3", label: "Presets")
+                    panelButton(.settings, active: "gearshape.fill", inactive: "gearshape", label: "Settings")
+                    panelButton(.info, active: "info.circle.fill", inactive: "info.circle", label: "Info")
+                  }
+                  .transition(.rowContent)
                 }
-                if let battery = light.batteryInfo {
-                  batteryIndicator(battery)
+                if let state = light.state {
+                  Button {
+                    Task { await service.toggle(at: index) }
+                  } label: {
+                    Image(systemName: state.isOn ? "power.circle.fill" : "power.circle")
+                      .font(.system(size: 22))
+                      .foregroundStyle(state.isOn ? Color.yellow : Color.secondary)
+                  }
+                  .buttonStyle(.plain)
                 }
-              }
-            }
-            .font(.callout)
-          }
-          .frame(maxWidth: .infinity, alignment: .leading)
-          .contentShape(Rectangle())
-          .onHover { if light.isReachable { isHovered = $0 } }
-          .onTapGesture {
-            guard light.isReachable, !sync.isOptionHeld else { return }
-            if service.selectedIndex == index {
-              service.selectedIndex = nil
-              activePanel = nil
-            } else {
-              service.selectedIndex = index
-              activePanel = nil
-            }
-          }
-          HStack(spacing: 3) {
-            if light.isReachable {
-              if service.selectedIndex == index, !sync.isOptionHeld {
-                Group {
-                  panelButton(.presets, active: "slider.horizontal.3", inactive: "slider.horizontal.3", label: "Presets")
-                  panelButton(.settings, active: "gearshape.fill", inactive: "gearshape", label: "Settings")
-                  panelButton(.info, active: "info.circle.fill", inactive: "info.circle", label: "Info")
-                }
-                .transition(.rowContent)
-              }
-              if let state = light.state {
+              } else if !sync.isOptionHeld {
                 Button {
-                  Task { await service.toggle(at: index) }
+                  service.selectedIndex = index
+                  activePanel = .remove
                 } label: {
-                  Image(systemName: state.isOn ? "power.circle.fill" : "power.circle")
-                    .font(.title)
-                    .foregroundStyle(state.isOn ? Color.yellow : Color.secondary)
-                    .contentTransition(.opacity)
+                  Image(systemName: "trash")
+                    .foregroundStyle(activePanel == .remove && service.selectedIndex == index ? Color.red : Color.secondary)
                 }
                 .buttonStyle(.plain)
+                .transition(.rowContent)
               }
-            } else if !sync.isOptionHeld {
-              Button {
-                service.selectedIndex = index
-                activePanel = .remove
-              } label: {
-                Image(systemName: "trash")
-                  .foregroundStyle(activePanel == .remove && service.selectedIndex == index ? Color.red : Color.secondary)
-              }
-              .buttonStyle(.plain)
-              .transition(.rowContent)
             }
           }
-          .padding(.top, -4)
+          HStack(spacing: 8) {
+            if light.isReachable {
+              if let wifi = light.accessoryInfo?.wifiInfo {
+                wifiIndicator(wifi)
+              }
+              if let battery = light.batteryInfo {
+                batteryIndicator(battery)
+              }
+            }
+          }
+        }
+      }
+      .padding(.horizontal, 12)
+      .padding(.top, 12)
+      .padding(.bottom, 12)
+      .contentShape(Rectangle())
+      .onHover { if light.isReachable { isHovered = $0 } }
+      .onTapGesture {
+        guard light.isReachable, !sync.isOptionHeld else { return }
+        if service.selectedIndex == index {
+          service.selectedIndex = nil
+          activePanel = nil
+        } else {
+          service.selectedIndex = index
+          activePanel = nil
         }
       }
       .background(Color.primary.opacity(isHovered && service.selectedIndex != index && !sync.isOptionHeld ? 0.05 : 0))
@@ -143,7 +141,7 @@ struct LightRow: View {
       ? sync.syncedBrightnesses[index] : Double(state.brightness)
     let temperatureValue = sync.isOptionHeld && sync.syncedTemperatures.indices.contains(index)
       ? sync.syncedTemperatures[index] : Double(state.temperature)
-    VStack(alignment: .leading, spacing: 10) {
+    VStack(alignment: .leading, spacing: 8) {
       LightSlider(
         icon: "sun.max.fill",
         value: brightnessValue,
@@ -187,9 +185,9 @@ struct LightRow: View {
         }
       }
       if !sync.isOptionHeld, !presets.isEmpty {
-        HStack(alignment: .top, spacing: 8) {
+        HStack(alignment: .top) {
           Image(systemName: "slider.horizontal.3")
-            .frame(width: 20)
+            .frame(width: 16)
             .foregroundStyle(.secondary)
             .padding(.top, 4)
           HFlow(itemSpacing: 6, rowSpacing: 6) {
@@ -199,13 +197,13 @@ struct LightRow: View {
             }
           }
         }
-        .padding(.top, 6)
+        .padding(.top, 5)
         .transition(.rowContent)
       }
     }
     .padding(.horizontal, 12)
     .padding(.bottom, 12)
-    .padding(.top, 4)
+    .padding(.top, 6)
   }
 
   private func panelButton(_ panel: Panel, active: String, inactive: String, label: String) -> some View {
@@ -215,8 +213,8 @@ struct LightRow: View {
       activePanel = isActive ? nil : panel
     } label: {
       Image(systemName: isActive ? active : inactive)
-        .font(.title2)
         .foregroundStyle(isActive ? Color.accentColor : Color.secondary)
+        .font(.system(size: 16))
     }
     .buttonStyle(.plain)
     .disabled(!light.isReachable)
@@ -231,7 +229,6 @@ struct LightRow: View {
   private func wifiIndicator(_ wifi: WifiInfo) -> some View {
     let strength = Double(wifi.signalPercent) / 100.0
     Image(systemName: "wifi", variableValue: strength)
-      .imageScale(.medium)
       .foregroundStyle(.secondary)
       .frame(height: 16)
   }
@@ -242,7 +239,6 @@ struct LightRow: View {
     // Plugged in but not charging = bypass mode, battery level is meaningless
     if battery.isPluggedIn, !battery.isCharging {
       Image(systemName: "powerplug.fill")
-        .imageScale(.medium)
         .foregroundStyle(.secondary)
         .frame(height: 16)
     } else {

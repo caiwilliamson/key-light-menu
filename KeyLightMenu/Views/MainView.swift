@@ -71,7 +71,7 @@ struct MainView: View {
         } label: {
           Image(systemName: "sparkles")
             .foregroundStyle(showScenes ? Color.accentColor : Color.secondary)
-            .font(.title2)
+            .font(.system(size: 16))
             .help("Scenes")
         }
         .buttonStyle(.plain)
@@ -81,7 +81,7 @@ struct MainView: View {
         } label: {
           Image(systemName: showGlobalSettings ? "gearshape.fill" : "gearshape")
             .foregroundStyle(showGlobalSettings ? Color.accentColor : Color.secondary)
-            .font(.title2)
+            .font(.system(size: 16))
             .help("App Settings")
         }
         .buttonStyle(.plain)

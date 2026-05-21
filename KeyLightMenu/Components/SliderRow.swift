@@ -36,7 +36,7 @@ struct SliderRow: View {
   var body: some View {
     HStack(spacing: 8) {
       Image(systemName: icon)
-        .frame(width: 20)
+        .frame(width: 16)
         .foregroundStyle(.secondary)
       GradientSlider(value: $value, range: range, gradient: gradient, isActive: isActive, onEditingChanged: onEditingChanged)
       Text(label(value))
