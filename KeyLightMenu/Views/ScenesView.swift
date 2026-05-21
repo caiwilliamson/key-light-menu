@@ -11,23 +11,94 @@ struct ScenesView: View {
   @Environment(PresetStore.self) private var store
   @Environment(SceneStore.self) private var sceneStore
 
+  @State private var isCreating = false
   @State private var sceneName = ""
   @State private var selectedSerials: Set<String> = []
 
   var body: some View {
+    Group {
+      if isCreating {
+        createView
+          .transition(.rowContent)
+      } else {
+        manageView
+          .transition(.rowContent)
+      }
+    }
+    .animation(.rowSpring, value: isCreating)
+  }
+
+  // MARK: - Manage View
+
+  private var manageView: some View {
+    VStack(alignment: .leading, spacing: 0) {
+      PanelSection {
+        HStack {
+          Text("Scenes")
+            .font(.headline)
+            .foregroundStyle(.secondary)
+          Spacer()
+          Button { isCreating = true } label: {
+            Image(systemName: "plus")
+              .font(.title2)
+              .foregroundStyle(.secondary)
+              .help("New Scene")
+          }
+          .buttonStyle(.plain)
+        }
+      }
+      Divider()
+      if sceneStore.scenes.isEmpty {
+        PanelSection {
+          Text("No saved scenes")
+            .foregroundStyle(.tertiary)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .font(.callout)
+            .padding(.vertical, 30)
+        }
+      } else {
+        ScrollView {
+          VStack(spacing: 0) {
+            ForEach(sceneStore.scenes) { scene in
+              SceneManageRow(
+                scene: scene,
+                isFirst: scene.id == sceneStore.scenes.first?.id,
+                isLast: scene.id == sceneStore.scenes.last?.id
+              )
+              if scene.id != sceneStore.scenes.last?.id {
+                SectionDivider()
+              }
+            }
+          }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(maxHeight: 250)
+      }
+    }
+  }
+
+  // MARK: - Create View
+
+  @ViewBuilder
+  private var createView: some View {
     let reachable = service.lights.indices.filter { service.lights[$0].isReachable }
     VStack(alignment: .leading, spacing: 0) {
       PanelSection {
-        VStack(alignment: .leading, spacing: 4) {
+        HStack(spacing: 8) {
+          Button { isCreating = false } label: {
+            Image(systemName: "chevron.left")
+              .font(.title2)
+              .foregroundStyle(.secondary)
+              .help("Back")
+          }
+          .buttonStyle(.plain)
           Text("New Scene")
-          Text("Select lights, adjust their settings, then save as a scene.")
-            .font(.callout)
+            .font(.headline)
             .foregroundStyle(.secondary)
+          Spacer()
         }
       }
-
       SectionDivider()
-
       if reachable.isEmpty {
         PanelSection {
           Text("No lights available")
@@ -54,7 +125,6 @@ struct ScenesView: View {
           SectionDivider()
         }
       }
-
       PanelSection {
         HStack(spacing: 8) {
           TextField("Scene Name", text: $sceneName)
@@ -63,42 +133,6 @@ struct ScenesView: View {
             .disabled(sceneName.trimmingCharacters(in: .whitespaces).isEmpty || selectedSerials.isEmpty)
             .buttonStyle(.borderedProminent)
         }
-      }
-
-      if sceneStore.scenes.isEmpty {
-        SectionDivider()
-        PanelSection {
-          Text("No saved scenes")
-            .foregroundStyle(.tertiary)
-            .frame(maxWidth: .infinity, alignment: .center)
-            .font(.callout)
-            .padding(.vertical, 30)
-        }
-      } else {
-        PanelSection {
-          VStack(alignment: .leading, spacing: 4) {
-            Text("Manage Scenes")
-            Text("Reorder or delete your saved scenes.")
-              .font(.callout)
-              .foregroundStyle(.secondary)
-          }
-        }
-        SectionDivider()
-        ScrollView {
-          VStack(spacing: 0) {
-            ForEach(sceneStore.scenes) { scene in
-              SceneManageRow(
-                scene: scene,
-                isFirst: scene.id == sceneStore.scenes.first?.id,
-                isLast: scene.id == sceneStore.scenes.last?.id
-              )
-              if scene.id != sceneStore.scenes.last?.id {
-                SectionDivider()
-              }
-            }
-          }
-        }
-        .frame(maxHeight: 125)
       }
     }
     .animation(.rowSpring, value: selectedSerials)
@@ -119,6 +153,7 @@ struct ScenesView: View {
     sceneStore.add(name: trimmedName, lights: lights)
     sceneName = ""
     selectedSerials = []
+    isCreating = false
   }
 }
 
@@ -139,6 +174,7 @@ private struct SceneLightRow: View {
           Toggle("", isOn: $isSelected)
             .labelsHidden()
             .toggleStyle(.checkbox)
+            .padding(.top, 2)
           Text(light.name)
             .font(.headline)
             .lineLimit(1)
@@ -153,6 +189,7 @@ private struct SceneLightRow: View {
                 .contentTransition(.opacity)
             }
             .buttonStyle(.plain)
+            .padding(.top, -4)
           }
         }
       }
@@ -160,7 +197,7 @@ private struct SceneLightRow: View {
         let serial = light.accessoryInfo?.serialNumber ?? ""
         let presets = store.presets(for: serial)
         let brightnessGradient = TrackGradient.brightness(for: state.temperature)
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 6) {
           LightSlider(
             icon: "sun.max.fill",
             value: Double(state.brightness),
@@ -178,11 +215,11 @@ private struct SceneLightRow: View {
             onCommit: { v in Task { await service.setTemperature(Int(v.rounded()), at: index) } }
           )
           if !presets.isEmpty {
-            HStack(alignment: .top, spacing: 8) {
+            HStack(alignment: .top) {
               Image(systemName: "slider.horizontal.3")
                 .frame(width: 20)
                 .foregroundStyle(.secondary)
-                .padding(.top, 4)
+                .padding(.top, 3)
               HFlow(itemSpacing: 6, rowSpacing: 6) {
                 ForEach(presets) { preset in
                   let active = preset.brightness == state.brightness && preset.temperature == state.temperature
@@ -190,12 +227,11 @@ private struct SceneLightRow: View {
                 }
               }
             }
-            .padding(.top, 6)
+            .padding(.top, 4)
           }
         }
         .padding(.horizontal, 12)
         .padding(.bottom, 12)
-        .padding(.top, 4)
         .transition(.rowContent)
       }
     }
@@ -214,7 +250,7 @@ private struct SceneManageRow: View {
   var body: some View {
     PanelSection {
       HStack {
-        VStack(alignment: .leading, spacing: 2) {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
           Text(scene.name)
             .foregroundStyle(.secondary)
           Text("\(scene.lights.count) light\(scene.lights.count == 1 ? "" : "s")")
