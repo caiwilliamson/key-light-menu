@@ -8,6 +8,7 @@ import SwiftUI
 
 struct MainView: View {
   @Environment(KeyLightService.self) private var service
+  @Environment(PresetStore.self) private var store
   @Environment(SceneStore.self) private var sceneStore
 
   @State private var activePanel: Panel?
@@ -83,6 +84,16 @@ struct MainView: View {
           homeAction: { showGlobalSettings = false },
           crumbs: [.init(title: "Settings")]
         )
+      } else if let panel = activePanel, let idx = service.selectedIndex,
+                service.lights.indices.contains(idx) {
+        let lightName = service.lights[idx].name
+        BreadcrumbHeader(
+          homeAction: { activePanel = nil; service.selectedIndex = nil },
+          crumbs: [
+            .init(title: lightName, action: { activePanel = nil }),
+            .init(title: panel.title)
+          ]
+        )
       } else {
         defaultHeader
       }
@@ -135,6 +146,10 @@ struct MainView: View {
     } else if showGlobalSettings {
       GlobalSettingsView()
         .transition(.rowContent)
+    } else if let panel = activePanel, let idx = service.selectedIndex,
+              service.lights.indices.contains(idx) {
+      lightPanelContent(index: idx, panel: panel)
+        .transition(.rowContent)
     } else {
       if !sceneStore.scenes.isEmpty {
         scenesPanel
@@ -155,6 +170,32 @@ struct MainView: View {
             .allowsHitTesting(sync.isOptionHeld || activePanel == nil || service.selectedIndex == i)
         }
       }
+    }
+  }
+
+  @ViewBuilder
+  private func lightPanelContent(index: Int, panel: Panel) -> some View {
+    let light = service.lights[index]
+    switch panel {
+    case .info:
+      if let info = light.accessoryInfo {
+        InfoView(light: light, info: info, index: index)
+      } else {
+        LoadingState(label: "Loading…")
+      }
+    case .settings:
+      if let info = light.accessoryInfo {
+        SettingsView(light: light, info: info, index: index)
+      } else {
+        LoadingState(label: "Loading…")
+      }
+    case .presets:
+      PresetsView(light: light, index: index)
+        .environment(store)
+        .fixedSize(horizontal: false, vertical: true)
+    case .remove:
+      RemoveLightView(light: light, index: index, activePanel: $activePanel)
+        .environment(store)
     }
   }
 

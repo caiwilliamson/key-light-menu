@@ -49,12 +49,16 @@ struct BreadcrumbHeader: View {
             Text(crumb.title)
               .font(.headline)
               .foregroundStyle(.secondary)
+              .lineLimit(1)
+              .truncationMode(.tail)
           }
           .buttonStyle(.plain)
         } else {
           Text(crumb.title)
             .font(.headline)
             .foregroundStyle(.primary)
+            .lineLimit(1)
+            .truncationMode(.tail)
         }
       }
 

@@ -7,7 +7,6 @@ import SwiftUI
 
 struct LightRow: View {
   @Environment(KeyLightService.self) private var service
-  @Environment(PresetStore.self) private var store
   @Environment(SyncCoordinator.self) private var sync
 
   let light: KeyLight
@@ -65,50 +64,14 @@ struct LightRow: View {
         }
       }
       .background(Color.primary.opacity(isHovered && service.selectedIndex != index && !sync.isOptionHeld ? 0.05 : 0))
-      if service.selectedIndex == index || sync.isOptionHeld, light.isReachable || activePanel == .remove {
-        if activePanel == .remove || service.selectedIndex == index {
-          panelContent
-            .transition(.rowContent)
-        } else if sync.isOptionHeld, light.isReachable, let state = light.state {
+      if light.isReachable, let state = light.state {
+        if service.selectedIndex == index || sync.isOptionHeld {
           controlsSection(state: state)
             .transition(.rowContent)
         }
       }
     }
     .background(Color.primary.opacity(service.selectedIndex == index && !sync.isOptionHeld ? 0.05 : 0))
-  }
-
-  @ViewBuilder
-  private var panelContent: some View {
-    if let panel = activePanel {
-      switch panel {
-      case .info:
-        if let info = light.accessoryInfo {
-          InfoView(light: light, info: info, index: index).environment(service)
-        } else {
-          loadingView
-        }
-      case .settings:
-        if let info = light.accessoryInfo {
-          SettingsView(light: light, info: info, index: index).environment(service)
-        } else {
-          loadingView
-        }
-      case .presets:
-        PresetsView(light: light, index: index)
-          .environment(service)
-          .environment(store)
-          .fixedSize(horizontal: false, vertical: true)
-      case .remove:
-        RemoveLightView(light: light, index: index, activePanel: $activePanel)
-          .environment(service)
-          .environment(store)
-      }
-    } else if light.isReachable, let state = light.state {
-      controlsSection(state: state)
-    } else if light.state == nil, service.isLoading {
-      loadingView
-    }
   }
 
   @ViewBuilder
@@ -171,7 +134,4 @@ struct LightRow: View {
     .help(label)
   }
 
-  private var loadingView: some View {
-    LoadingState(label: "Loading…")
-  }
 }
