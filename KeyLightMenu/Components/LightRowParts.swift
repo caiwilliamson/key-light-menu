@@ -40,11 +40,10 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
   }
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 2) {
+    VStack(alignment: .leading, spacing: 0) {
       HStack(alignment: .center, spacing: 3) {
         leadingAccessory
         Text(light.name)
-          .font(.headline)
           .lineLimit(1)
           .frame(maxWidth: .infinity, alignment: .leading)
         trailingActions
@@ -80,7 +79,7 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
         .foregroundStyle(.secondary)
         .frame(height: 16)
     } else {
-      HStack(spacing: 4) {
+      HStack(spacing: 2) {
         Text("\(Int(level.rounded()))%")
           .foregroundStyle(.secondary)
           .font(.callout)

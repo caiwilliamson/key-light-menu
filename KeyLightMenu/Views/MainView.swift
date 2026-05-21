@@ -13,6 +13,7 @@ struct MainView: View {
   @State private var activePanel: Panel?
   @State private var showGlobalSettings = false
   @State private var showScenes = false
+  @State private var isCreatingScene = false
   @State private var sync = SyncCoordinator()
   @State private var eventMonitor: Any?
 
@@ -60,32 +61,66 @@ struct MainView: View {
 
   private var header: some View {
     PanelSection {
-      HStack {
-        Text("Key Light Menu")
-          .font(.headline)
-          .foregroundStyle(.secondary)
-        Spacer()
-        Button {
-          showScenes.toggle()
-          if showScenes { showGlobalSettings = false }
-        } label: {
-          Image(systemName: "sparkles")
-            .foregroundStyle(showScenes ? Color.accentColor : Color.secondary)
-            .font(.system(size: 16))
-            .help("Scenes")
+      if showScenes {
+        BreadcrumbHeader(
+          homeAction: { showScenes = false; isCreatingScene = false },
+          crumbs: isCreatingScene
+            ? [.init(title: "Scenes", action: { isCreatingScene = false }), .init(title: "New Scene")]
+            : [.init(title: "Scenes")]
+        ) {
+          if !isCreatingScene {
+            Button { isCreatingScene = true } label: {
+              Image(systemName: "plus")
+                .font(.system(size: 16))
+                .foregroundStyle(.secondary)
+                .help("New Scene")
+            }
+            .buttonStyle(.plain)
+          }
         }
-        .buttonStyle(.plain)
-        Button {
-          showGlobalSettings.toggle()
-          if showGlobalSettings { showScenes = false }
-        } label: {
-          Image(systemName: showGlobalSettings ? "gearshape.fill" : "gearshape")
-            .foregroundStyle(showGlobalSettings ? Color.accentColor : Color.secondary)
-            .font(.system(size: 16))
-            .help("App Settings")
-        }
-        .buttonStyle(.plain)
+      } else if showGlobalSettings {
+        BreadcrumbHeader(
+          homeAction: { showGlobalSettings = false },
+          crumbs: [.init(title: "Settings")]
+        )
+      } else {
+        defaultHeader
       }
+    }
+    .frame(height: 44)
+  }
+
+  private var defaultHeader: some View {
+    HStack(spacing: 4) {
+      Text("Key Light Menu")
+        .font(.headline)
+      Spacer()
+      Button {
+        showScenes.toggle()
+        if showScenes {
+          showGlobalSettings = false
+          isCreatingScene = false
+        }
+      } label: {
+        Image(systemName: "sparkles")
+          .foregroundStyle(showScenes ? Color.accentColor : Color.secondary)
+          .font(.system(size: 16))
+          .help("Scenes")
+      }
+      .buttonStyle(.plain)
+      Button {
+        showGlobalSettings.toggle()
+        if showGlobalSettings {
+          showScenes = false
+          isCreatingScene = false
+        }
+      } label: {
+        Image(systemName: showGlobalSettings ? "gearshape.fill" : "gearshape")
+          .foregroundStyle(showGlobalSettings ? Color.accentColor : Color.secondary)
+          .font(.system(size: 16))
+          .help("App Settings")
+      }
+      .buttonStyle(.plain)
     }
   }
 
@@ -94,7 +129,7 @@ struct MainView: View {
   @ViewBuilder
   private var mainContent: some View {
     if showScenes {
-      ScenesView()
+      ScenesView(isCreating: $isCreatingScene)
         .transition(.rowContent)
         .fixedSize(horizontal: false, vertical: true)
     } else if showGlobalSettings {

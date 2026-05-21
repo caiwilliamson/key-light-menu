@@ -21,10 +21,10 @@ struct LightRow: View {
       LightRowHeader(light: light, showsIndicators: !sync.isOptionHeld) {
         EmptyView()
       } trailingActions: {
-        HStack(spacing: 2) {
+        HStack(spacing: 4) {
           if light.isReachable {
             if service.selectedIndex == index, !sync.isOptionHeld {
-              HStack(spacing: 0) {
+              HStack(spacing: 1) {
                 panelButton(.presets, active: "slider.horizontal.3", inactive: "slider.horizontal.3", label: "Presets")
                 panelButton(.settings, active: "gearshape.fill", inactive: "gearshape", label: "Settings")
                 panelButton(.info, active: "info.circle.fill", inactive: "info.circle", label: "Info")

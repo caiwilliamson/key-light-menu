@@ -7,10 +7,9 @@ import SwiftUI
 
 struct ScenesView: View {
   @Environment(KeyLightService.self) private var service
-  @Environment(PresetStore.self) private var store
   @Environment(SceneStore.self) private var sceneStore
 
-  @State private var isCreating = false
+  @Binding var isCreating: Bool
   @State private var sceneName = ""
   @State private var selectedSerials: Set<String> = []
 
@@ -31,22 +30,6 @@ struct ScenesView: View {
 
   private var manageView: some View {
     VStack(alignment: .leading, spacing: 0) {
-      PanelSection {
-        HStack {
-          Text("Scenes")
-            .font(.headline)
-            .foregroundStyle(.secondary)
-          Spacer()
-          Button { isCreating = true } label: {
-            Image(systemName: "plus")
-              .font(.title2)
-              .foregroundStyle(.secondary)
-              .help("New Scene")
-          }
-          .buttonStyle(.plain)
-        }
-      }
-      Divider()
       if sceneStore.scenes.isEmpty {
         PanelSection {
           Text("No saved scenes")
@@ -82,22 +65,6 @@ struct ScenesView: View {
   private var createView: some View {
     let reachable = service.lights.indices.filter { service.lights[$0].isReachable }
     VStack(alignment: .leading, spacing: 0) {
-      PanelSection {
-        HStack(spacing: 8) {
-          Button { isCreating = false } label: {
-            Image(systemName: "chevron.left")
-              .font(.title2)
-              .foregroundStyle(.secondary)
-              .help("Back")
-          }
-          .buttonStyle(.plain)
-          Text("New Scene")
-            .font(.headline)
-            .foregroundStyle(.secondary)
-          Spacer()
-        }
-      }
-      SectionDivider()
       if reachable.isEmpty {
         PanelSection {
           Text("No lights available")
