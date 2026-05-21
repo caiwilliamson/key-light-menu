@@ -24,7 +24,9 @@ final class SceneStore {
   private(set) var scenes: [LightScene] = []
   private let storageKey = "keylight.scenes"
 
-  init() { load() }
+  init() {
+    load()
+  }
 
   func add(name: String, lights: [SceneLight]) {
     scenes.append(LightScene(name: name, lights: lights))

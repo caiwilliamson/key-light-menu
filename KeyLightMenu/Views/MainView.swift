@@ -146,7 +146,7 @@ struct MainView: View {
 
       PanelSection {
         HStack {
-          if activePanel == nil && !showGlobalSettings && !showScenes {
+          if activePanel == nil, !showGlobalSettings, !showScenes {
             Button {
               service.startDiscovery()
             } label: {

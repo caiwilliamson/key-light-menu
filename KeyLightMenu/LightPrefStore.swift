@@ -15,7 +15,9 @@ final class LightPrefStore {
 
   private let storageKey = "keylight.prefs.sleepOff"
 
-  init() { load() }
+  init() {
+    load()
+  }
 
   func isEnabled(for serial: String) -> Bool {
     sleepOffSerials.contains(serial)
