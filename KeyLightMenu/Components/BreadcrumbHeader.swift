@@ -57,13 +57,13 @@ struct BreadcrumbHeader: View {
           Text(crumb.title)
             .font(.headline)
             .foregroundStyle(.primary)
-            .lineLimit(1)
-            .truncationMode(.tail)
+            .fixedSize()
         }
       }
 
       Spacer()
       trailing
+        .padding(.leading, 8)
     }
   }
 }
