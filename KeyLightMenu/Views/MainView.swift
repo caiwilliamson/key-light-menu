@@ -90,20 +90,21 @@ struct MainView: View {
           crumbs: [.init(title: "Settings")]
         )
       } else if let panel = activePanel, let idx = service.selectedIndex,
-                service.lights.indices.contains(idx) {
+                service.lights.indices.contains(idx)
+      {
         let lightName = service.lights[idx].name
         BreadcrumbHeader(
           homeAction: { activePanel = nil; service.selectedIndex = nil },
           crumbs: panel == .presets && isCreatingPreset
             ? [
-                .init(title: lightName, action: { activePanel = nil }),
-                .init(title: panel.title, action: { isCreatingPreset = false }),
-                .init(title: "New Preset")
-              ]
+              .init(title: lightName, action: { activePanel = nil }),
+              .init(title: panel.title, action: { isCreatingPreset = false }),
+              .init(title: "New Preset"),
+            ]
             : [
-                .init(title: lightName, action: { activePanel = nil }),
-                .init(title: panel.title)
-              ]
+              .init(title: lightName, action: { activePanel = nil }),
+              .init(title: panel.title),
+            ]
         ) {
           if panel == .presets, !isCreatingPreset {
             Button { isCreatingPreset = true } label: {
@@ -178,7 +179,8 @@ struct MainView: View {
       GlobalSettingsView()
         .transition(.rowContent)
     } else if let panel = activePanel, let idx = service.selectedIndex,
-              service.lights.indices.contains(idx) {
+              service.lights.indices.contains(idx)
+    {
       lightPanelContent(index: idx, panel: panel)
         .transition(.rowContent)
     } else {

@@ -8,10 +8,10 @@ enum Panel {
 
   var title: String {
     switch self {
-    case .info: return "Info"
-    case .presets: return "Presets"
-    case .settings: return "Settings"
-    case .remove: return "Remove"
+    case .info: "Info"
+    case .presets: "Presets"
+    case .settings: "Settings"
+    case .remove: "Remove"
     }
   }
 }
