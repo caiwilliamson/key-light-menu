@@ -154,6 +154,7 @@ struct MainView: View {
         }
         .buttonStyle(.plain)
       }
+      .frame(height: 20)
       if !sceneStore.scenes.isEmpty {
         HFlow(itemSpacing: 6, rowSpacing: 6) {
           ForEach(sceneStore.scenes) { scene in

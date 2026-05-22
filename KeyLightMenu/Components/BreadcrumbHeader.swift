@@ -65,5 +65,6 @@ struct BreadcrumbHeader: View {
       trailing
         .padding(.leading, 8)
     }
+    .frame(height: 20)
   }
 }
