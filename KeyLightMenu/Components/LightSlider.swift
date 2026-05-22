@@ -16,6 +16,7 @@ struct LightSlider: View {
   let onDragStart: (() -> Void)?
   let onDragChange: ((Double) -> Void)?
   let onCommit: ((Double) -> Void)?
+  var iconTooltip: String?
 
   @State private var value: Double
   @State private var lastSent: Date = .distantPast
@@ -33,7 +34,8 @@ struct LightSlider: View {
     gradient: TrackGradient,
     onDragStart: (() -> Void)? = nil,
     onDragChange: ((Double) -> Void)? = nil,
-    onCommit: ((Double) -> Void)? = nil
+    onCommit: ((Double) -> Void)? = nil,
+    iconTooltip: String? = nil
   ) {
     self.icon = icon
     externalValue = value
@@ -43,13 +45,14 @@ struct LightSlider: View {
     self.onDragStart = onDragStart
     self.onDragChange = onDragChange
     self.onCommit = onCommit
+    self.iconTooltip = iconTooltip
     _value = State(initialValue: value)
   }
 
   var body: some View {
     Group {
       if let onCommit {
-        SliderRow(icon: icon, value: $value, range: range, label: label, gradient: gradient) { editing in
+        SliderRow(icon: icon, value: $value, range: range, label: label, gradient: gradient, iconTooltip: iconTooltip) { editing in
           if editing, !isDragging { onDragStart?() }
           isDragging = editing
           if !editing {
@@ -61,7 +64,7 @@ struct LightSlider: View {
           }
         }
       } else {
-        SliderRow(icon: icon, value: .constant(externalValue), range: range, label: label, gradient: gradient, isActive: false)
+        SliderRow(icon: icon, value: .constant(externalValue), range: range, label: label, gradient: gradient, isActive: false, iconTooltip: iconTooltip)
           .allowsHitTesting(false)
       }
     }

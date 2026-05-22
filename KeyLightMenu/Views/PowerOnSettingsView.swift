@@ -43,14 +43,16 @@ struct PowerOnSettingsView: View {
           value: $brightness,
           range: 1 ... 100,
           label: { "\(Int($0))%" },
-          gradient: .brightness(for: Int(temperature))
+          gradient: .brightness(for: Int(temperature)),
+          iconTooltip: "Brightness"
         ) { editing in if !editing { send() } }
         SliderRow(
           icon: "thermometer.medium",
           value: $temperature,
           range: 143 ... 344,
           label: { "\(Int(1_000_000 / $0.rounded()))K" },
-          gradient: .temperature
+          gradient: .temperature,
+          iconTooltip: "Color Temperature"
         ) { editing in if !editing { send() } }
       }
     }

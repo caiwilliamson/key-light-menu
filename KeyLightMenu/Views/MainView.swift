@@ -29,6 +29,7 @@ struct MainView: View {
     }
     .environment(sync)
     .frame(width: 320)
+    .tooltipContainer()
     .animation(.rowSpring, value: service.selectedIndex)
     .animation(.rowSpring, value: activePanel)
     .animation(.rowSpring, value: sync.isOptionHeld)
@@ -79,9 +80,9 @@ struct MainView: View {
               Image(systemName: "plus")
                 .font(.system(size: 16))
                 .foregroundStyle(.secondary)
-                .help("New Scene")
             }
             .buttonStyle(.plain)
+            .tooltip("New Scene")
           }
         }
       } else if showGlobalSettings {
@@ -111,8 +112,8 @@ struct MainView: View {
               Image(systemName: "plus")
                 .font(.system(size: 16))
                 .foregroundStyle(.secondary)
-                .help("New Preset")
             }
+            .tooltip("New Preset")
             .buttonStyle(.plain)
           }
         }
@@ -136,11 +137,11 @@ struct MainView: View {
           }
         } label: {
           Image(systemName: "sparkles")
-            .foregroundStyle(showScenes ? Color.accentColor : Color.secondary)
+            .foregroundStyle(Color.secondary)
             .font(.system(size: 16))
-            .help("Scenes")
         }
         .buttonStyle(.plain)
+        .tooltip("Scenes")
         Button {
           showGlobalSettings.toggle()
           if showGlobalSettings {
@@ -148,12 +149,12 @@ struct MainView: View {
             isCreatingScene = false
           }
         } label: {
-          Image(systemName: showGlobalSettings ? "gearshape.fill" : "gearshape")
-            .foregroundStyle(showGlobalSettings ? Color.accentColor : Color.secondary)
+          Image(systemName: "gearshape")
+            .foregroundStyle(Color.secondary)
             .font(.system(size: 16))
-            .help("App Settings")
         }
         .buttonStyle(.plain)
+        .tooltip("App Settings")
       }
       .frame(height: 20)
       if !sceneStore.scenes.isEmpty {

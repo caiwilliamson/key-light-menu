@@ -13,6 +13,7 @@ struct SliderRow: View {
   let label: (Double) -> String
   let gradient: TrackGradient
   var isActive: Bool = true
+  var iconTooltip: String?
   var onEditingChanged: ((Bool) -> Void)?
 
   init(
@@ -22,6 +23,7 @@ struct SliderRow: View {
     label: @escaping (Double) -> String,
     gradient: TrackGradient,
     isActive: Bool = true,
+    iconTooltip: String? = nil,
     onEditingChanged: ((Bool) -> Void)? = nil
   ) {
     self.icon = icon
@@ -30,6 +32,7 @@ struct SliderRow: View {
     self.label = label
     self.gradient = gradient
     self.isActive = isActive
+    self.iconTooltip = iconTooltip
     self.onEditingChanged = onEditingChanged
   }
 
@@ -38,6 +41,7 @@ struct SliderRow: View {
       Image(systemName: icon)
         .frame(width: 16)
         .foregroundStyle(.secondary)
+        .tooltip(iconTooltip)
       GradientSlider(value: $value, range: range, gradient: gradient, isActive: isActive, onEditingChanged: onEditingChanged)
       Text(label(value))
         .frame(width: 40, alignment: .trailing)

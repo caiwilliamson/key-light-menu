@@ -208,17 +208,20 @@ private struct SceneManageRow: View {
         }
         .buttonStyle(.plain)
         .disabled(isFirst)
+        .tooltip("Move Up")
         Button { sceneStore.move(scene, by: 1) } label: {
           Image(systemName: "chevron.down")
             .foregroundStyle(isLast ? Color.secondary.opacity(0.3) : Color.secondary)
         }
         .buttonStyle(.plain)
         .disabled(isLast)
+        .tooltip("Move Down")
         Button { sceneStore.delete(scene) } label: {
           Image(systemName: "trash")
             .foregroundStyle(Color.secondary)
         }
         .buttonStyle(.plain)
+        .tooltip("Delete Scene")
       }
     }
   }

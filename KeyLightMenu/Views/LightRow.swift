@@ -24,9 +24,9 @@ struct LightRow: View {
           if light.isReachable {
             if service.selectedIndex == index, !sync.isOptionHeld {
               HStack(spacing: 1) {
-                panelButton(.presets, active: "slider.horizontal.3", inactive: "slider.horizontal.3", label: "Presets")
-                panelButton(.settings, active: "gearshape.fill", inactive: "gearshape", label: "Settings")
-                panelButton(.info, active: "info.circle.fill", inactive: "info.circle", label: "Info")
+                panelButton(.presets, icon: "slider.horizontal.3", label: "Presets")
+                panelButton(.settings, icon: "gearshape", label: "Settings")
+                panelButton(.info, icon: "info.circle", label: "Info")
               }
               .transition(.rowContent)
             }
@@ -41,9 +41,10 @@ struct LightRow: View {
               activePanel = .remove
             } label: {
               Image(systemName: "trash")
-                .foregroundStyle(activePanel == .remove && service.selectedIndex == index ? Color.red : Color.secondary)
+                .foregroundStyle(Color.secondary)
             }
             .buttonStyle(.plain)
+            .tooltip("Remove Light")
             .transition(.rowContent)
           }
         }
@@ -115,18 +116,18 @@ struct LightRow: View {
     )
   }
 
-  private func panelButton(_ panel: Panel, active: String, inactive: String, label: String) -> some View {
+  private func panelButton(_ panel: Panel, icon: String, label: String) -> some View {
     let isActive = service.selectedIndex == index && activePanel == panel
     return Button {
       service.selectedIndex = index
       activePanel = isActive ? nil : panel
     } label: {
-      Image(systemName: isActive ? active : inactive)
-        .foregroundStyle(isActive ? Color.accentColor : Color.secondary)
+      Image(systemName: icon)
+        .foregroundStyle(Color.secondary)
         .font(.system(size: 16))
     }
     .buttonStyle(.plain)
     .disabled(!light.isReachable)
-    .help(label)
+    .tooltip(label)
   }
 }

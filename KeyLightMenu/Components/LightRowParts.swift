@@ -73,6 +73,7 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
     Image(systemName: "wifi", variableValue: strength)
       .foregroundStyle(.secondary)
       .frame(height: 16)
+      .tooltip("Wi-Fi Network: \(wifi.ssid)\nWi-Fi Frequency: \(wifi.frequencyGHz)\nWi-Fi Signal Strength: \(wifi.signalPercent)%")
   }
 
   @ViewBuilder
@@ -82,6 +83,7 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
       Image(systemName: "powerplug.fill")
         .foregroundStyle(.secondary)
         .frame(height: 16)
+        .tooltip("Bypass Battery")
     } else {
       HStack(spacing: 2) {
         Text("\(Int(level.rounded()))%")
@@ -124,7 +126,8 @@ struct LightControlsSection: View {
         gradient: brightnessGradient,
         onDragStart: onBrightnessDragStart,
         onDragChange: onBrightnessDragChange,
-        onCommit: onBrightnessCommit
+        onCommit: onBrightnessCommit,
+        iconTooltip: "Brightness"
       )
       LightSlider(
         icon: "thermometer.medium",
@@ -134,7 +137,8 @@ struct LightControlsSection: View {
         gradient: .temperature,
         onDragStart: onTemperatureDragStart,
         onDragChange: onTemperatureDragChange,
-        onCommit: onTemperatureCommit
+        onCommit: onTemperatureCommit,
+        iconTooltip: "Color Temperature"
       )
       if showsPresets, !presets.isEmpty {
         HStack(alignment: .top) {
@@ -142,6 +146,7 @@ struct LightControlsSection: View {
             .frame(width: 16)
             .foregroundStyle(.secondary)
             .padding(.top, 4)
+            .tooltip("Presets")
           HFlow(itemSpacing: 6, rowSpacing: 6) {
             ForEach(presets) { preset in
               let active = preset.brightness == state.brightness && preset.temperature == state.temperature
