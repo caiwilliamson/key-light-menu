@@ -13,7 +13,7 @@ struct LightPowerButton: View {
   var body: some View {
     Button(action: action) {
       Image(systemName: isOn ? "power.circle.fill" : "power.circle")
-        .font(.system(size: 22))
+        .font(.system(size: 20))
         .foregroundStyle(isOn ? Color.yellow : Color.secondary)
         .contentTransition(.opacity)
     }
