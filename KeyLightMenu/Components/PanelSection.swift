@@ -11,7 +11,7 @@ struct PanelSection<Content: View>: View {
   @ViewBuilder let content: () -> Content
 
   var body: some View {
-    VStack(alignment: .leading, spacing: spacing ?? 10) {
+    VStack(alignment: .leading, spacing: spacing ?? 12) {
       content()
     }
     .padding(.horizontal, 12)

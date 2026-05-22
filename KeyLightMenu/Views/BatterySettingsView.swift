@@ -46,6 +46,7 @@ struct BatterySettingsView: View {
 
       if !bypass {
         SectionDivider()
+          .transition(.rowContent)
 
         PanelSection {
           SettingToggleRow(label: "Energy Saving Mode", isOn: $energySavingEnabled, onChange: send)
@@ -63,10 +64,13 @@ struct BatterySettingsView: View {
               .fixedSize()
               .onChange(of: minBatteryLevel) { _, _ in send() }
             }
+            .transition(.rowContent)
             SettingToggleRow(label: "Disable Wi-Fi", isOn: $disableWifi, onChange: send)
               .padding(.leading, 16)
+              .transition(.rowContent)
             SettingToggleRow(label: "Adjust Brightness", isOn: $adjustBrightnessEnabled, onChange: send)
               .padding(.leading, 16)
+              .transition(.rowContent)
             if adjustBrightnessEnabled {
               SliderRow(
                 icon: "sun.max.fill",
@@ -77,11 +81,16 @@ struct BatterySettingsView: View {
                 iconTooltip: "Brightness"
               ) { editing in if !editing { send() } }
                 .padding(.leading, 16)
+                .transition(.rowContent)
             }
           }
         }
+        .transition(.rowContent)
+        .animation(.rowSpring, value: energySavingEnabled)
+        .animation(.rowSpring, value: adjustBrightnessEnabled)
       }
     }
+    .animation(.rowSpring, value: bypass)
     .onChange(of: battery) { _, new in
       bypass = new.bypass == 1
       energySavingEnabled = new.energySaving.enable == 1

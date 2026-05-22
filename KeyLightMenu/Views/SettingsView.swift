@@ -24,9 +24,11 @@ struct SettingsView: View {
           if displayNameDraft != info.displayName {
             Button("Save", action: saveDisplayName)
               .buttonStyle(.borderedProminent)
+              .transition(.rowContent)
           }
         }
       }
+      .animation(.rowSpring, value: displayNameDraft != info.displayName)
 
       SectionDivider()
 
@@ -46,14 +48,27 @@ struct SettingsView: View {
         let serial = info.serialNumber
         SettingToggleRow(
           label: "Turn Off Automatically",
-          subtitle: "Turn the light off when your Mac sleeps or locks, and restore it on wake.",
+          subtitle: "Turn the light off when your Mac sleeps or locks.",
           isOn: Binding(
             get: { service.lightPrefs.isEnabled(for: serial) },
             set: { service.lightPrefs.setEnabled($0, for: serial) }
           ),
           onChange: {}
         )
+        if service.lightPrefs.isEnabled(for: serial) {
+          SettingToggleRow(
+            label: "Turn Back On Automatically",
+            subtitle: "Turn the light back on when your Mac wakes or unlocks.",
+            isOn: Binding(
+              get: { service.lightPrefs.isRestoreEnabled(for: serial) },
+              set: { service.lightPrefs.setRestoreEnabled($0, for: serial) }
+            ),
+            onChange: {}
+          )
+          .transition(.rowContent)
+        }
       }
+      .animation(.rowSpring, value: service.lightPrefs.isEnabled(for: info.serialNumber))
     }
     .onAppear { displayNameDraft = info.displayName }
     .onChange(of: info.displayName) { _, new in displayNameDraft = new }

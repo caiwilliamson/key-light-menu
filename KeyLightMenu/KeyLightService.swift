@@ -432,7 +432,8 @@ extension KeyLightService {
     lightsToRestore = []
     for (i, light) in lights.enumerated() {
       guard let serial = light.accessoryInfo?.serialNumber,
-            toRestore.contains(serial) else { continue }
+            toRestore.contains(serial),
+            lightPrefs.isRestoreEnabled(for: serial) else { continue }
       Task { await self.setOn(true, at: i) }
     }
   }
