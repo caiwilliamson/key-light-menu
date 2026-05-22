@@ -68,7 +68,7 @@ private struct TooltipContainerModifier: ViewModifier {
             let y = rect.maxY + yGap + labelSize.height / 2
 
             Text(value.text)
-              .font(.caption)
+              .font(.callout)
               .padding(.horizontal, 6)
               .padding(.vertical, 3)
               .fixedSize()
