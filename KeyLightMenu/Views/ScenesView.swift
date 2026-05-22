@@ -233,8 +233,8 @@ struct SceneChip: View {
       }
     } label: {
       Text(scene.name)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
+        .padding(.horizontal, 7)
+        .padding(.vertical, 3)
         .background(Color.clear, in: Capsule())
         .overlay(Capsule().strokeBorder(Color.secondary.opacity(0.4), lineWidth: 1))
         .foregroundStyle(Color.secondary)

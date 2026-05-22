@@ -119,40 +119,49 @@ struct MainView: View {
         defaultHeader
       }
     }
-    .frame(height: 44)
   }
 
   private var defaultHeader: some View {
-    HStack(spacing: 4) {
-      Text("Key Light Menu")
-        .font(.headline)
-      Spacer()
-      Button {
-        showScenes.toggle()
-        if showScenes {
-          showGlobalSettings = false
-          isCreatingScene = false
+    VStack(alignment: .leading, spacing: 8) {
+      HStack(spacing: 4) {
+        Text("Key Light Menu")
+          .font(.headline)
+        Spacer()
+        Button {
+          showScenes.toggle()
+          if showScenes {
+            showGlobalSettings = false
+            isCreatingScene = false
+          }
+        } label: {
+          Image(systemName: "sparkles")
+            .foregroundStyle(showScenes ? Color.accentColor : Color.secondary)
+            .font(.system(size: 16))
+            .help("Scenes")
         }
-      } label: {
-        Image(systemName: "sparkles")
-          .foregroundStyle(showScenes ? Color.accentColor : Color.secondary)
-          .font(.system(size: 16))
-          .help("Scenes")
-      }
-      .buttonStyle(.plain)
-      Button {
-        showGlobalSettings.toggle()
-        if showGlobalSettings {
-          showScenes = false
-          isCreatingScene = false
+        .buttonStyle(.plain)
+        Button {
+          showGlobalSettings.toggle()
+          if showGlobalSettings {
+            showScenes = false
+            isCreatingScene = false
+          }
+        } label: {
+          Image(systemName: showGlobalSettings ? "gearshape.fill" : "gearshape")
+            .foregroundStyle(showGlobalSettings ? Color.accentColor : Color.secondary)
+            .font(.system(size: 16))
+            .help("App Settings")
         }
-      } label: {
-        Image(systemName: showGlobalSettings ? "gearshape.fill" : "gearshape")
-          .foregroundStyle(showGlobalSettings ? Color.accentColor : Color.secondary)
-          .font(.system(size: 16))
-          .help("App Settings")
+        .buttonStyle(.plain)
       }
-      .buttonStyle(.plain)
+      if !sceneStore.scenes.isEmpty {
+        HFlow(itemSpacing: 6, rowSpacing: 6) {
+          ForEach(sceneStore.scenes) { scene in
+            SceneChip(scene: scene)
+          }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+      }
     }
   }
 
@@ -172,10 +181,6 @@ struct MainView: View {
       lightPanelContent(index: idx, panel: panel)
         .transition(.rowContent)
     } else {
-      if !sceneStore.scenes.isEmpty {
-        scenesPanel
-        Divider()
-      }
       if service.lights.isEmpty {
         if service.isDiscovering {
           LoadingState(label: "Scanning…")
@@ -217,16 +222,6 @@ struct MainView: View {
     case .remove:
       RemoveLightView(light: light, index: index, activePanel: $activePanel)
         .environment(store)
-    }
-  }
-
-  private var scenesPanel: some View {
-    PanelSection(spacing: 6) {
-      HFlow(itemSpacing: 6, rowSpacing: 6) {
-        ForEach(sceneStore.scenes) { scene in
-          SceneChip(scene: scene)
-        }
-      }
     }
   }
 
