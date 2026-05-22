@@ -16,7 +16,7 @@ struct LightRow: View {
   @State private var isHovered = false
 
   var body: some View {
-    VStack(spacing: 0) {
+    PanelSection {
       LightRowHeader(light: light, showsIndicators: !sync.isOptionHeld) {
         EmptyView()
       } trailingActions: {
@@ -48,27 +48,24 @@ struct LightRow: View {
           }
         }
       }
-      .padding(.horizontal, 12)
-      .padding(.top, 12)
-      .padding(.bottom, 12)
-      .contentShape(Rectangle())
-      .onHover { if light.isReachable { isHovered = $0 } }
-      .onTapGesture {
-        guard light.isReachable, !sync.isOptionHeld else { return }
-        if service.selectedIndex == index {
-          service.selectedIndex = nil
-          activePanel = nil
-        } else {
-          service.selectedIndex = index
-          activePanel = nil
-        }
+    }
+    .contentShape(Rectangle())
+    .onHover { if light.isReachable { isHovered = $0 } }
+    .onTapGesture {
+      guard light.isReachable, !sync.isOptionHeld else { return }
+      if service.selectedIndex == index {
+        service.selectedIndex = nil
+        activePanel = nil
+      } else {
+        service.selectedIndex = index
+        activePanel = nil
       }
-      .background(Color.primary.opacity(isHovered && service.selectedIndex != index && !sync.isOptionHeld ? 0.05 : 0))
-      if light.isReachable, let state = light.state {
-        if service.selectedIndex == index || sync.isOptionHeld {
-          controlsSection(state: state)
-            .transition(.rowContent)
-        }
+    }
+    .background(Color.primary.opacity(isHovered && service.selectedIndex != index && !sync.isOptionHeld ? 0.05 : 0))
+    if light.isReachable, let state = light.state {
+      if service.selectedIndex == index || sync.isOptionHeld {
+        controlsSection(state: state)
+          .transition(.rowContent)
       }
     }
   }
@@ -132,5 +129,4 @@ struct LightRow: View {
     .disabled(!light.isReachable)
     .help(label)
   }
-
 }

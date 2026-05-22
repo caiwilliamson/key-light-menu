@@ -109,6 +109,7 @@ struct LightControlsSection: View {
   let onTemperatureDragStart: (() -> Void)?
   let onTemperatureDragChange: ((Double) -> Void)?
   let onTemperatureCommit: (Double) -> Void
+  var showsPresets: Bool = true
 
   var body: some View {
     let presets = store.presets(for: light.accessoryInfo?.serialNumber ?? "")
@@ -135,7 +136,7 @@ struct LightControlsSection: View {
         onDragChange: onTemperatureDragChange,
         onCommit: onTemperatureCommit
       )
-      if !presets.isEmpty {
+      if showsPresets, !presets.isEmpty {
         HStack(alignment: .top) {
           Image(systemName: "slider.horizontal.3")
             .frame(width: 16)

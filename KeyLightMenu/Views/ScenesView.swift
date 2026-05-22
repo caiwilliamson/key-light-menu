@@ -80,6 +80,11 @@ struct ScenesView: View {
         }
         SectionDivider()
       } else {
+        PanelSection {
+          Text("Select lights and adjust the sliders to your desired values, then save as a scene.")
+            .font(.callout)
+            .foregroundStyle(.secondary)
+        }
         ForEach(reachable, id: \.self) { i in
           let light = service.lights[i]
           let serial = light.accessoryInfo?.serialNumber ?? "\(i)"

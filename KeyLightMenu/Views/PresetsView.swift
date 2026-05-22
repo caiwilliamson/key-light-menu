@@ -71,45 +71,54 @@ struct PresetsView: View {
   private var createView: some View {
     if let state = light.state {
       let serial = light.accessoryInfo?.serialNumber ?? ""
-      PanelSection(spacing: 8) {
-        Text("Set the sliders to your desired values, then save as a preset.")
-          .font(.callout)
-          .foregroundStyle(.secondary)
-        LightSlider(
-          icon: "sun.max.fill",
-          value: Double(state.brightness),
-          range: 1 ... 100,
-          label: { v in "\(Int(v))%" },
-          gradient: .brightness(for: state.temperature),
-          onCommit: { v in Task { await service.setBrightness(Int(v), at: index) } }
-        )
-        LightSlider(
-          icon: "thermometer.medium",
-          value: Double(state.temperature),
-          range: 143 ... 344,
-          label: { v in "\(Int(1_000_000 / v.rounded()))K" },
-          gradient: .temperature,
-          onCommit: { v in Task { await service.setTemperature(Int(v), at: index) } }
-        )
-      }
-      SectionDivider()
-      PanelSection {
-        HStack(spacing: 8) {
-          TextField("Preset Name", text: $presetName)
-            .textFieldStyle(.roundedBorder)
-          Button("Save") {
-            guard !presetName.isEmpty else { return }
-            store.add(
-              name: presetName,
-              brightness: state.brightness,
-              temperature: state.temperature,
-              lightSerial: serial
-            )
-            presetName = ""
-            isCreating = false
+      VStack(alignment: .leading, spacing: 0) {
+        PanelSection {
+          Text("Set the sliders to your desired values, then save as a preset.")
+            .font(.callout)
+            .foregroundStyle(.secondary)
+        }
+        PanelSection {
+          LightRowHeader(light: light, showsIndicators: false) {
+            EmptyView()
+          } trailingActions: {
+            LightPowerButton(isOn: state.isOn) {
+              Task { await service.toggle(at: index) }
+            }
           }
-          .disabled(presetName.isEmpty)
-          .buttonStyle(.borderedProminent)
+        }
+        LightControlsSection(
+          light: light,
+          index: index,
+          state: state,
+          brightnessValue: Double(state.brightness),
+          temperatureValue: Double(state.temperature),
+          onBrightnessDragStart: nil,
+          onBrightnessDragChange: nil,
+          onBrightnessCommit: { v in Task { await service.setBrightness(Int(v), at: index) } },
+          onTemperatureDragStart: nil,
+          onTemperatureDragChange: nil,
+          onTemperatureCommit: { v in Task { await service.setTemperature(Int(v), at: index) } },
+          showsPresets: false
+        )
+        SectionDivider()
+        PanelSection {
+          HStack(spacing: 8) {
+            TextField("Preset Name", text: $presetName)
+              .textFieldStyle(.roundedBorder)
+            Button("Save") {
+              guard !presetName.isEmpty else { return }
+              store.add(
+                name: presetName,
+                brightness: state.brightness,
+                temperature: state.temperature,
+                lightSerial: serial
+              )
+              presetName = ""
+              isCreating = false
+            }
+            .disabled(presetName.isEmpty)
+            .buttonStyle(.borderedProminent)
+          }
         }
       }
     }
