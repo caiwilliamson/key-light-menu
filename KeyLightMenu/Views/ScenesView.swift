@@ -36,7 +36,12 @@ struct ScenesView: View {
             .foregroundStyle(.tertiary)
             .frame(maxWidth: .infinity, alignment: .center)
             .font(.callout)
-            .padding(.vertical, 30)
+            .padding(.top, 30)
+          Text("Press + to add one")
+            .foregroundStyle(.tertiary)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .font(.callout)
+            .padding(.bottom, 30)
         }
       } else {
         ScrollView {

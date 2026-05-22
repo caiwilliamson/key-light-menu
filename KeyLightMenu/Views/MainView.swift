@@ -15,6 +15,7 @@ struct MainView: View {
   @State private var showGlobalSettings = false
   @State private var showScenes = false
   @State private var isCreatingScene = false
+  @State private var isCreatingPreset = false
   @State private var sync = SyncCoordinator()
   @State private var eventMonitor: Any?
 
@@ -33,6 +34,7 @@ struct MainView: View {
     .animation(.rowSpring, value: sync.isOptionHeld)
     .animation(.rowSpring, value: showGlobalSettings)
     .animation(.rowSpring, value: showScenes)
+    .animation(.rowSpring, value: isCreatingPreset)
     .animation(.rowSpring, value: sceneStore.scenes.isEmpty)
     .task { service.startSession() }
     .onAppear {
@@ -55,6 +57,9 @@ struct MainView: View {
     }
     .onChange(of: service.selectedLight?.isReachable) { _, reachable in
       if reachable == false, activePanel != .remove { activePanel = nil }
+    }
+    .onChange(of: activePanel) { _, new in
+      if new != .presets { isCreatingPreset = false }
     }
   }
 
@@ -89,11 +94,27 @@ struct MainView: View {
         let lightName = service.lights[idx].name
         BreadcrumbHeader(
           homeAction: { activePanel = nil; service.selectedIndex = nil },
-          crumbs: [
-            .init(title: lightName, action: { activePanel = nil }),
-            .init(title: panel.title)
-          ]
-        )
+          crumbs: panel == .presets && isCreatingPreset
+            ? [
+                .init(title: lightName, action: { activePanel = nil }),
+                .init(title: panel.title, action: { isCreatingPreset = false }),
+                .init(title: "New Preset")
+              ]
+            : [
+                .init(title: lightName, action: { activePanel = nil }),
+                .init(title: panel.title)
+              ]
+        ) {
+          if panel == .presets, !isCreatingPreset {
+            Button { isCreatingPreset = true } label: {
+              Image(systemName: "plus")
+                .font(.system(size: 16))
+                .foregroundStyle(.secondary)
+                .help("New Preset")
+            }
+            .buttonStyle(.plain)
+          }
+        }
       } else {
         defaultHeader
       }
@@ -190,7 +211,7 @@ struct MainView: View {
         LoadingState(label: "Loading…")
       }
     case .presets:
-      PresetsView(light: light, index: index)
+      PresetsView(light: light, index: index, isCreating: $isCreatingPreset)
         .environment(store)
         .fixedSize(horizontal: false, vertical: true)
     case .remove:
