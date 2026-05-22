@@ -53,7 +53,6 @@ struct BatterySettingsView: View {
           if energySavingEnabled {
             HStack {
               Text("When Battery Level Falls Below")
-                .foregroundStyle(.secondary)
               Spacer()
               Picker("", selection: $minBatteryLevel) {
                 ForEach(stride(from: 5.0, through: 50.0, by: 5.0).map { $0 }, id: \.self) { v in
@@ -64,9 +63,9 @@ struct BatterySettingsView: View {
               .fixedSize()
               .onChange(of: minBatteryLevel) { _, _ in send() }
             }
-            SettingToggleRow(label: "Disable Wi-Fi", isLabelSecondary: true, isOn: $disableWifi, onChange: send)
+            SettingToggleRow(label: "Disable Wi-Fi", isOn: $disableWifi, onChange: send)
               .padding(.leading, 16)
-            SettingToggleRow(label: "Adjust Brightness", isLabelSecondary: true, isOn: $adjustBrightnessEnabled, onChange: send)
+            SettingToggleRow(label: "Adjust Brightness", isOn: $adjustBrightnessEnabled, onChange: send)
               .padding(.leading, 16)
             if adjustBrightnessEnabled {
               SliderRow(

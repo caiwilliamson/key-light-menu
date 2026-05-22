@@ -10,7 +10,6 @@ struct SettingToggleRow: View {
   let label: String
   var subtitle: String?
   var icon: String?
-  var isLabelSecondary: Bool = false
   @Binding var isOn: Bool
   let onChange: () -> Void
 
@@ -18,7 +17,7 @@ struct SettingToggleRow: View {
     VStack(alignment: .leading, spacing: 4) {
       HStack(spacing: 8) {
         Text(label)
-          .foregroundStyle(isLabelSecondary ? Color.secondary : Color.primary)
+          .foregroundStyle(Color.primary)
         if let icon {
           Image(systemName: icon)
             .foregroundStyle(Color.secondary)
