@@ -137,14 +137,14 @@ private struct PresetRow: View {
         Text(preset.name)
           .foregroundStyle(.secondary)
         Spacer()
-        Button { store.move(preset, by: -1) } label: {
+        Button { withAnimation(.rowSpring) { store.move(preset, by: -1) } } label: {
           Image(systemName: "chevron.up")
             .foregroundStyle(isFirst ? Color.secondary.opacity(0.3) : Color.secondary)
         }
         .buttonStyle(.plain)
         .disabled(isFirst)
         .tooltip("Move Up")
-        Button { store.move(preset, by: 1) } label: {
+        Button { withAnimation(.rowSpring) { store.move(preset, by: 1) } } label: {
           Image(systemName: "chevron.down")
             .foregroundStyle(isLast ? Color.secondary.opacity(0.3) : Color.secondary)
         }
