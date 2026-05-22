@@ -57,6 +57,10 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
             if let battery = light.batteryInfo {
               batteryIndicator(battery)
             }
+          } else {
+            Text("Disconnected")
+              .font(.callout)
+              .foregroundStyle(.secondary)
           }
         }
       }
