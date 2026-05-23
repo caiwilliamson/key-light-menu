@@ -92,7 +92,7 @@ struct MainView: View {
       } else if showGlobalSettings {
         BreadcrumbHeader(
           homeAction: { showGlobalSettings = false },
-          crumbs: [.init(title: "Settings")]
+          crumbs: [.init(title: "App Settings")]
         )
       } else if let panel = activePanel, let idx = service.selectedIndex,
                 service.lights.indices.contains(idx)
