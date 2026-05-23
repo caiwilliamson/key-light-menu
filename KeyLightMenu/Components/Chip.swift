@@ -146,10 +146,10 @@ struct ChipRow<Content: View>: View {
 
 struct PresetChipsRow<Content: View>: View {
   @ViewBuilder let content: Content
-  var body: some View { ChipRow(rowHeight: 22) { content } }
+  var body: some View { ChipRow(rowHeight: 21) { content } }
 }
 
 struct SceneChipsRow<Content: View>: View {
   @ViewBuilder let content: Content
-  var body: some View { ChipRow(rowHeight: 32) { content } }
+  var body: some View { ChipRow(rowHeight: 25) { content } }
 }
