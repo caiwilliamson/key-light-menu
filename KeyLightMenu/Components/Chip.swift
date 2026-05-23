@@ -1,5 +1,5 @@
 //
-//  PresetChip.swift
+//  Chip.swift
 //  KeyLightMenu
 //
 

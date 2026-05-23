@@ -201,7 +201,7 @@ struct MainView: View {
           let light = service.lights[i]
           if !sync.isOptionHeld || light.isReachable {
             if i > 0 {
-              let precedingVisible = !sync.isOptionHeld || service.lights[0..<i].contains { $0.isReachable }
+              let precedingVisible = !sync.isOptionHeld || service.lights[0 ..< i].contains { $0.isReachable }
               if precedingVisible { Divider() }
             }
             LightRow(light: light, index: i, activePanel: $activePanel)

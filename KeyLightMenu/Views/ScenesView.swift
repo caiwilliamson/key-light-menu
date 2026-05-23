@@ -221,4 +221,3 @@ private struct SceneManageRow: View {
     }
   }
 }
-
