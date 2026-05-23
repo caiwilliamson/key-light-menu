@@ -194,11 +194,17 @@ struct MainView: View {
         }
       } else {
         ForEach(service.lights.indices, id: \.self) { i in
-          if i > 0 { Divider() }
-          LightRow(light: service.lights[i], index: i, activePanel: $activePanel)
-            .grayscale(!sync.isOptionHeld && activePanel != nil && service.selectedIndex != i ? 1 : 0)
-            .opacity(!sync.isOptionHeld && activePanel != nil && service.selectedIndex != i ? 0.4 : 1)
-            .allowsHitTesting(sync.isOptionHeld || activePanel == nil || service.selectedIndex == i)
+          let light = service.lights[i]
+          if !sync.isOptionHeld || light.isReachable {
+            if i > 0 {
+              let precedingVisible = !sync.isOptionHeld || service.lights[0..<i].contains { $0.isReachable }
+              if precedingVisible { Divider() }
+            }
+            LightRow(light: light, index: i, activePanel: $activePanel)
+              .grayscale(!sync.isOptionHeld && activePanel != nil && service.selectedIndex != i ? 1 : 0)
+              .opacity(!sync.isOptionHeld && activePanel != nil && service.selectedIndex != i ? 0.4 : 1)
+              .allowsHitTesting(sync.isOptionHeld || activePanel == nil || service.selectedIndex == i)
+          }
         }
       }
     }
