@@ -222,27 +222,3 @@ private struct SceneManageRow: View {
   }
 }
 
-// MARK: - Scene Chip
-
-struct SceneChip: View {
-  @Environment(KeyLightService.self) private var service
-  let scene: LightScene
-
-  var body: some View {
-    Button {
-      for sl in scene.lights {
-        guard let i = service.lights.firstIndex(where: { $0.accessoryInfo?.serialNumber == sl.serialNumber }) else { continue }
-        Task { await service.applyPreset(brightness: sl.brightness, temperature: sl.temperature, at: i) }
-      }
-    } label: {
-      Text(scene.name)
-        .padding(.horizontal, 7)
-        .padding(.vertical, 3)
-        .background(Color.clear, in: Capsule())
-        .overlay(Capsule().strokeBorder(Color.secondary.opacity(0.4), lineWidth: 1))
-        .foregroundStyle(Color.secondary)
-        .font(.callout)
-    }
-    .buttonStyle(.plain)
-  }
-}

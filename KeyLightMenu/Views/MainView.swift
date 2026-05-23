@@ -162,12 +162,16 @@ struct MainView: View {
       }
       .frame(height: 20)
       if !sceneStore.scenes.isEmpty {
-        HFlow(itemSpacing: 6, rowSpacing: 6) {
+        ChipRow {
           ForEach(sceneStore.scenes) { scene in
-            SceneChip(scene: scene)
+            Chip(label: scene.name) {
+              for sl in scene.lights {
+                guard let i = service.lights.firstIndex(where: { $0.accessoryInfo?.serialNumber == sl.serialNumber }) else { continue }
+                Task { await service.applyPreset(brightness: sl.brightness, temperature: sl.temperature, at: i) }
+              }
+            }
           }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
       }
     }
   }

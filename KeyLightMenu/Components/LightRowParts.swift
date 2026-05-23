@@ -95,6 +95,7 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
 }
 
 struct LightControlsSection: View {
+  @Environment(KeyLightService.self) private var service
   @Environment(PresetStore.self) private var store
 
   let light: KeyLight
@@ -115,6 +116,17 @@ struct LightControlsSection: View {
     let brightnessGradient = TrackGradient.brightness(for: state.temperature)
 
     VStack(alignment: .leading, spacing: 8) {
+      if showsPresets, !presets.isEmpty {
+        ChipRow {
+          ForEach(presets) { preset in
+            let active = preset.brightness == state.brightness && preset.temperature == state.temperature
+            Chip(label: preset.name, isActive: active) {
+              Task { await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature, at: index) }
+            }
+          }
+        }
+        .padding(.bottom, 5)
+      }
       LightSlider(
         icon: "sun.max.fill",
         value: brightnessValue,
@@ -137,25 +149,9 @@ struct LightControlsSection: View {
         onCommit: onTemperatureCommit,
         iconTooltip: "Color Temperature"
       )
-      if showsPresets, !presets.isEmpty {
-        HStack(alignment: .top) {
-          Image(systemName: "slider.horizontal.3")
-            .frame(width: 16)
-            .foregroundStyle(.secondary)
-            .padding(.top, 4)
-            .tooltip("Presets")
-          HFlow(itemSpacing: 6, rowSpacing: 6) {
-            ForEach(presets) { preset in
-              let active = preset.brightness == state.brightness && preset.temperature == state.temperature
-              PresetChip(preset: preset, isActive: active, index: index)
-            }
-          }
-        }
-        .padding(.top, 5)
-      }
     }
     .padding(.horizontal, 12)
-    .padding(.bottom, 12)
+    .padding(.bottom, 14)
     .padding(.top, 6)
   }
 }
