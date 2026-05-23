@@ -97,6 +97,7 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
 struct LightControlsSection: View {
   @Environment(KeyLightService.self) private var service
   @Environment(PresetStore.self) private var store
+  @Environment(SyncCoordinator.self) private var sync
 
   let light: KeyLight
   let index: Int
@@ -116,7 +117,7 @@ struct LightControlsSection: View {
     let brightnessGradient = TrackGradient.brightness(for: state.temperature)
 
     VStack(alignment: .leading, spacing: 8) {
-      if showsPresets, !presets.isEmpty {
+      if showsPresets, !presets.isEmpty, !sync.isOptionHeld {
         PresetChipsRow {
           ForEach(presets) { preset in
             let active = preset.brightness == state.brightness && preset.temperature == state.temperature
