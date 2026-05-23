@@ -162,7 +162,7 @@ struct MainView: View {
       }
       .frame(height: 20)
       if !sceneStore.scenes.isEmpty {
-        ChipRow(rowHeight: 25) {
+        SceneChipsRow {
           ForEach(sceneStore.scenes) { scene in
             SceneChip(scene: scene)
           }

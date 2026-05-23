@@ -117,10 +117,10 @@ struct LightControlsSection: View {
 
     VStack(alignment: .leading, spacing: 8) {
       if showsPresets, !presets.isEmpty {
-        ChipRow {
+        PresetChipsRow {
           ForEach(presets) { preset in
             let active = preset.brightness == state.brightness && preset.temperature == state.temperature
-            Chip(label: preset.name, isActive: active) {
+            PresetChip(label: preset.name, isActive: active) {
               Task { await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature, at: index) }
             }
           }

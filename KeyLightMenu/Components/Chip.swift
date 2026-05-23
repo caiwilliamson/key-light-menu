@@ -33,7 +33,7 @@ private struct ChipLabelStyle: ViewModifier {
 
 // MARK: - Chip
 
-struct Chip: View {
+struct PresetChip: View {
   let label: String
   var isActive: Bool = false
   let action: () -> Void
@@ -113,8 +113,13 @@ struct SceneChip: View {
 }
 
 struct ChipRow<Content: View>: View {
-  var rowHeight: CGFloat = 13
+  private let rowHeight: CGFloat
   @ViewBuilder let content: Content
+
+  fileprivate init(rowHeight: CGFloat, @ViewBuilder content: () -> Content) {
+    self.rowHeight = rowHeight
+    self.content = content()
+  }
 
   @State private var expanded = false
   @State private var flowHeight: CGFloat = 0
@@ -137,4 +142,14 @@ struct ChipRow<Content: View>: View {
       }
     }
   }
+}
+
+struct PresetChipsRow<Content: View>: View {
+  @ViewBuilder let content: Content
+  var body: some View { ChipRow(rowHeight: 22) { content } }
+}
+
+struct SceneChipsRow<Content: View>: View {
+  @ViewBuilder let content: Content
+  var body: some View { ChipRow(rowHeight: 32) { content } }
 }
