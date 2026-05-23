@@ -72,7 +72,6 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
     let strength = Double(wifi.signalPercent) / 100.0
     Image(systemName: "wifi", variableValue: strength)
       .foregroundStyle(.secondary)
-      .frame(height: 16)
       .tooltip("Wi-Fi Network: \(wifi.ssid)\nWi-Fi Frequency: \(wifi.frequencyGHz)\nWi-Fi Signal Strength: \(wifi.signalPercent)%")
   }
 
@@ -82,7 +81,6 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
     if battery.isPluggedIn, !battery.isCharging {
       Image(systemName: "powerplug.fill")
         .foregroundStyle(.secondary)
-        .frame(height: 16)
         .tooltip("Bypass Battery")
     } else {
       HStack(spacing: 2) {
@@ -92,7 +90,6 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
         Battery(level: Float(level / 100), isCharging: battery.isCharging)
           .frame(height: 11)
       }
-      .frame(height: 16)
     }
   }
 }
