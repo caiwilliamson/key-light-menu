@@ -162,14 +162,9 @@ struct MainView: View {
       }
       .frame(height: 20)
       if !sceneStore.scenes.isEmpty {
-        ChipRow {
+        ChipRow(rowHeight: 25) {
           ForEach(sceneStore.scenes) { scene in
-            Chip(label: scene.name) {
-              for sl in scene.lights {
-                guard let i = service.lights.firstIndex(where: { $0.accessoryInfo?.serialNumber == sl.serialNumber }) else { continue }
-                Task { await service.applyPreset(brightness: sl.brightness, temperature: sl.temperature, at: i) }
-              }
-            }
+            SceneChip(scene: scene)
           }
         }
       }
