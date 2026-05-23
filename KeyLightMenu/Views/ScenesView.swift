@@ -12,11 +12,29 @@ struct ScenesView: View {
   @Binding var isCreating: Bool
   @State private var sceneName = ""
   @State private var selectedSerials: Set<String> = []
+  @State private var lightSnapshots: [(index: Int, brightness: Int, temperature: Int)] = []
 
   var body: some View {
     Group {
       if isCreating {
         createView
+          .onAppear {
+            lightSnapshots = service.lights.indices.compactMap { i in
+              guard service.lights[i].isReachable, let state = service.lights[i].state else { return nil }
+              return (i, state.brightness, state.temperature)
+            }
+          }
+          .onDisappear {
+            let snaps = lightSnapshots
+            lightSnapshots = []
+            for snap in snaps {
+              guard service.lights.indices.contains(snap.index), service.lights[snap.index].isReachable else { continue }
+              Task {
+                await service.setBrightness(snap.brightness, at: snap.index)
+                await service.setTemperature(snap.temperature, at: snap.index)
+              }
+            }
+          }
       } else {
         manageView
       }

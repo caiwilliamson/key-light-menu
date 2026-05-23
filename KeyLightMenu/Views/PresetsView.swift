@@ -13,11 +13,26 @@ struct PresetsView: View {
   @Binding var isCreating: Bool
 
   @State private var presetName = ""
+  @State private var snapshot: (brightness: Int, temperature: Int)?
 
   var body: some View {
     Group {
       if isCreating {
         createView
+          .onAppear {
+            if let state = light.state {
+              snapshot = (state.brightness, state.temperature)
+            }
+          }
+          .onDisappear {
+            guard let snap = snapshot else { return }
+            snapshot = nil
+            guard service.lights.indices.contains(index), service.lights[index].isReachable else { return }
+            Task {
+              await service.setBrightness(snap.brightness, at: index)
+              await service.setTemperature(snap.temperature, at: index)
+            }
+          }
       } else {
         manageView
       }
