@@ -12,6 +12,7 @@ struct KeyLightMenuApp: App {
   @State private var service = KeyLightService()
   @State private var store = PresetStore()
   @State private var sceneStore = SceneStore()
+  @State private var appSettings = AppSettings()
 
   var body: some Scene {
     MenuBarExtra {
@@ -19,6 +20,7 @@ struct KeyLightMenuApp: App {
         .environment(service)
         .environment(store)
         .environment(sceneStore)
+        .environment(appSettings)
     } label: {
       Image(systemName: service.isOn ? "lightbulb.fill" : "lightbulb")
     }

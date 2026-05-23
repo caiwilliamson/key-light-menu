@@ -98,6 +98,7 @@ struct LightControlsSection: View {
   @Environment(KeyLightService.self) private var service
   @Environment(PresetStore.self) private var store
   @Environment(SyncCoordinator.self) private var sync
+  @Environment(AppSettings.self) private var appSettings
 
   let light: KeyLight
   let index: Int
@@ -122,7 +123,12 @@ struct LightControlsSection: View {
           ForEach(presets) { preset in
             let active = preset.brightness == state.brightness && preset.temperature == state.temperature
             PresetChip(label: preset.name, isActive: active) {
-              Task { await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature, at: index) }
+              Task {
+                if appSettings.turnOnLightWithPreset, service.lights[index].state?.isOn == false {
+                  await service.setOn(true, at: index)
+                }
+                await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature, at: index)
+              }
             }
           }
         }

@@ -51,6 +51,7 @@ struct PresetChip: View {
 
 struct SceneChip: View {
   @Environment(KeyLightService.self) private var service
+  @Environment(AppSettings.self) private var appSettings
   let scene: LightScene
 
   private enum Reachability { case all, some, none }
@@ -85,7 +86,12 @@ struct SceneChip: View {
           let i = service.lights.firstIndex(where: { $0.accessoryInfo?.serialNumber == sl.serialNumber }),
           service.lights[i].isReachable
         else { continue }
-        Task { await service.applyPreset(brightness: sl.brightness, temperature: sl.temperature, at: i) }
+        Task {
+          if appSettings.turnOnLightsWithScene, service.lights[i].state?.isOn == false {
+            await service.setOn(true, at: i)
+          }
+          await service.applyPreset(brightness: sl.brightness, temperature: sl.temperature, at: i)
+        }
       }
     } label: {
       HStack(spacing: 4) {
