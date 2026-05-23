@@ -18,13 +18,10 @@ struct PresetsView: View {
     Group {
       if isCreating {
         createView
-          .transition(.rowContent)
       } else {
         manageView
-          .transition(.rowContent)
       }
     }
-    .animation(.rowSpring, value: isCreating)
   }
 
   // MARK: - Manage
@@ -137,14 +134,14 @@ private struct PresetRow: View {
         Text(preset.name)
           .foregroundStyle(.secondary)
         Spacer()
-        Button { withAnimation(.rowSpring) { store.move(preset, by: -1) } } label: {
+        Button { store.move(preset, by: -1) } label: {
           Image(systemName: "chevron.up")
             .foregroundStyle(isFirst ? Color.secondary.opacity(0.3) : Color.secondary)
         }
         .buttonStyle(.plain)
         .disabled(isFirst)
         .tooltip("Move Up")
-        Button { withAnimation(.rowSpring) { store.move(preset, by: 1) } } label: {
+        Button { store.move(preset, by: 1) } label: {
           Image(systemName: "chevron.down")
             .foregroundStyle(isLast ? Color.secondary.opacity(0.3) : Color.secondary)
         }

@@ -41,13 +41,6 @@ struct MainView: View {
     .environment(sync)
     .frame(width: 340)
     .tooltipContainer()
-    .animation(.rowSpring, value: service.selectedIndex)
-    .animation(.rowSpring, value: activePanel)
-    .animation(.rowSpring, value: sync.isOptionHeld)
-    .animation(.rowSpring, value: showGlobalSettings)
-    .animation(.rowSpring, value: showScenes)
-    .animation(.rowSpring, value: isCreatingPreset)
-    .animation(.rowSpring, value: sceneStore.scenes.isEmpty)
     .task { service.startSession() }
     .onAppear {
       sync.isOptionHeld = NSEvent.modifierFlags.contains(.option) && activePanel == nil && !showGlobalSettings && !showScenes
@@ -185,16 +178,13 @@ struct MainView: View {
   private var mainContent: some View {
     if showScenes {
       ScenesView(isCreating: $isCreatingScene)
-        .transition(.rowContent)
         .fixedSize(horizontal: false, vertical: true)
     } else if showGlobalSettings {
       GlobalSettingsView()
-        .transition(.rowContent)
     } else if let panel = activePanel, let idx = service.selectedIndex,
               service.lights.indices.contains(idx)
     {
       lightPanelContent(index: idx, panel: panel)
-        .transition(.rowContent)
     } else {
       if service.lights.isEmpty {
         if service.isDiscovering {
@@ -260,7 +250,6 @@ struct MainView: View {
               Label(service.isDiscovering ? "Scanning…" : "Scan", systemImage: "antenna.radiowaves.left.and.right")
             }
             .disabled(service.isDiscovering)
-            .transition(.rowContent)
           }
           Spacer()
           Button("Quit") { NSApplication.shared.terminate(nil) }

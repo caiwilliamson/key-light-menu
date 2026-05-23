@@ -28,7 +28,6 @@ struct LightRow: View {
                 panelButton(.settings, icon: "gearshape", label: "Settings")
                 panelButton(.info, icon: "info.circle", label: "Info")
               }
-              .transition(.rowContent)
             }
             if let state = light.state {
               LightPowerButton(isOn: state.isOn) {
@@ -45,7 +44,6 @@ struct LightRow: View {
             }
             .buttonStyle(.plain)
             .tooltip("Remove Light")
-            .transition(.rowContent)
           }
         }
       }
@@ -66,7 +64,6 @@ struct LightRow: View {
     if light.isReachable, let state = light.state {
       if service.selectedIndex == index || sync.isOptionHeld {
         controlsSection(state: state)
-          .transition(.rowContent)
       }
     }
   }

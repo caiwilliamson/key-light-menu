@@ -8,7 +8,7 @@ import SwiftUI
 // MARK: - Preference Keys
 
 private struct TooltipAnchorKey: PreferenceKey {
-  static var defaultValue: (text: String, anchor: Anchor<CGRect>)? = nil
+  static var defaultValue: (text: String, anchor: Anchor<CGRect>)?
   static func reduce(value: inout Value, nextValue: () -> Value) {
     value = nextValue() ?? value
   }
@@ -48,7 +48,7 @@ private struct TooltipModifier: ViewModifier {
 // MARK: - Container modifier
 
 private struct TooltipContainerModifier: ViewModifier {
-  @State private var labelSize: CGSize = CGSize(width: 80, height: 20)
+  @State private var labelSize: CGSize = .init(width: 80, height: 20)
   /// Whether the tooltip label is currently shown. Controlled explicitly so we
   /// can apply the initial-appearance delay only when coming from hidden, and
   /// debounce the hide so moving between adjacent buttons doesn't cause a flash.

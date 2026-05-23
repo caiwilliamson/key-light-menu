@@ -46,7 +46,6 @@ struct PowerOnSettingsView: View {
           gradient: .brightness(for: Int(temperature)),
           iconTooltip: "Brightness"
         ) { editing in if !editing { send() } }
-          .transition(.rowContent)
         SliderRow(
           icon: "thermometer.medium",
           value: $temperature,
@@ -55,10 +54,9 @@ struct PowerOnSettingsView: View {
           gradient: .temperature,
           iconTooltip: "Color Temperature"
         ) { editing in if !editing { send() } }
-          .transition(.rowContent)
       }
     }
-    .animation(.rowSpring, value: behavior == 2)
+
     .onChange(of: settings) { _, new in
       behavior = new.powerOnBehavior
       brightness = Double(new.powerOnBrightness)

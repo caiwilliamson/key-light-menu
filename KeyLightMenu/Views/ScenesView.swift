@@ -17,13 +17,10 @@ struct ScenesView: View {
     Group {
       if isCreating {
         createView
-          .transition(.rowContent)
       } else {
         manageView
-          .transition(.rowContent)
       }
     }
-    .animation(.rowSpring, value: isCreating)
   }
 
   // MARK: - Manage View
@@ -111,7 +108,6 @@ struct ScenesView: View {
         }
       }
     }
-    .animation(.rowSpring, value: selectedSerials)
   }
 
   private func saveScene() {
@@ -176,7 +172,6 @@ private struct SceneLightRow: View {
             Task { await service.setTemperature(Int(v.rounded()), at: index) }
           }
         )
-        .transition(.rowContent)
       }
     }
   }
@@ -202,14 +197,14 @@ private struct SceneManageRow: View {
             .foregroundStyle(.tertiary)
         }
         Spacer()
-        Button { withAnimation(.rowSpring) { sceneStore.move(scene, by: -1) } } label: {
+        Button { sceneStore.move(scene, by: -1) } label: {
           Image(systemName: "chevron.up")
             .foregroundStyle(isFirst ? Color.secondary.opacity(0.3) : Color.secondary)
         }
         .buttonStyle(.plain)
         .disabled(isFirst)
         .tooltip("Move Up")
-        Button { withAnimation(.rowSpring) { sceneStore.move(scene, by: 1) } } label: {
+        Button { sceneStore.move(scene, by: 1) } label: {
           Image(systemName: "chevron.down")
             .foregroundStyle(isLast ? Color.secondary.opacity(0.3) : Color.secondary)
         }

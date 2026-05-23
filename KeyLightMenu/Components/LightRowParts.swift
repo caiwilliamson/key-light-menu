@@ -155,7 +155,6 @@ struct LightControlsSection: View {
           }
         }
         .padding(.top, 5)
-        .transition(.rowContent)
       }
     }
     .padding(.horizontal, 12)

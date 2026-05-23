@@ -24,11 +24,9 @@ struct SettingsView: View {
           if displayNameDraft != info.displayName {
             Button("Save", action: saveDisplayName)
               .buttonStyle(.borderedProminent)
-              .transition(.rowContent)
           }
         }
       }
-      .animation(.rowSpring, value: displayNameDraft != info.displayName)
 
       SectionDivider()
 
@@ -65,10 +63,8 @@ struct SettingsView: View {
             ),
             onChange: {}
           )
-          .transition(.rowContent)
         }
       }
-      .animation(.rowSpring, value: service.lightPrefs.isEnabled(for: info.serialNumber))
     }
     .onAppear { displayNameDraft = info.displayName }
     .onChange(of: info.displayName) { _, new in displayNameDraft = new }
