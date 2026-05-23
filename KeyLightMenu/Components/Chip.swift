@@ -6,8 +6,34 @@
 import Flow
 import SwiftUI
 
-struct Chip: View {
+// MARK: - Shared Label Style
+
+private struct ChipLabelStyle: ViewModifier {
   @Environment(\.colorScheme) private var colorScheme
+  var isActive: Bool = false
+  var activeOpacity: Double = 1
+  var hPadding: CGFloat = 6
+  var vPadding: CGFloat = 3
+
+  func body(content: Content) -> some View {
+    content
+      .padding(.horizontal, hPadding)
+      .padding(.vertical, vPadding)
+      .background(
+        isActive
+          ? Color.accentColor.opacity(activeOpacity)
+          : Color.primary.opacity(colorScheme == .dark ? 0.15 : 0.08),
+        in: Capsule()
+      )
+      .foregroundStyle(isActive ? Color.white : Color.secondary)
+      .font(.callout)
+      .contentShape(Capsule())
+  }
+}
+
+// MARK: - Chip
+
+struct Chip: View {
   let label: String
   var isActive: Bool = false
   let action: () -> Void
@@ -15,12 +41,7 @@ struct Chip: View {
   var body: some View {
     Button(action: action) {
       Text(label)
-        .padding(.horizontal, 6)
-        .padding(.vertical, 3)
-        .background(isActive ? Color.accentColor : Color.primary.opacity(colorScheme == .dark ? 0.15 : 0.08), in: Capsule())
-        .foregroundStyle(isActive ? Color.white : Color.secondary)
-        .font(.callout)
-        .contentShape(Capsule())
+        .modifier(ChipLabelStyle(isActive: isActive))
     }
     .buttonStyle(.plain)
   }
@@ -30,7 +51,6 @@ struct Chip: View {
 
 struct SceneChip: View {
   @Environment(KeyLightService.self) private var service
-  @Environment(\.colorScheme) private var colorScheme
   let scene: LightScene
 
   private enum Reachability { case all, some, none }
@@ -50,7 +70,7 @@ struct SceneChip: View {
     return scene.lights.allSatisfy { sl in
       guard let light = service.lights.first(where: { $0.accessoryInfo?.serialNumber == sl.serialNumber }),
             light.isReachable
-      else { return true } // unreachable lights don't disqualify
+      else { return true }
       return light.state?.brightness == sl.brightness && light.state?.temperature == sl.temperature
     }
   }
@@ -58,7 +78,6 @@ struct SceneChip: View {
   var body: some View {
     let status = reachability
     let isDisabled = status == .none
-    let active = isActive
 
     Button {
       for sl in scene.lights {
@@ -72,29 +91,23 @@ struct SceneChip: View {
       HStack(spacing: 4) {
         Text(scene.name)
         switch status {
-        case .some:
-          Image(systemName: "exclamationmark.circle")
-        case .none:
-          Image(systemName: "nosign")
-        case .all:
-          EmptyView()
+        case .some: Image(systemName: "exclamationmark.circle")
+        case .none: Image(systemName: "nosign")
+        case .all: EmptyView()
         }
       }
-      .padding(.horizontal, 9)
-      .padding(.vertical, 5)
-      .background(
-        active ? Color.accentColor.opacity(status == .some ? 0.5 : 1) : Color.primary.opacity(isDisabled ? 0.04 : (colorScheme == .dark ? 0.15 : 0.08)),
-        in: Capsule()
-      )
-      .foregroundStyle(active ? Color.white : (isDisabled ? Color.secondary.opacity(0.4) : Color.secondary))
-      .font(.callout)
-      .contentShape(Capsule())
+      .modifier(ChipLabelStyle(
+        isActive: isActive,
+        activeOpacity: status == .some ? 0.5 : 1,
+        hPadding: 9,
+        vPadding: 5
+      ))
     }
     .buttonStyle(.plain)
     .disabled(isDisabled)
     .tooltip(
       status == .none ? "No lights in this scene are connected." :
-      status == .some ? "Some lights in this scene are not connected. \nOnly connected lights will be applied." : nil
+      status == .some ? "Some lights in this scene are not connected.\nOnly connected lights will be applied." : nil
     )
   }
 }
