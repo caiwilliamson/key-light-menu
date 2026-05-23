@@ -18,17 +18,28 @@ struct MainView: View {
   @State private var isCreatingPreset = false
   @State private var sync = SyncCoordinator()
   @State private var eventMonitor: Any?
+  @State private var scrollContentHeight: CGFloat = 0
 
   var body: some View {
     VStack(spacing: 0) {
       header
       Divider()
-      mainContent
+      ScrollView {
+        VStack(spacing: 0) {
+          mainContent
+        }
+        .background(GeometryReader { geo in
+          Color.clear.preference(key: ScrollContentHeightKey.self, value: geo.size.height)
+        })
+      }
+      .frame(height: min(scrollContentHeight, 500))
+      .onPreferenceChange(ScrollContentHeightKey.self) { scrollContentHeight = $0 }
+
       Divider()
       footer
     }
     .environment(sync)
-    .frame(width: 320)
+    .frame(width: 340)
     .tooltipContainer()
     .animation(.rowSpring, value: service.selectedIndex)
     .animation(.rowSpring, value: activePanel)
@@ -268,5 +279,12 @@ struct MainView: View {
     }
     .frame(maxWidth: .infinity)
     .padding(20)
+  }
+}
+
+private struct ScrollContentHeightKey: PreferenceKey {
+  static let defaultValue: CGFloat = 0
+  static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+    value = max(value, nextValue())
   }
 }
