@@ -65,7 +65,10 @@ private struct TooltipContainerModifier: ViewModifier {
             let rect = geo[value.anchor]
             let halfW = labelSize.width / 2
             let x = max(halfW + edgePadding, min(geo.size.width - halfW - edgePadding, rect.midX))
-            let y = rect.maxY + yGap + labelSize.height / 2
+            let fitsBelow = rect.maxY + yGap + labelSize.height <= geo.size.height - edgePadding
+            let y = fitsBelow
+              ? rect.maxY + yGap + labelSize.height / 2
+              : rect.minY - yGap - labelSize.height / 2
 
             Text(value.text)
               .font(.callout)
