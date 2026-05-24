@@ -9,7 +9,6 @@ import SwiftUI
 struct SettingToggleRow: View {
   let label: String
   var subtitle: String?
-  var icon: String?
   @Binding var isOn: Bool
   let onChange: () -> Void
 
@@ -18,10 +17,6 @@ struct SettingToggleRow: View {
       HStack(spacing: 8) {
         Text(label)
           .foregroundStyle(Color.primary)
-        if let icon {
-          Image(systemName: icon)
-            .foregroundStyle(Color.secondary)
-        }
         Spacer()
         Toggle("", isOn: $isOn)
           .labelsHidden()

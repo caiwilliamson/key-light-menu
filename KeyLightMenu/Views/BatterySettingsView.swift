@@ -35,9 +35,8 @@ struct BatterySettingsView: View {
       PanelSection {
         SettingToggleRow(
           label: "Bypass Battery",
-          subtitle: "Bypass the battery so the light only works when connected to power."
-            + (isPluggedIn ? "" : " Please connect to a power source to enable."),
-          icon: "powerplug.fill",
+          subtitle: "Bypass the battery so the light only works when connected to a power adapter."
+            + (isPluggedIn ? "" : " Please connect to a power adapter to enable."),
           isOn: $bypass,
           onChange: send
         )
