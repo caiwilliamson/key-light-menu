@@ -81,7 +81,7 @@ struct LightRow: View {
         activePanel = nil
       }
     }
-    .background(Color.primary.opacity(isHovered && service.selectedIndex != index && !sync.isOptionHeld ? 0.05 : 0))
+    .background(Color.primary.opacity(isHovered && service.selectedIndex != index && !sync.isOptionHeld ? 0.04 : 0))
     if light.isReachable, let state = light.state {
       if service.selectedIndex == index || sync.isOptionHeld {
         controlsSection(state: state)
