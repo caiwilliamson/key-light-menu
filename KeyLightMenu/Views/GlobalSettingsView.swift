@@ -35,6 +35,15 @@ struct GlobalSettingsView: View {
         subtitle: "When a preset is applied, if the light is currently off it will be turned on.",
         isOn: $appSettings.turnOnLightWithPreset
       ) {}
+      Divider()
+      SettingToggleRow(
+        label: "Show Battery Percentage",
+        isOn: $appSettings.showBatteryPercentage
+      ) {}
+      SettingToggleRow(
+        label: "Show Wi-Fi Signal Percentage",
+        isOn: $appSettings.showWifiSignalPercentage
+      ) {}
     }
   }
 }

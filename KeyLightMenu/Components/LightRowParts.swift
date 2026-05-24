@@ -22,6 +22,7 @@ struct LightPowerButton: View {
 }
 
 struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
+  @Environment(AppSettings.self) private var appSettings
   let light: KeyLight
   let showsIndicators: Bool
   let leadingAccessory: LeadingAccessory
@@ -71,9 +72,11 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
   private func wifiIndicator(_ wifi: WifiInfo) -> some View {
     let strength = Double(wifi.signalPercent) / 100.0
     HStack(spacing: 2) {
-      Text(wifi.signalPercent > 0 ? "\(wifi.signalPercent)%" : "No Signal")
-        .foregroundStyle(.secondary)
-        .font(.callout)
+      if appSettings.showWifiSignalPercentage {
+        Text(wifi.signalPercent > 0 ? "\(wifi.signalPercent)%" : "No Signal")
+          .foregroundStyle(.secondary)
+          .font(.callout)
+      }
       Image(systemName: "wifi", variableValue: strength)
         .foregroundStyle(.secondary)
         .tooltip("Wi-Fi Network: \(wifi.ssid)\nWi-Fi Frequency: \(wifi.frequencyGHz)\nWi-Fi Signal Strength: \(wifi.signalPercent)%")
@@ -89,9 +92,11 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
         .tooltip("Power Source: Power Adapter")
     } else {
       HStack(spacing: 2) {
-        Text("\(Int(level.rounded()))%")
-          .foregroundStyle(.secondary)
-          .font(.callout)
+        if appSettings.showBatteryPercentage {
+          Text("\(Int(level.rounded()))%")
+            .foregroundStyle(.secondary)
+            .font(.callout)
+        }
         Battery(level: Float(level / 100), isCharging: battery.isCharging)
           .frame(height: 11)
           .tooltip("Power Source: \(battery.isPluggedIn ? "Power Adapter" : "Battery")\nBattery Level: \(Int(level.rounded()))%\nCharging: \(battery.isCharging ? "Yes" : "No")")
