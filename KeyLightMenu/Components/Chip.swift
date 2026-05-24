@@ -110,8 +110,8 @@ struct SceneChip: View {
     .buttonStyle(.plain)
     .disabled(isDisabled)
     .tooltip(
-      status == .none ? "No lights in this scene are connected." :
-      status == .some ? "Some lights in this scene are not connected.\nOnly connected lights will be applied." : nil
+      status == .none ? "All lights in this scene are disconnected." :
+      status == .some ? "Some lights in this scene are disconnected.\nOnly connected lights will be applied." : nil
     )
   }
 }
