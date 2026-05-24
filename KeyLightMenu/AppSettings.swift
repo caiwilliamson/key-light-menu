@@ -5,7 +5,27 @@
 
 import Foundation
 import Observation
+import SwiftUI
 
+enum AppearanceMode: String, CaseIterable {
+  case system, light, dark
+
+  var title: String {
+    switch self {
+    case .system: return "System"
+    case .light: return "Light"
+    case .dark: return "Dark"
+    }
+  }
+
+  var colorScheme: ColorScheme? {
+    switch self {
+    case .system: return nil
+    case .light: return .light
+    case .dark: return .dark
+    }
+  }
+}
 @Observable
 @MainActor
 final class AppSettings {
@@ -33,6 +53,12 @@ final class AppSettings {
     }
   }
 
+  var appearanceMode: AppearanceMode = .system {
+    didSet {
+      UserDefaults.standard.set(appearanceMode.rawValue, forKey: "keylight.settings.appearanceMode")
+    }
+  }
+
   init() {
     if UserDefaults.standard.object(forKey: "keylight.settings.turnOnLightsWithScene") != nil {
       turnOnLightsWithScene = UserDefaults.standard.bool(forKey: "keylight.settings.turnOnLightsWithScene")
@@ -45,6 +71,10 @@ final class AppSettings {
     }
     if UserDefaults.standard.object(forKey: "keylight.settings.showWifiSignalPercentage") != nil {
       showWifiSignalPercentage = UserDefaults.standard.bool(forKey: "keylight.settings.showWifiSignalPercentage")
+    }
+    if let raw = UserDefaults.standard.string(forKey: "keylight.settings.appearanceMode"),
+       let mode = AppearanceMode(rawValue: raw) {
+      appearanceMode = mode
     }
   }
 }

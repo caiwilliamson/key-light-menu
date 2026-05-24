@@ -44,6 +44,19 @@ struct GlobalSettingsView: View {
         label: "Show Wi-Fi Signal Percentage",
         isOn: $appSettings.showWifiSignalPercentage
       ) {}
+      Divider()
+      HStack {
+        Text("Appearance")
+        Spacer()
+        Picker("", selection: $appSettings.appearanceMode) {
+          ForEach(AppearanceMode.allCases, id: \.self) { mode in
+            Text(mode.title).tag(mode)
+          }
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .fixedSize()
+      }
     }
   }
 }
