@@ -23,11 +23,29 @@ struct LightRow: View {
         HStack(spacing: 4) {
           if light.isReachable {
             if service.selectedIndex == index, !sync.isOptionHeld {
-              HStack(spacing: 1) {
-                panelButton(.presets, icon: "slider.horizontal.3", label: "Presets")
-                panelButton(.settings, icon: "gearshape", label: "Settings")
-                panelButton(.info, icon: "info.circle", label: "Info")
+              Menu {
+                Button {
+                  activePanel = activePanel == .settings ? nil : .settings
+                } label: {
+                  Label("Settings", systemImage: "gearshape")
+                }
+                Button {
+                  activePanel = activePanel == .presets ? nil : .presets
+                } label: {
+                  Label("Presets", systemImage: "slider.horizontal.3")
+                }
+                Button {
+                  activePanel = activePanel == .info ? nil : .info
+                } label: {
+                  Label("Info", systemImage: "info.circle")
+                }
+              } label: {
+                Image(systemName: "ellipsis")
+                  .foregroundStyle(Color.secondary)
               }
+              .menuStyle(.borderlessButton)
+              .menuIndicator(.hidden)
+              .fixedSize()
             }
             if let state = light.state {
               LightPowerButton(isOn: state.isOn) {
@@ -111,20 +129,5 @@ struct LightRow: View {
         }
       }
     )
-  }
-
-  private func panelButton(_ panel: Panel, icon: String, label: String) -> some View {
-    let isActive = service.selectedIndex == index && activePanel == panel
-    return Button {
-      service.selectedIndex = index
-      activePanel = isActive ? nil : panel
-    } label: {
-      Image(systemName: icon)
-        .foregroundStyle(Color.secondary)
-        .font(.system(size: 16))
-    }
-    .buttonStyle(.plain)
-    .disabled(!light.isReachable)
-    .tooltip(label)
   }
 }
