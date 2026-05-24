@@ -108,7 +108,7 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
       }
       Image(systemName: "wifi", variableValue: strength)
         .foregroundStyle(.secondary)
-        .tooltip("Wi-Fi Network: \(wifi.ssid)\nWi-Fi Frequency: \(wifi.frequencyGHz)\nWi-Fi Signal Strength: \(wifi.signalPercent)%")
+        .tooltip("Wi-Fi Signal Strength: \(wifi.signalPercent)%\nWi-Fi Frequency: \(wifi.frequencyGHz)\nWi-Fi Network: \(wifi.ssid)")
     }
   }
 
@@ -128,7 +128,7 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
         }
         Battery(level: Float(level / 100), isCharging: battery.isCharging)
           .frame(height: 11)
-          .tooltip("Power Source: \(battery.isPluggedIn ? "Power Adapter" : "Battery")\nBattery Level: \(Int(level.rounded()))%\nCharging: \(battery.isCharging ? "Yes" : "No")")
+          .tooltip("Battery Level: \(Int(level.rounded()))%\nCharging: \(battery.isCharging ? "Yes" : "No")\nPower Source: \(battery.isPluggedIn ? "Power Adapter" : "Battery")")
       }
     }
   }
