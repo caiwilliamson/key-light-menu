@@ -232,26 +232,10 @@ struct MainView: View {
 
   @ViewBuilder
   private var footer: some View {
-    let showScan = activePanel == nil && !showGlobalSettings && !showScenes
-    if service.errorMessage != nil || showScan {
+    if let err = service.errorMessage {
       Divider()
-      VStack(spacing: 0) {
-        if let err = service.errorMessage {
-          PanelSection {
-            Text(err).foregroundStyle(.red).lineLimit(2)
-          }
-          SectionDivider()
-        }
-        if showScan {
-          PanelSection {
-            Button {
-              service.startDiscovery()
-            } label: {
-              Label(service.isDiscovering ? "Scanning…" : "Scan", systemImage: "antenna.radiowaves.left.and.right")
-            }
-            .disabled(service.isDiscovering)
-          }
-        }
+      PanelSection {
+        Text(err).foregroundStyle(.red).lineLimit(2)
       }
     }
   }

@@ -196,10 +196,10 @@ final class KeyLightService: NSObject {
     b.searchForServices(ofType: "_elg._tcp.", inDomain: "local.")
     browser = b
 
-    // Auto-stop after 5 seconds
+    // Clear the scanning indicator after 5 s, but keep the browser running
     Task { [weak self] in
       try? await Task.sleep(for: .seconds(5))
-      self?.stopDiscovery()
+      self?.isDiscovering = false
     }
   }
 
