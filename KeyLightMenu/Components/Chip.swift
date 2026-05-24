@@ -11,7 +11,6 @@ import SwiftUI
 private struct ChipLabelStyle: ViewModifier {
   @Environment(\.colorScheme) private var colorScheme
   var isActive: Bool = false
-  var activeOpacity: Double = 1
   var hPadding: CGFloat = 6
   var vPadding: CGFloat = 3
 
@@ -21,7 +20,7 @@ private struct ChipLabelStyle: ViewModifier {
       .padding(.vertical, vPadding)
       .background(
         isActive
-          ? Color.accentColor.opacity(activeOpacity)
+          ? Color.accentColor
           : Color.primary.opacity(colorScheme == .dark ? 0.15 : 0.08),
         in: Capsule()
       )
@@ -104,7 +103,6 @@ struct SceneChip: View {
       }
       .modifier(ChipLabelStyle(
         isActive: isActive,
-        activeOpacity: status == .some ? 0.5 : 1,
         hPadding: 9,
         vPadding: 5
       ))
