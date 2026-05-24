@@ -26,7 +26,7 @@ struct GlobalSettingsView: View {
       }
       Divider()
       SettingToggleRow(
-        label: "Turn On Lights with Scene",
+        label: "Turn On Lights With Scene",
         subtitle: "When a scene is applied, any lights in the scene that are currently off will be turned on.",
         isOn: $appSettings.turnOnLightsWithScene
       ) {}
