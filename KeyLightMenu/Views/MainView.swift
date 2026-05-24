@@ -35,7 +35,6 @@ struct MainView: View {
       .frame(height: min(scrollContentHeight, 500))
       .onPreferenceChange(ScrollContentHeightKey.self) { scrollContentHeight = $0 }
 
-      Divider()
       footer
     }
     .environment(sync)
@@ -133,32 +132,26 @@ struct MainView: View {
         Text("Key Light Menu")
           .font(.headline)
         Spacer()
-        Button {
-          showScenes.toggle()
-          if showScenes {
+        Menu {
+          Button {
+            showScenes = true
             showGlobalSettings = false
             isCreatingScene = false
-          }
-        } label: {
-          Image(systemName: "sparkles")
-            .foregroundStyle(Color.secondary)
-            .font(.system(size: 16))
-        }
-        .buttonStyle(.plain)
-        .tooltip("Scenes")
-        Button {
-          showGlobalSettings.toggle()
-          if showGlobalSettings {
+          } label: { Label("Scenes", systemImage: "sparkles") }
+          Button {
+            showGlobalSettings = true
             showScenes = false
             isCreatingScene = false
-          }
+          } label: { Label("App Settings", systemImage: "gearshape") }
+          Divider()
+          Button("Quit") { NSApplication.shared.terminate(nil) }
         } label: {
-          Image(systemName: "gearshape")
+          Image(systemName: "ellipsis")
             .foregroundStyle(Color.secondary)
-            .font(.system(size: 16))
         }
-        .buttonStyle(.plain)
-        .tooltip("App Settings")
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+        .fixedSize()
       }
       .frame(height: 20)
       if !sceneStore.scenes.isEmpty, !sync.isOptionHeld {
@@ -237,18 +230,20 @@ struct MainView: View {
 
   // MARK: - Footer
 
+  @ViewBuilder
   private var footer: some View {
-    VStack(spacing: 0) {
-      if let err = service.errorMessage {
-        PanelSection {
-          Text(err).foregroundStyle(.red).lineLimit(2)
+    let showScan = activePanel == nil && !showGlobalSettings && !showScenes
+    if service.errorMessage != nil || showScan {
+      Divider()
+      VStack(spacing: 0) {
+        if let err = service.errorMessage {
+          PanelSection {
+            Text(err).foregroundStyle(.red).lineLimit(2)
+          }
+          SectionDivider()
         }
-        SectionDivider()
-      }
-
-      PanelSection {
-        HStack {
-          if activePanel == nil, !showGlobalSettings, !showScenes {
+        if showScan {
+          PanelSection {
             Button {
               service.startDiscovery()
             } label: {
@@ -256,8 +251,6 @@ struct MainView: View {
             }
             .disabled(service.isDiscovering)
           }
-          Spacer()
-          Button("Quit") { NSApplication.shared.terminate(nil) }
         }
       }
     }
