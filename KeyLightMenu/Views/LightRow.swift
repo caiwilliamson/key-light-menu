@@ -111,7 +111,7 @@ struct LightRow: View {
       onBrightnessCommit: { v in
         Task { await service.setBrightness(Int(v), at: index) }
         if sync.isOptionHeld, sync.brightnessSourceIndex == index {
-          for j in sync.syncedBrightnesses.indices where j != index {
+          for j in sync.syncedBrightnesses.indices where j != index && service.lights[j].isReachable {
             Task { await service.setBrightness(Int(sync.syncedBrightnesses[j].rounded()), at: j) }
           }
         }
@@ -126,7 +126,7 @@ struct LightRow: View {
       onTemperatureCommit: { v in
         Task { await service.setTemperature(Int(v.rounded()), at: index) }
         if sync.isOptionHeld, sync.temperatureSourceIndex == index {
-          for j in sync.syncedTemperatures.indices where j != index {
+          for j in sync.syncedTemperatures.indices where j != index && service.lights[j].isReachable {
             Task { await service.setTemperature(Int(sync.syncedTemperatures[j].rounded()), at: j) }
           }
         }
