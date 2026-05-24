@@ -17,24 +17,27 @@ struct LightRow: View {
 
   var body: some View {
     PanelSection {
-      LightRowHeader(light: light, showsIndicators: !sync.isOptionHeld) {
+      LightRowHeader(light: light, index: index, showsIndicators: !sync.isOptionHeld) {
         EmptyView()
       } trailingActions: {
         HStack(spacing: 4) {
           if light.isReachable {
-            if service.selectedIndex == index, !sync.isOptionHeld {
+          if !sync.isOptionHeld {
               Menu {
                 Button {
+                  service.selectedIndex = index
                   activePanel = activePanel == .settings ? nil : .settings
                 } label: {
                   Label("Settings", systemImage: "gearshape")
                 }
                 Button {
+                  service.selectedIndex = index
                   activePanel = activePanel == .presets ? nil : .presets
                 } label: {
                   Label("Presets", systemImage: "slider.horizontal.3")
                 }
                 Button {
+                  service.selectedIndex = index
                   activePanel = activePanel == .info ? nil : .info
                 } label: {
                   Label("Info", systemImage: "info.circle")

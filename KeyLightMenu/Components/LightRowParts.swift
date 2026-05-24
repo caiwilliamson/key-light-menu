@@ -23,45 +23,74 @@ struct LightPowerButton: View {
 
 struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
   @Environment(AppSettings.self) private var appSettings
+  @Environment(KeyLightService.self) private var service
+  @Environment(PresetStore.self) private var store
+  @Environment(SyncCoordinator.self) private var sync
   let light: KeyLight
+  let index: Int
   let showsIndicators: Bool
+  let showsPresets: Bool
   let leadingAccessory: LeadingAccessory
   let trailingActions: TrailingActions
 
   init(
     light: KeyLight,
+    index: Int,
     showsIndicators: Bool = true,
+    showsPresets: Bool = true,
     @ViewBuilder leadingAccessory: () -> LeadingAccessory,
     @ViewBuilder trailingActions: () -> TrailingActions
   ) {
     self.light = light
+    self.index = index
     self.showsIndicators = showsIndicators
+    self.showsPresets = showsPresets
     self.leadingAccessory = leadingAccessory()
     self.trailingActions = trailingActions()
   }
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 0) {
-      HStack(alignment: .center, spacing: 3) {
+    let presets = store.presets(for: light.accessoryInfo?.serialNumber ?? "")
+    let lightState = service.lights.indices.contains(index) ? service.lights[index].state : nil
+    VStack(alignment: .leading, spacing: 6) {
+      HStack(alignment: .center, spacing: 6) {
         leadingAccessory
-        Text(light.name)
-          .lineLimit(1)
-          .frame(maxWidth: .infinity, alignment: .leading)
+        HStack(spacing: 6) {
+          Text(light.name)
+            .lineLimit(1)
+            .layoutPriority(-1)
+          if showsIndicators {
+            HStack(spacing: 6) {
+              if light.isReachable {
+                if let wifi = light.accessoryInfo?.wifiInfo {
+                  wifiIndicator(wifi)
+                }
+                if let battery = light.batteryInfo {
+                  batteryIndicator(battery)
+                }
+              } else {
+                Text("Disconnected")
+                  .font(.callout)
+                  .foregroundStyle(.secondary)
+              }
+            }
+          }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
         trailingActions
       }
-      if showsIndicators {
-        HStack(spacing: 8) {
-          if light.isReachable {
-            if let wifi = light.accessoryInfo?.wifiInfo {
-              wifiIndicator(wifi)
+      if showsPresets, !presets.isEmpty, !sync.isOptionHeld {
+        PresetChipsRow {
+          ForEach(presets) { preset in
+            let active = lightState?.brightness == preset.brightness && lightState?.temperature == preset.temperature
+            PresetChip(label: preset.name, isActive: active) {
+              Task {
+                if appSettings.turnOnLightWithPreset, service.lights[index].state?.isOn == false {
+                  await service.setOn(true, at: index)
+                }
+                await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature, at: index)
+              }
             }
-            if let battery = light.batteryInfo {
-              batteryIndicator(battery)
-            }
-          } else {
-            Text("Disconnected")
-              .font(.callout)
-              .foregroundStyle(.secondary)
           }
         }
       }
@@ -107,9 +136,7 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
 
 struct LightControlsSection: View {
   @Environment(KeyLightService.self) private var service
-  @Environment(PresetStore.self) private var store
   @Environment(SyncCoordinator.self) private var sync
-  @Environment(AppSettings.self) private var appSettings
 
   let light: KeyLight
   let index: Int
@@ -122,29 +149,11 @@ struct LightControlsSection: View {
   let onTemperatureDragStart: (() -> Void)?
   let onTemperatureDragChange: ((Double) -> Void)?
   let onTemperatureCommit: (Double) -> Void
-  var showsPresets: Bool = true
 
   var body: some View {
-    let presets = store.presets(for: light.accessoryInfo?.serialNumber ?? "")
     let brightnessGradient = TrackGradient.brightness(for: state.temperature)
 
     VStack(alignment: .leading, spacing: 8) {
-      if showsPresets, !presets.isEmpty, !sync.isOptionHeld {
-        PresetChipsRow {
-          ForEach(presets) { preset in
-            let active = preset.brightness == state.brightness && preset.temperature == state.temperature
-            PresetChip(label: preset.name, isActive: active) {
-              Task {
-                if appSettings.turnOnLightWithPreset, service.lights[index].state?.isOn == false {
-                  await service.setOn(true, at: index)
-                }
-                await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature, at: index)
-              }
-            }
-          }
-        }
-        .padding(.bottom, 5)
-      }
       LightSlider(
         icon: "sun.max.fill",
         value: brightnessValue,

@@ -90,7 +90,7 @@ struct PresetsView: View {
             .foregroundStyle(.secondary)
         }
         PanelSection {
-          LightRowHeader(light: light, showsIndicators: false) {
+          LightRowHeader(light: light, index: index, showsIndicators: false, showsPresets: false) {
             EmptyView()
           } trailingActions: {
             LightPowerButton(isOn: state.isOn) {
@@ -109,8 +109,7 @@ struct PresetsView: View {
           onBrightnessCommit: { v in Task { await service.setBrightness(Int(v), at: index) } },
           onTemperatureDragStart: nil,
           onTemperatureDragChange: nil,
-          onTemperatureCommit: { v in Task { await service.setTemperature(Int(v), at: index) } },
-          showsPresets: false
+          onTemperatureCommit: { v in Task { await service.setTemperature(Int(v), at: index) } }
         )
         SectionDivider()
         PanelSection {
