@@ -77,7 +77,7 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
             .foregroundStyle(.secondary)
         }
       }
-      if showsPresets, !presets.isEmpty, !sync.isOptionHeld {
+      if showsPresets, light.isReachable, !presets.isEmpty, !sync.isOptionHeld {
         PresetChipsRow {
           ForEach(presets) { preset in
             let active = lightState?.brightness == preset.brightness && lightState?.temperature == preset.temperature
