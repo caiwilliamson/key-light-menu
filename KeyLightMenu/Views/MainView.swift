@@ -144,6 +144,17 @@ struct MainView: View {
             isCreatingScene = false
           } label: { Label("Scenes", systemImage: "sparkles") }
           Divider()
+          Button {
+            for i in service.lights.indices where service.lights[i].isReachable {
+              Task { await service.setOn(true, at: i) }
+            }
+          } label: { Label("Turn All Lights On", systemImage: "power.circle.fill") }
+          Button {
+            for i in service.lights.indices where service.lights[i].isReachable {
+              Task { await service.setOn(false, at: i) }
+            }
+          } label: { Label("Turn All Lights Off", systemImage: "power.circle") }
+          Divider()
           Button("Quit") { NSApplication.shared.terminate(nil) }
         } label: {
           Image(systemName: "ellipsis")
