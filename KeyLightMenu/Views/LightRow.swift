@@ -71,6 +71,7 @@ struct LightRow: View {
     }
     .contentShape(Rectangle())
     .onHover { if light.isReachable { isHovered = $0 } }
+    .onChange(of: light.isReachable) { _, reachable in if !reachable { isHovered = false } }
     .onTapGesture {
       guard light.isReachable, !sync.isOptionHeld else { return }
       if service.selectedIndex == index {
