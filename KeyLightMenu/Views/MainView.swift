@@ -134,15 +134,15 @@ struct MainView: View {
         Spacer()
         Menu {
           Button {
-            showScenes = true
-            showGlobalSettings = false
-            isCreatingScene = false
-          } label: { Label("Scenes", systemImage: "sparkles") }
-          Button {
             showGlobalSettings = true
             showScenes = false
             isCreatingScene = false
           } label: { Label("App Settings", systemImage: "gearshape") }
+          Button {
+            showScenes = true
+            showGlobalSettings = false
+            isCreatingScene = false
+          } label: { Label("Scenes", systemImage: "sparkles") }
           Divider()
           Button("Quit") { NSApplication.shared.terminate(nil) }
         } label: {
