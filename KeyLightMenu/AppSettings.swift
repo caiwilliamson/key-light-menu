@@ -53,6 +53,12 @@ final class AppSettings {
     }
   }
 
+  var alwaysShowSliders: Bool = false {
+    didSet {
+      UserDefaults.standard.set(alwaysShowSliders, forKey: "keylight.settings.alwaysShowSliders")
+    }
+  }
+
   var appearanceMode: AppearanceMode = .system {
     didSet {
       UserDefaults.standard.set(appearanceMode.rawValue, forKey: "keylight.settings.appearanceMode")
@@ -71,6 +77,9 @@ final class AppSettings {
     }
     if UserDefaults.standard.object(forKey: "keylight.settings.showWifiSignalPercentage") != nil {
       showWifiSignalPercentage = UserDefaults.standard.bool(forKey: "keylight.settings.showWifiSignalPercentage")
+    }
+    if UserDefaults.standard.object(forKey: "keylight.settings.alwaysShowSliders") != nil {
+      alwaysShowSliders = UserDefaults.standard.bool(forKey: "keylight.settings.alwaysShowSliders")
     }
     if let raw = UserDefaults.standard.string(forKey: "keylight.settings.appearanceMode"),
        let mode = AppearanceMode(rawValue: raw) {

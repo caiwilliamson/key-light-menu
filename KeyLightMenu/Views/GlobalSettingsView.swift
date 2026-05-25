@@ -37,6 +37,11 @@ struct GlobalSettingsView: View {
       ) {}
       Divider()
       SettingToggleRow(
+        label: "Always Show Sliders",
+        subtitle: "Show sliders for all lights at once.",
+        isOn: $appSettings.alwaysShowSliders
+      ) {}
+      SettingToggleRow(
         label: "Show Battery Percentage",
         isOn: $appSettings.showBatteryPercentage
       ) {}

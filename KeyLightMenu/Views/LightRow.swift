@@ -8,6 +8,7 @@ import SwiftUI
 struct LightRow: View {
   @Environment(KeyLightService.self) private var service
   @Environment(SyncCoordinator.self) private var sync
+  @Environment(AppSettings.self) private var appSettings
 
   let light: KeyLight
   let index: Int
@@ -70,10 +71,11 @@ struct LightRow: View {
       }
     }
     .contentShape(Rectangle())
-    .onHover { if light.isReachable { isHovered = $0 } }
+    .onHover { if light.isReachable, !appSettings.alwaysShowSliders { isHovered = $0 } }
     .onChange(of: light.isReachable) { _, reachable in if !reachable { isHovered = false } }
+    .onChange(of: appSettings.alwaysShowSliders) { _, expand in if expand { isHovered = false } }
     .onTapGesture {
-      guard light.isReachable, !sync.isOptionHeld else { return }
+      guard light.isReachable, !sync.isOptionHeld, !appSettings.alwaysShowSliders else { return }
       if service.selectedIndex == index {
         service.selectedIndex = nil
         activePanel = nil
@@ -84,7 +86,7 @@ struct LightRow: View {
     }
     .background(Color.primary.opacity(isHovered && service.selectedIndex != index && !sync.isOptionHeld ? 0.04 : 0))
     if light.isReachable, let state = light.state {
-      if service.selectedIndex == index || sync.isOptionHeld {
+      if service.selectedIndex == index || sync.isOptionHeld || appSettings.alwaysShowSliders {
         controlsSection(state: state)
       }
     }
