@@ -19,7 +19,6 @@ private struct Unchecked<T>: @unchecked Sendable { let value: T }
 final class KeyLightService: NSObject {
   var lights: [KeyLight] = []
   var selectedIndex: Int?
-  var isDiscovering = false
   var isLoading = false
 
   let lightPrefs = LightPrefStore()
@@ -186,18 +185,10 @@ final class KeyLightService: NSObject {
     stopDiscovery()
     // Don't clear lights/selectedIndex here — cached lights should remain
     // visible until Bonjour resolves and live data replaces them.
-    isDiscovering = true
-
     let b = NetServiceBrowser()
     b.delegate = self
     b.searchForServices(ofType: "_elg._tcp.", inDomain: "local.")
     browser = b
-
-    // Clear the scanning indicator after 5 s, but keep the browser running
-    Task { [weak self] in
-      try? await Task.sleep(for: .seconds(5))
-      self?.isDiscovering = false
-    }
   }
 
   func stopDiscovery() {
@@ -205,7 +196,6 @@ final class KeyLightService: NSObject {
     browser = nil
     resolving.forEach { $0.stop() }
     resolving = []
-    isDiscovering = false
   }
 
   /// Silently restarts the Bonjour browser without showing the scanning indicator.

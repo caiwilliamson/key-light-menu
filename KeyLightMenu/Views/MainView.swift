@@ -201,11 +201,7 @@ struct MainView: View {
       lightPanelContent(index: idx, panel: panel)
     } else {
       if service.lights.isEmpty {
-        if service.isDiscovering {
-          LoadingState(label: "Scanning…")
-        } else {
-          noLightsView
-        }
+        LoadingState(label: "Scanning…")
       } else {
         ForEach(service.lights.indices, id: \.self) { i in
           let light = service.lights[i]
@@ -250,17 +246,6 @@ struct MainView: View {
     }
   }
 
-  private var noLightsView: some View {
-    VStack(spacing: 8) {
-      Image(systemName: "lightbulb.slash")
-        .font(.largeTitle)
-        .foregroundStyle(.secondary)
-      Text("No lights found")
-        .foregroundStyle(.secondary)
-    }
-    .frame(maxWidth: .infinity)
-    .padding(20)
-  }
 }
 
 private struct ScrollContentHeightKey: PreferenceKey {
