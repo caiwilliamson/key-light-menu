@@ -12,6 +12,7 @@ struct SettingsView: View {
   let index: Int
 
   @State private var displayNameDraft = ""
+  @State private var saveError: String?
 
   var body: some View {
     VStack(spacing: 0) {
@@ -25,6 +26,9 @@ struct SettingsView: View {
             Button("Save", action: saveDisplayName)
               .buttonStyle(.borderedProminent)
           }
+        }
+        if let err = saveError {
+          Text(err).font(.callout).foregroundStyle(.red)
         }
       }
 
@@ -71,6 +75,13 @@ struct SettingsView: View {
   }
 
   private func saveDisplayName() {
-    Task { await service.setDisplayName(displayNameDraft, at: index) }
+    Task {
+      do {
+        try await service.setDisplayName(displayNameDraft, at: index)
+        saveError = nil
+      } catch {
+        saveError = "Couldn't save — try again"
+      }
+    }
   }
 }

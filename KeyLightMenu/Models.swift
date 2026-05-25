@@ -17,6 +17,7 @@ struct KeyLight: Identifiable {
   var settings: LightSettings?
   var batteryInfo: BatteryInfo?
   var isReachable: Bool = true
+  var actionError: String?
 
   /// Prefers displayName, then productName, then the Bonjour-discovered name.
   var name: String {

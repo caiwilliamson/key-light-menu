@@ -21,7 +21,6 @@ final class KeyLightService: NSObject {
   var selectedIndex: Int?
   var isDiscovering = false
   var isLoading = false
-  var errorMessage: String?
 
   let lightPrefs = LightPrefStore()
   private var lightsToRestore: Set<String> = []
@@ -123,6 +122,7 @@ final class KeyLightService: NSObject {
     } catch {
       if lights.indices.contains(i) {
         lights[i].isReachable = false
+        lights[i].actionError = nil
         saveCache()
       }
       return
@@ -189,7 +189,6 @@ final class KeyLightService: NSObject {
     // Don't clear lights/selectedIndex here — cached lights should remain
     // visible until Bonjour resolves and live data replaces them.
     isDiscovering = true
-    errorMessage = nil
 
     let b = NetServiceBrowser()
     b.delegate = self
@@ -216,14 +215,10 @@ final class KeyLightService: NSObject {
   func fetchStatus(at index: Int) async {
     guard let url = url(for: index, path: "lights") else { return }
     isLoading = true
-    errorMessage = nil
     defer { isLoading = false }
     do {
       let (data, response) = try await URLSession.shared.data(from: url)
-      guard (response as? HTTPURLResponse)?.statusCode == 200 else {
-        errorMessage = "Unexpected response from device"
-        return
-      }
+      guard (response as? HTTPURLResponse)?.statusCode == 200 else { return }
       guard lights.indices.contains(index) else { return }
       if let state = try JSONDecoder().decode(LightsResponse.self, from: data).lights.first {
         lights[index].state = state
@@ -232,7 +227,6 @@ final class KeyLightService: NSObject {
       }
     } catch {
       if lights.indices.contains(index) { lights[index].isReachable = false }
-      errorMessage = error.localizedDescription
     }
   }
 
@@ -242,16 +236,19 @@ final class KeyLightService: NSObject {
       let req = try putRequest(url: url, body: LightsResponse(numberOfLights: 1, lights: [state]))
       let (data, response) = try await actionSession.data(for: req)
       guard (response as? HTTPURLResponse)?.statusCode == 200 else {
-        errorMessage = "Failed to update light"
+        if lights.indices.contains(index) { lights[index].actionError = "Couldn't apply — try again" }
         return
       }
       guard lights.indices.contains(index) else { return }
       if let newState = try JSONDecoder().decode(LightsResponse.self, from: data).lights.first {
         lights[index].state = newState
+        lights[index].actionError = nil
       }
     } catch {
-      if lights.indices.contains(index) { lights[index].isReachable = false }
-      errorMessage = error.localizedDescription
+      if lights.indices.contains(index) {
+        lights[index].isReachable = false
+        lights[index].actionError = nil
+      }
     }
   }
 
@@ -310,20 +307,17 @@ final class KeyLightService: NSObject {
     } catch {}
   }
 
-  func setDisplayName(_ name: String, at index: Int) async {
+  func setDisplayName(_ name: String, at index: Int) async throws {
     guard let url = url(for: index, path: "accessory-info") else { return }
     struct Payload: Encodable { let displayName: String }
-    do {
-      let req = try putRequest(url: url, body: Payload(displayName: name))
-      let (data, _) = try await URLSession.shared.data(for: req)
-      guard lights.indices.contains(index) else { return }
-      if let updated = try? JSONDecoder().decode(AccessoryInfo.self, from: data) {
-        lights[index].accessoryInfo = updated
-      } else {
-        lights[index].accessoryInfo?.displayName = name
-      }
-    } catch {
-      errorMessage = error.localizedDescription
+    let req = try putRequest(url: url, body: Payload(displayName: name))
+    let (data, response) = try await URLSession.shared.data(for: req)
+    guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw URLError(.badServerResponse) }
+    guard lights.indices.contains(index) else { return }
+    if let updated = try? JSONDecoder().decode(AccessoryInfo.self, from: data) {
+      lights[index].accessoryInfo = updated
+    } else {
+      lights[index].accessoryInfo?.displayName = name
     }
   }
 
@@ -345,20 +339,17 @@ final class KeyLightService: NSObject {
     } catch {}
   }
 
-  func setPowerOnSettings(behavior: Int, brightness: Int, temperature: Int, at index: Int) async {
+  func setPowerOnSettings(behavior: Int, brightness: Int, temperature: Int, at index: Int) async throws {
     guard let url = url(for: index, path: "lights/settings"),
           var settings = lights[index].settings else { return }
     settings.powerOnBehavior = behavior
     settings.powerOnBrightness = max(1, min(100, brightness))
     settings.powerOnTemperature = max(143, min(344, temperature))
-    do {
-      let req = try putRequest(url: url, body: settings)
-      let (data, _) = try await URLSession.shared.data(for: req)
-      guard lights.indices.contains(index) else { return }
-      lights[index].settings = (try? JSONDecoder().decode(LightSettings.self, from: data)) ?? settings
-    } catch {
-      errorMessage = error.localizedDescription
-    }
+    let req = try putRequest(url: url, body: settings)
+    let (data, response) = try await URLSession.shared.data(for: req)
+    guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw URLError(.badServerResponse) }
+    guard lights.indices.contains(index) else { return }
+    lights[index].settings = (try? JSONDecoder().decode(LightSettings.self, from: data)) ?? settings
   }
 
   func fetchBatteryInfo(at index: Int) async {
@@ -371,18 +362,15 @@ final class KeyLightService: NSObject {
     lights[index].batteryInfo = info
   }
 
-  func setBatterySettings(_ battery: BatteryConfig, at index: Int) async {
+  func setBatterySettings(_ battery: BatteryConfig, at index: Int) async throws {
     guard let url = url(for: index, path: "lights/settings"),
           var settings = lights[index].settings else { return }
     settings.battery = battery
-    do {
-      let req = try putRequest(url: url, body: settings)
-      let (data, _) = try await URLSession.shared.data(for: req)
-      guard lights.indices.contains(index) else { return }
-      lights[index].settings = (try? JSONDecoder().decode(LightSettings.self, from: data)) ?? settings
-    } catch {
-      errorMessage = error.localizedDescription
-    }
+    let req = try putRequest(url: url, body: settings)
+    let (data, response) = try await URLSession.shared.data(for: req)
+    guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw URLError(.badServerResponse) }
+    guard lights.indices.contains(index) else { return }
+    lights[index].settings = (try? JSONDecoder().decode(LightSettings.self, from: data)) ?? settings
   }
 }
 
@@ -460,7 +448,6 @@ extension KeyLightService: NetServiceBrowserDelegate {
     didNotSearch _: [String: NSNumber]
   ) {
     Task { @MainActor in
-      self.errorMessage = "Bonjour search failed"
       self.stopDiscovery()
     }
   }

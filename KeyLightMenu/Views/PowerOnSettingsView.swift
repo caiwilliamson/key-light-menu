@@ -14,6 +14,7 @@ struct PowerOnSettingsView: View {
   @State private var brightness: Double
   @State private var temperature: Double
   @State private var sendTask: Task<Void, Never>?
+  @State private var sendError: String?
 
   init(settings: LightSettings, index: Int) {
     self.settings = settings
@@ -55,6 +56,9 @@ struct PowerOnSettingsView: View {
           iconTooltip: "Color Temperature"
         ) { editing in if !editing { send() } }
       }
+      if let err = sendError {
+        Text(err).font(.callout).foregroundStyle(.red)
+      }
     }
 
     .onChange(of: settings) { _, new in
@@ -67,12 +71,17 @@ struct PowerOnSettingsView: View {
   private func send() {
     sendTask?.cancel()
     sendTask = Task {
-      await service.setPowerOnSettings(
-        behavior: behavior,
-        brightness: Int(brightness),
-        temperature: Int(temperature),
-        at: index
-      )
+      do {
+        try await service.setPowerOnSettings(
+          behavior: behavior,
+          brightness: Int(brightness),
+          temperature: Int(temperature),
+          at: index
+        )
+        sendError = nil
+      } catch {
+        sendError = "Couldn't save — try again"
+      }
     }
   }
 }

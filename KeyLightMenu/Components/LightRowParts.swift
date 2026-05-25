@@ -86,11 +86,15 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
         }
         .padding(.top, 6)
       }
-      if showsIndicators, !light.isReachable {
+      if !light.isReachable {
         Text("Disconnected")
           .font(.callout)
           .foregroundStyle(.secondary)
           .padding(.top, 3)
+      } else if let err = light.actionError {
+        Text(err)
+          .font(.callout)
+          .foregroundStyle(.red)
       }
     }
   }

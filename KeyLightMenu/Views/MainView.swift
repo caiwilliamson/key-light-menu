@@ -35,7 +35,6 @@ struct MainView: View {
       .frame(height: min(scrollContentHeight, 500))
       .onPreferenceChange(ScrollContentHeightKey.self) { scrollContentHeight = $0 }
 
-      footer
     }
     .environment(sync)
     .frame(width: 340)
@@ -248,18 +247,6 @@ struct MainView: View {
     case .remove:
       RemoveLightView(light: light, index: index, activePanel: $activePanel)
         .environment(store)
-    }
-  }
-
-  // MARK: - Footer
-
-  @ViewBuilder
-  private var footer: some View {
-    if let err = service.errorMessage {
-      Divider()
-      PanelSection {
-        Text(err).foregroundStyle(.red).lineLimit(2)
-      }
     }
   }
 

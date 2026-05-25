@@ -17,6 +17,7 @@ struct BatterySettingsView: View {
   @State private var adjustBrightnessEnabled: Bool
   @State private var adjustBrightnessLevel: Double
   @State private var sendTask: Task<Void, Never>?
+  @State private var sendError: String?
 
   init(battery: BatteryConfig, index: Int) {
     self.battery = battery
@@ -80,6 +81,12 @@ struct BatterySettingsView: View {
           }
         }
       }
+      if let err = sendError {
+        SectionDivider()
+        PanelSection {
+          Text(err).font(.callout).foregroundStyle(.red)
+        }
+      }
     }
     .onChange(of: battery) { _, new in
       bypass = new.bypass == 1
@@ -113,10 +120,15 @@ struct BatterySettingsView: View {
 
   private func send() {
     let updated = buildConfig()
-    // Don't send if the config already matches the server state (breaks the echo cycle)
     guard updated != battery else { return }
-    // Cancel any in-flight request so interleaved responses can't ping-pong the value
     sendTask?.cancel()
-    sendTask = Task { await service.setBatterySettings(updated, at: index) }
+    sendTask = Task {
+      do {
+        try await service.setBatterySettings(updated, at: index)
+        sendError = nil
+      } catch {
+        sendError = "Couldn't save — try again"
+      }
+    }
   }
 }
