@@ -173,18 +173,16 @@ final class KeyLightService: NSObject {
 
   // MARK: - Discovery
 
-  /// Called on app open. Skips Bonjour scan if we already have cached lights.
-  /// Polling is already running from init — just do a single immediate refresh.
+  /// Called on app open. Always starts the Bonjour browser so new and
+  /// returning lights are discovered. Polls existing lights immediately too.
   func startSession() {
-    if lights.isEmpty {
-      startDiscovery()
-    } else {
+    startDiscovery()
+    if !lights.isEmpty {
       Task { await pollAllLights() }
     }
   }
 
   func startDiscovery() {
-    stopPolling()
     stopDiscovery()
     // Don't clear lights/selectedIndex here — cached lights should remain
     // visible until Bonjour resolves and live data replaces them.
