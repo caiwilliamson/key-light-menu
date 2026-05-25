@@ -19,7 +19,16 @@ struct LightRow: View {
   var body: some View {
     PanelSection {
       LightRowHeader(light: light, index: index, showsIndicators: !sync.isOptionHeld) {
-        EmptyView()
+        if sync.isOptionHeld {
+          let serial = light.accessoryInfo?.serialNumber ?? "\(light.host):\(light.port)"
+          Toggle("", isOn: Binding(
+            get: { sync.isIncluded(serial: serial) },
+            set: { sync.setIncluded($0, for: serial) }
+          ))
+          .labelsHidden()
+          .toggleStyle(.checkbox)
+          .padding(.trailing, 5)
+        }
       } trailingActions: {
         HStack(spacing: 4) {
           if light.isReachable {
@@ -86,7 +95,9 @@ struct LightRow: View {
     }
     .background(Color.primary.opacity(isHovered && service.selectedIndex != index && !sync.isOptionHeld ? 0.04 : 0))
     if light.isReachable, let state = light.state {
-      if service.selectedIndex == index || sync.isOptionHeld || appSettings.alwaysShowSliders {
+      let serial = light.accessoryInfo?.serialNumber ?? "\(light.host):\(light.port)"
+      let isSyncParticipant = sync.isOptionHeld && sync.isIncluded(serial: serial)
+      if sync.isOptionHeld ? isSyncParticipant : (service.selectedIndex == index || appSettings.alwaysShowSliders) {
         controlsSection(state: state)
       }
     }
@@ -94,9 +105,11 @@ struct LightRow: View {
 
   @ViewBuilder
   private func controlsSection(state: LightState) -> some View {
-    let brightnessValue = sync.isOptionHeld && sync.syncedBrightnesses.indices.contains(index)
+    let serial = light.accessoryInfo?.serialNumber ?? "\(light.host):\(light.port)"
+    let isSyncParticipant = sync.isOptionHeld && sync.isIncluded(serial: serial)
+    let brightnessValue = isSyncParticipant && sync.syncedBrightnesses.indices.contains(index)
       ? sync.syncedBrightnesses[index] : Double(state.brightness)
-    let temperatureValue = sync.isOptionHeld && sync.syncedTemperatures.indices.contains(index)
+    let temperatureValue = isSyncParticipant && sync.syncedTemperatures.indices.contains(index)
       ? sync.syncedTemperatures[index] : Double(state.temperature)
     LightControlsSection(
       light: light,
@@ -104,33 +117,39 @@ struct LightRow: View {
       state: state,
       brightnessValue: brightnessValue,
       temperatureValue: temperatureValue,
-      onBrightnessDragStart: sync.isOptionHeld ? {
+      onBrightnessDragStart: isSyncParticipant ? {
         sync.brightnessSourceIndex = index
         sync.captureBrightnessStart(lights: service.lights)
       } : nil,
-      onBrightnessDragChange: sync.isOptionHeld ? { v in
-        sync.updateBrightnessSync(fromIndex: index, value: v)
+      onBrightnessDragChange: isSyncParticipant ? { v in
+        sync.updateBrightnessSync(fromIndex: index, value: v, lights: service.lights)
       } : nil,
       onBrightnessCommit: { v in
         Task { await service.setBrightness(Int(v), at: index) }
-        if sync.isOptionHeld, sync.brightnessSourceIndex == index {
+        if isSyncParticipant, sync.brightnessSourceIndex == index {
           for j in sync.syncedBrightnesses.indices where j != index && service.lights[j].isReachable {
-            Task { await service.setBrightness(Int(sync.syncedBrightnesses[j].rounded()), at: j) }
+            let jSerial = service.lights[j].accessoryInfo?.serialNumber ?? "\(service.lights[j].host):\(service.lights[j].port)"
+            if sync.isIncluded(serial: jSerial) {
+              Task { await service.setBrightness(Int(sync.syncedBrightnesses[j].rounded()), at: j) }
+            }
           }
         }
       },
-      onTemperatureDragStart: sync.isOptionHeld ? {
+      onTemperatureDragStart: isSyncParticipant ? {
         sync.temperatureSourceIndex = index
         sync.captureTemperatureStart(lights: service.lights)
       } : nil,
-      onTemperatureDragChange: sync.isOptionHeld ? { v in
-        sync.updateTemperatureSync(fromIndex: index, value: v)
+      onTemperatureDragChange: isSyncParticipant ? { v in
+        sync.updateTemperatureSync(fromIndex: index, value: v, lights: service.lights)
       } : nil,
       onTemperatureCommit: { v in
         Task { await service.setTemperature(Int(v.rounded()), at: index) }
-        if sync.isOptionHeld, sync.temperatureSourceIndex == index {
+        if isSyncParticipant, sync.temperatureSourceIndex == index {
           for j in sync.syncedTemperatures.indices where j != index && service.lights[j].isReachable {
-            Task { await service.setTemperature(Int(sync.syncedTemperatures[j].rounded()), at: j) }
+            let jSerial = service.lights[j].accessoryInfo?.serialNumber ?? "\(service.lights[j].host):\(service.lights[j].port)"
+            if sync.isIncluded(serial: jSerial) {
+              Task { await service.setTemperature(Int(sync.syncedTemperatures[j].rounded()), at: j) }
+            }
           }
         }
       }

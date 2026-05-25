@@ -11,6 +11,21 @@ import Observation
 final class SyncCoordinator {
   var isOptionHeld = false
 
+  // Serials explicitly excluded from sync (empty = all included)
+  var excludedSerials: Set<String> = {
+    let arr = UserDefaults.standard.stringArray(forKey: "keylight.sync.excludedSerials") ?? []
+    return Set(arr)
+  }()
+
+  func isIncluded(serial: String) -> Bool {
+    !excludedSerials.contains(serial)
+  }
+
+  func setIncluded(_ included: Bool, for serial: String) {
+    if included { excludedSerials.remove(serial) } else { excludedSerials.insert(serial) }
+    UserDefaults.standard.set(Array(excludedSerials), forKey: "keylight.sync.excludedSerials")
+  }
+
   // Real-time display values — updated every drag frame (not throttled)
   var syncedBrightnesses: [Double] = []
   var syncedTemperatures: [Double] = []
@@ -42,20 +57,24 @@ final class SyncCoordinator {
     }
   }
 
-  func updateBrightnessSync(fromIndex: Int, value: Double) {
+  func updateBrightnessSync(fromIndex: Int, value: Double, lights: [KeyLight]) {
     guard !startBrightnesses.isEmpty, syncedBrightnesses.count == startBrightnesses.count else { return }
     // floor matches Int($0) truncation used in the brightness label
     let delta = floor(value) - Double(startBrightnesses[fromIndex])
     for j in startBrightnesses.indices {
+      let serial = lights[j].accessoryInfo?.serialNumber ?? "\(lights[j].host):\(lights[j].port)"
+      guard isIncluded(serial: serial) else { continue }
       syncedBrightnesses[j] = max(1, min(100, Double(startBrightnesses[j]) + delta))
     }
   }
 
-  func updateTemperatureSync(fromIndex: Int, value: Double) {
+  func updateTemperatureSync(fromIndex: Int, value: Double, lights: [KeyLight]) {
     guard !startTemperatures.isEmpty, syncedTemperatures.count == startTemperatures.count else { return }
     // rounded matches $0.rounded() used before the Kelvin conversion in the temperature label
     let delta = value.rounded() - Double(startTemperatures[fromIndex])
     for j in startTemperatures.indices {
+      let serial = lights[j].accessoryInfo?.serialNumber ?? "\(lights[j].host):\(lights[j].port)"
+      guard isIncluded(serial: serial) else { continue }
       syncedTemperatures[j] = max(143, min(344, Double(startTemperatures[j]) + delta))
     }
   }
