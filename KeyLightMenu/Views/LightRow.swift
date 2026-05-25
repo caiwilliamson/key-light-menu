@@ -66,15 +66,20 @@ struct LightRow: View {
               }
             }
           } else if !sync.isOptionHeld {
-            Button {
-              service.selectedIndex = index
-              activePanel = .remove
+            Menu {
+              Button {
+                service.selectedIndex = index
+                activePanel = .remove
+              } label: {
+                Label("Remove Light", systemImage: "trash")
+              }
             } label: {
-              Image(systemName: "trash")
+              Image(systemName: "ellipsis")
                 .foregroundStyle(Color.secondary)
             }
-            .buttonStyle(.plain)
-            .tooltip("Remove Light")
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
           }
         }
       }
