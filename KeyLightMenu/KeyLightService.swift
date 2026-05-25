@@ -208,6 +208,18 @@ final class KeyLightService: NSObject {
     isDiscovering = false
   }
 
+  /// Silently restarts the Bonjour browser without showing the scanning indicator.
+  /// Use this when the current browser may have missed a service coming back online.
+  private func restartBrowser() {
+    browser?.stop()
+    resolving.forEach { $0.stop() }
+    resolving = []
+    let b = NetServiceBrowser()
+    b.delegate = self
+    b.searchForServices(ofType: "_elg._tcp.", inDomain: "local.")
+    browser = b
+  }
+
   // MARK: - API
 
   func fetchStatus(at index: Int) async {
@@ -293,6 +305,7 @@ final class KeyLightService: NSObject {
       selectedIndex = sel - 1
     }
     saveCache()
+    restartBrowser()
   }
 
   func fetchAccessoryInfo(at index: Int) async {
@@ -490,9 +503,13 @@ extension KeyLightService: NetServiceDelegate {
       }
 
       // Match by serial number first, then fall back to host:port.
+      // Always try host:port as a fallback even when we have a serial — a concurrent
+      // task may have already appended the same light before its accessoryInfo was set.
       let existing: Int? = {
-        if let serial = resolvedInfo?.serialNumber, !serial.isEmpty {
-          return self.lights.firstIndex { $0.accessoryInfo?.serialNumber == serial }
+        if let serial = resolvedInfo?.serialNumber, !serial.isEmpty,
+           let idx = self.lights.firstIndex(where: { $0.accessoryInfo?.serialNumber == serial })
+        {
+          return idx
         }
         return self.lights.firstIndex { $0.host == ipAddress && $0.port == port }
       }()
