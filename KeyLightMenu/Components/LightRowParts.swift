@@ -52,30 +52,23 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
   var body: some View {
     let presets = store.presets(for: light.accessoryInfo?.serialNumber ?? "")
     let lightState = service.lights.indices.contains(index) ? service.lights[index].state : nil
-    VStack(alignment: .leading, spacing: 6) {
-      VStack(alignment: .leading, spacing: 3) {
-        HStack(alignment: .center, spacing: 6) {
-          leadingAccessory
-          HStack(spacing: 6) {
-            Text(light.name)
-              .lineLimit(1)
-            if showsIndicators, light.isReachable {
-              if let wifi = light.accessoryInfo?.wifiInfo {
-                wifiIndicator(wifi)
-              }
-              if let battery = light.batteryInfo {
-                batteryIndicator(battery)
-              }
+    VStack(alignment: .leading, spacing: 0) {
+      HStack(alignment: .center, spacing: 6) {
+        leadingAccessory
+        HStack(spacing: 6) {
+          Text(light.name)
+            .lineLimit(1)
+          if showsIndicators, light.isReachable {
+            if let wifi = light.accessoryInfo?.wifiInfo {
+              wifiIndicator(wifi)
+            }
+            if let battery = light.batteryInfo {
+              batteryIndicator(battery)
             }
           }
-          .frame(maxWidth: .infinity, alignment: .leading)
-          trailingActions
         }
-        if showsIndicators, !light.isReachable {
-          Text("Disconnected")
-            .font(.callout)
-            .foregroundStyle(.secondary)
-        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        trailingActions
       }
       if showsPresets, light.isReachable, !presets.isEmpty, !sync.isOptionHeld {
         PresetChipsRow {
@@ -91,6 +84,13 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
             }
           }
         }
+        .padding(.top, 6)
+      }
+      if showsIndicators, !light.isReachable {
+        Text("Disconnected")
+          .font(.callout)
+          .foregroundStyle(.secondary)
+          .padding(.top, 3)
       }
     }
   }

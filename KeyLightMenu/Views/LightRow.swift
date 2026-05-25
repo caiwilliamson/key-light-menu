@@ -44,7 +44,7 @@ struct LightRow: View {
                   service.selectedIndex = index
                   activePanel = activePanel == .presets ? nil : .presets
                 } label: {
-                  Label("Presets", systemImage: "slider.horizontal.3")
+                  Label("Presets", systemImage: "star")
                 }
                 Button {
                   service.selectedIndex = index

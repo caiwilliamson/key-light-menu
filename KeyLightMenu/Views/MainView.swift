@@ -42,11 +42,12 @@ struct MainView: View {
     .tooltipContainer()
     .task { service.startSession() }
     .onAppear {
-      sync.isOptionHeld = NSEvent.modifierFlags.contains(.option) && activePanel == nil && !showGlobalSettings && !showScenes
       eventMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { event in
-        let held = event.modifierFlags.contains(.option)
-        sync.isOptionHeld = held && activePanel == nil && !showGlobalSettings && !showScenes
-        if !held { sync.reset() }
+        // Only act on the key-down transition (option becoming pressed)
+        guard event.modifierFlags.contains(.option) else { return event }
+        guard activePanel == nil, !showGlobalSettings, !showScenes else { return event }
+        sync.isOptionHeld.toggle()
+        if !sync.isOptionHeld { sync.reset() }
         return event
       }
     }
@@ -127,7 +128,7 @@ struct MainView: View {
   }
 
   private var defaultHeader: some View {
-    VStack(alignment: .leading, spacing: 8) {
+    VStack(alignment: .leading, spacing: 0) {
       HStack(spacing: 4) {
         Text("Key Light Menu")
           .font(.headline)
@@ -154,6 +155,10 @@ struct MainView: View {
               Task { await service.setOn(false, at: i) }
             }
           } label: { Label("Turn All Lights Off", systemImage: "power.circle") }
+          Toggle(isOn: Binding(
+            get: { sync.isOptionHeld },
+            set: { on in sync.isOptionHeld = on; if !on { sync.reset() } }
+          )) { Label("Toggle Slider Sync Mode ⌥", systemImage: "slider.horizontal.3") }
           Divider()
           Button("Quit") { NSApplication.shared.terminate(nil) }
         } label: {
@@ -171,6 +176,13 @@ struct MainView: View {
             SceneChip(scene: scene)
           }
         }
+        .padding(.top, 6)
+      } else if sync.isOptionHeld {
+        Text("Slider Sync Mode  · ⌥ to exit")
+          .font(.callout)
+          .foregroundStyle(.secondary)
+          .frame(maxWidth: .infinity, alignment: .leading)
+          .padding(.top, 3)
       }
     }
   }
