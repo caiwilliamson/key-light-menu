@@ -28,7 +28,6 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
   @Environment(SyncCoordinator.self) private var sync
   let light: KeyLight
   let index: Int
-  let showsIndicators: Bool
   let showsPresets: Bool
   let leadingAccessory: LeadingAccessory
   let trailingActions: TrailingActions
@@ -36,14 +35,12 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
   init(
     light: KeyLight,
     index: Int,
-    showsIndicators: Bool = true,
     showsPresets: Bool = true,
     @ViewBuilder leadingAccessory: () -> LeadingAccessory,
     @ViewBuilder trailingActions: () -> TrailingActions
   ) {
     self.light = light
     self.index = index
-    self.showsIndicators = showsIndicators
     self.showsPresets = showsPresets
     self.leadingAccessory = leadingAccessory()
     self.trailingActions = trailingActions()
@@ -58,7 +55,7 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
         HStack(spacing: 6) {
           Text(light.name)
             .lineLimit(1)
-          if showsIndicators, light.isReachable {
+          if light.isReachable {
             if let wifi = light.accessoryInfo?.wifiInfo {
               wifiIndicator(wifi)
             }

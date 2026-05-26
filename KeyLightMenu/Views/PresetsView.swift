@@ -90,7 +90,7 @@ struct PresetsView: View {
             .foregroundStyle(.secondary)
         }
         PanelSection {
-          LightRowHeader(light: light, index: index, showsIndicators: false, showsPresets: false) {
+          LightRowHeader(light: light, index: index, showsPresets: false) {
             EmptyView()
           } trailingActions: {
             LightPowerButton(isOn: state.isOn) {

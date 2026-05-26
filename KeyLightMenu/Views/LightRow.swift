@@ -18,7 +18,7 @@ struct LightRow: View {
 
   var body: some View {
     PanelSection {
-      LightRowHeader(light: light, index: index, showsIndicators: !sync.isOptionHeld && !sync.isReordering) {
+      LightRowHeader(light: light, index: index) {
         if sync.isReordering {
           VStack(spacing: 2) {
             Button { service.move(from: index, by: -1) } label: {
