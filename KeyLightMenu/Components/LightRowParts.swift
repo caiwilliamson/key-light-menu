@@ -49,50 +49,52 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
   var body: some View {
     let presets = store.presets(for: light.accessoryInfo?.serialNumber ?? "")
     let lightState = service.lights.indices.contains(index) ? service.lights[index].state : nil
-    VStack(alignment: .leading, spacing: 0) {
-      HStack(alignment: .center, spacing: 6) {
-        leadingAccessory
-        HStack(spacing: 6) {
-          Text(light.name)
-            .lineLimit(1)
-          if light.isReachable {
-            if let wifi = light.accessoryInfo?.wifiInfo {
-              wifiIndicator(wifi)
-            }
-            if let battery = light.batteryInfo {
-              batteryIndicator(battery)
-            }
-          }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        trailingActions
-      }
-      if !light.isReachable {
-        Text("Disconnected")
-          .font(.callout)
-          .foregroundStyle(.secondary)
-          .padding(.top, 1)
-      } else if let err = light.actionError {
-        Text(err)
-          .font(.callout)
-          .foregroundStyle(.red)
-          .padding(.top, 1)
-      }
-      if showsPresets, light.isReachable, !presets.isEmpty, !sync.isOptionHeld, !sync.isReordering {
-        PresetChipsRow {
-          ForEach(presets) { preset in
-            let active = lightState?.brightness == preset.brightness && lightState?.temperature == preset.temperature
-            PresetChip(label: preset.name, isActive: active) {
-              Task {
-                if appSettings.turnOnLightWithPreset, service.lights[index].state?.isOn == false {
-                  await service.setOn(true, at: index)
-                }
-                await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature, at: index)
+    HStack(alignment: .center, spacing: 6) {
+      leadingAccessory
+      VStack(alignment: .leading, spacing: 0) {
+        HStack(alignment: .center, spacing: 6) {
+          HStack(spacing: 6) {
+            Text(light.name)
+              .lineLimit(1)
+            if light.isReachable {
+              if let wifi = light.accessoryInfo?.wifiInfo {
+                wifiIndicator(wifi)
+              }
+              if let battery = light.batteryInfo {
+                batteryIndicator(battery)
               }
             }
           }
+          .frame(maxWidth: .infinity, alignment: .leading)
+          trailingActions
         }
-        .padding(.top, 6)
+        if !light.isReachable {
+          Text("Disconnected")
+            .font(.callout)
+            .foregroundStyle(.secondary)
+            .padding(.top, 1)
+        } else if let err = light.actionError {
+          Text(err)
+            .font(.callout)
+            .foregroundStyle(.red)
+            .padding(.top, 1)
+        }
+        if showsPresets, light.isReachable, !presets.isEmpty, !sync.isOptionHeld, !sync.isReordering {
+          PresetChipsRow {
+            ForEach(presets) { preset in
+              let active = lightState?.brightness == preset.brightness && lightState?.temperature == preset.temperature
+              PresetChip(label: preset.name, isActive: active) {
+                Task {
+                  if appSettings.turnOnLightWithPreset, service.lights[index].state?.isOn == false {
+                    await service.setOn(true, at: index)
+                  }
+                  await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature, at: index)
+                }
+              }
+            }
+          }
+          .padding(.top, 6)
+        }
       }
     }
   }
