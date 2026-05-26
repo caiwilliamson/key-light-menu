@@ -9,7 +9,12 @@ import Observation
 @Observable
 @MainActor
 final class SyncCoordinator {
-  var isOptionHeld = false
+  var isOptionHeld = false {
+    didSet { if isOptionHeld { isReordering = false } }
+  }
+  var isReordering = false {
+    didSet { if isReordering { isOptionHeld = false; reset() } }
+  }
 
   // Serials explicitly excluded from sync (empty = all included)
   var excludedSerials: Set<String> = {

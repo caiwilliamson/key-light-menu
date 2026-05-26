@@ -18,8 +18,24 @@ struct LightRow: View {
 
   var body: some View {
     PanelSection {
-      LightRowHeader(light: light, index: index, showsIndicators: !sync.isOptionHeld) {
-        if sync.isOptionHeld {
+      LightRowHeader(light: light, index: index, showsIndicators: !sync.isOptionHeld && !sync.isReordering) {
+        if sync.isReordering {
+          VStack(spacing: 2) {
+            Button { service.move(from: index, by: -1) } label: {
+              Image(systemName: "chevron.up")
+                .foregroundStyle(index == 0 ? Color.secondary.opacity(0.3) : Color.secondary)
+            }
+            .buttonStyle(.plain)
+            .disabled(index == 0)
+            Button { service.move(from: index, by: 1) } label: {
+              Image(systemName: "chevron.down")
+                .foregroundStyle(index == service.lights.count - 1 ? Color.secondary.opacity(0.3) : Color.secondary)
+            }
+            .buttonStyle(.plain)
+            .disabled(index == service.lights.count - 1)
+          }
+          .padding(.trailing, 4)
+        } else if sync.isOptionHeld {
           let serial = light.accessoryInfo?.serialNumber ?? "\(light.host):\(light.port)"
           Toggle("", isOn: Binding(
             get: { sync.isIncluded(serial: serial) },
@@ -31,7 +47,7 @@ struct LightRow: View {
         }
       } trailingActions: {
         HStack(spacing: 4) {
-          if light.isReachable, !sync.isOptionHeld {
+          if light.isReachable, !sync.isOptionHeld, !sync.isReordering {
             Menu {
               Button {
                 service.selectedIndex = index
@@ -58,7 +74,7 @@ struct LightRow: View {
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
             .fixedSize()
-          } else if !sync.isOptionHeld {
+          } else if !sync.isOptionHeld, !sync.isReordering {
             Menu {
               Button {
                 service.selectedIndex = index
@@ -82,11 +98,12 @@ struct LightRow: View {
       }
     }
     .contentShape(Rectangle())
-    .onHover { if light.isReachable, !appSettings.alwaysShowSliders { isHovered = $0 } }
+    .onHover { if light.isReachable, !appSettings.alwaysShowSliders, !sync.isReordering { isHovered = $0 } }
     .onChange(of: light.isReachable) { _, reachable in if !reachable { isHovered = false } }
     .onChange(of: appSettings.alwaysShowSliders) { _, expand in if expand { isHovered = false } }
+    .onChange(of: sync.isReordering) { _, reordering in if reordering { isHovered = false } }
     .onTapGesture {
-      guard light.isReachable, !sync.isOptionHeld, !appSettings.alwaysShowSliders else { return }
+      guard light.isReachable, !sync.isOptionHeld, !sync.isReordering, !appSettings.alwaysShowSliders else { return }
       if service.selectedIndex == index {
         service.selectedIndex = nil
         activePanel = nil
@@ -95,8 +112,8 @@ struct LightRow: View {
         activePanel = nil
       }
     }
-    .background(Color.primary.opacity(isHovered && service.selectedIndex != index && !sync.isOptionHeld ? 0.04 : 0))
-    if light.isReachable, let state = light.state {
+    .background(Color.primary.opacity(isHovered && service.selectedIndex != index && !sync.isOptionHeld && !sync.isReordering ? 0.04 : 0))
+    if light.isReachable, !sync.isReordering, let state = light.state {
       let serial = light.accessoryInfo?.serialNumber ?? "\(light.host):\(light.port)"
       let isSyncParticipant = sync.isOptionHeld && sync.isIncluded(serial: serial)
       if sync.isOptionHeld ? isSyncParticipant : (service.selectedIndex == index || appSettings.alwaysShowSliders) {

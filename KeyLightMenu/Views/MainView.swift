@@ -64,6 +64,7 @@ struct MainView: View {
     }
     .onChange(of: activePanel) { _, new in
       if new != .presets { isCreatingPreset = false }
+      if new != nil { sync.isReordering = false }
     }
   }
 
@@ -92,6 +93,16 @@ struct MainView: View {
         BreadcrumbHeader(
           homeAction: { showGlobalSettings = false },
           crumbs: [.init(title: "App Settings")]
+        )
+      } else if sync.isOptionHeld {
+        BreadcrumbHeader(
+          homeAction: { sync.isOptionHeld = false; sync.reset() },
+          crumbs: [.init(title: "Sync Sliders")]
+        )
+      } else if sync.isReordering {
+        BreadcrumbHeader(
+          homeAction: { sync.isReordering = false },
+          crumbs: [.init(title: "Reorder Lights")]
         )
       } else if let panel = activePanel, let idx = service.selectedIndex,
                 service.lights.indices.contains(idx)
@@ -157,7 +168,11 @@ struct MainView: View {
           Toggle(isOn: Binding(
             get: { sync.isOptionHeld },
             set: { on in sync.isOptionHeld = on; if !on { sync.reset() } }
-          )) { Label("Slider Sync Mode ⌥", systemImage: "slider.horizontal.3") }
+          )) { Label("Sync Sliders ⌥", systemImage: "slider.horizontal.3") }
+          Toggle(isOn: Binding(
+            get: { sync.isReordering },
+            set: { sync.isReordering = $0 }
+          )) { Label("Reorder Lights", systemImage: "arrow.up.arrow.down") }
           Divider()
           Button("Quit") { NSApplication.shared.terminate(nil) }
         } label: {
@@ -169,19 +184,13 @@ struct MainView: View {
         .fixedSize()
       }
       .frame(height: 20)
-      if !sceneStore.scenes.isEmpty, !sync.isOptionHeld {
+      if !sceneStore.scenes.isEmpty {
         SceneChipsRow {
           ForEach(sceneStore.scenes) { scene in
             SceneChip(scene: scene)
           }
         }
         .padding(.top, 6)
-      } else if sync.isOptionHeld {
-        Text("Slider Sync Mode  · ⌥ to exit")
-          .font(.callout)
-          .foregroundStyle(.secondary)
-          .frame(maxWidth: .infinity, alignment: .leading)
-          .padding(.top, 3)
       }
     }
   }

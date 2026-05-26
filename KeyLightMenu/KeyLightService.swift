@@ -283,6 +283,18 @@ final class KeyLightService: NSObject {
     await apply(s, at: index)
   }
 
+  func move(from source: Int, by offset: Int) {
+    let destination = source + offset
+    guard lights.indices.contains(source), lights.indices.contains(destination) else { return }
+    lights.swapAt(source, destination)
+    if selectedIndex == source {
+      selectedIndex = destination
+    } else if selectedIndex == destination {
+      selectedIndex = source
+    }
+    saveCache()
+  }
+
   func remove(at index: Int) {
     guard lights.indices.contains(index) else { return }
     lights.remove(at: index)
