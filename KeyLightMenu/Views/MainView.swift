@@ -161,11 +161,13 @@ struct MainView: View {
               Task { await service.setOn(true, at: i) }
             }
           } label: { Label("Turn All Lights On", systemImage: "power.circle.fill") }
+          .disabled(!service.lights.contains { $0.isReachable && $0.state?.isOn == false })
           Button {
             for i in service.lights.indices where service.lights[i].isReachable {
               Task { await service.setOn(false, at: i) }
             }
           } label: { Label("Turn All Lights Off", systemImage: "power.circle") }
+          .disabled(!service.lights.contains { $0.isReachable && $0.state?.isOn == true })
           Toggle(isOn: Binding(
             get: { sync.isOptionHeld },
             set: { on in sync.isOptionHeld = on; if !on { sync.reset() } }
