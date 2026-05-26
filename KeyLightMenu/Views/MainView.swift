@@ -45,6 +45,7 @@ struct MainView: View {
         // Only act on the key-down transition (option becoming pressed)
         guard event.modifierFlags.contains(.option) else { return event }
         guard activePanel == nil, !showGlobalSettings, !showScenes else { return event }
+        guard service.lights.filter(\.isReachable).count >= 2 else { return event }
         sync.isOptionHeld.toggle()
         if !sync.isOptionHeld { sync.reset() }
         return event
@@ -169,10 +170,12 @@ struct MainView: View {
             get: { sync.isOptionHeld },
             set: { on in sync.isOptionHeld = on; if !on { sync.reset() } }
           )) { Label("Sync Sliders ⌥", systemImage: "slider.horizontal.3") }
+          .disabled(service.lights.filter(\.isReachable).count < 2)
           Toggle(isOn: Binding(
             get: { sync.isReordering },
             set: { sync.isReordering = $0 }
           )) { Label("Reorder Lights", systemImage: "arrow.up.arrow.down") }
+          .disabled(service.lights.count < 2)
           Divider()
           Button("Quit") { NSApplication.shared.terminate(nil) }
         } label: {
