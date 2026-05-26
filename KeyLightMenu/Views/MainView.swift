@@ -157,7 +157,7 @@ struct MainView: View {
           Toggle(isOn: Binding(
             get: { sync.isOptionHeld },
             set: { on in sync.isOptionHeld = on; if !on { sync.reset() } }
-          )) { Label("Toggle Slider Sync Mode ⌥", systemImage: "slider.horizontal.3") }
+          )) { Label("Slider Sync Mode ⌥", systemImage: "slider.horizontal.3") }
           Divider()
           Button("Quit") { NSApplication.shared.terminate(nil) }
         } label: {
