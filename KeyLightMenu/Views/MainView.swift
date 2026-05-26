@@ -201,7 +201,10 @@ struct MainView: View {
       lightPanelContent(index: idx, panel: panel)
     } else {
       if service.lights.isEmpty {
-        LoadingState(label: "Scanning…")
+        LoadingView(
+          label: "Searching for lights…",
+          hint: "To connect a new light, open the Wi-Fi menu, choose it under \"New Accessories\", and follow the steps in AirPort Utility."
+        )
       } else {
         ForEach(service.lights.indices, id: \.self) { i in
           let light = service.lights[i]
@@ -228,13 +231,13 @@ struct MainView: View {
       if let info = light.accessoryInfo {
         InfoView(light: light, info: info, index: index)
       } else {
-        LoadingState(label: "Loading…")
+        LoadingView(label: "Loading…")
       }
     case .settings:
       if let info = light.accessoryInfo {
         SettingsView(light: light, info: info, index: index)
       } else {
-        LoadingState(label: "Loading…")
+        LoadingView(label: "Loading…")
       }
     case .presets:
       PresetsView(light: light, index: index, isCreating: $isCreatingPreset)
