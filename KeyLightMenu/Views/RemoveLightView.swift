@@ -7,7 +7,6 @@ import SwiftUI
 
 struct RemoveLightView: View {
   @Environment(KeyLightService.self) private var service
-  @Environment(PresetStore.self) private var store
 
   let light: KeyLight
   let index: Int
@@ -17,7 +16,7 @@ struct RemoveLightView: View {
     PanelSection {
       Text("Remove \"\(light.name)\"?")
         .font(.headline)
-      Text("This will remove the light and all its saved presets. You can add it again later if you want to.")
+      Text("This will remove the light from the menu. You can add it again later if you want to.")
         .foregroundStyle(.secondary)
         .font(.callout)
         .fixedSize(horizontal: false, vertical: true)
@@ -30,7 +29,7 @@ struct RemoveLightView: View {
         Spacer()
         Button("Remove Light") {
           activePanel = nil
-          service.remove(at: index, store: store)
+          service.remove(at: index)
         }
         .foregroundStyle(.red)
       }

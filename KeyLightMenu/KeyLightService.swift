@@ -283,11 +283,8 @@ final class KeyLightService: NSObject {
     await apply(s, at: index)
   }
 
-  func remove(at index: Int, store: PresetStore) {
+  func remove(at index: Int) {
     guard lights.indices.contains(index) else { return }
-    if let serial = lights[index].accessoryInfo?.serialNumber {
-      store.deleteAll(for: serial)
-    }
     lights.remove(at: index)
     if selectedIndex == index {
       selectedIndex = lights.isEmpty ? nil : max(0, index - 1)
