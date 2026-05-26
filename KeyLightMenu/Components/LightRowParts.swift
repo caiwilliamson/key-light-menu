@@ -70,6 +70,17 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         trailingActions
       }
+      if !light.isReachable {
+        Text("Disconnected")
+          .font(.callout)
+          .foregroundStyle(.secondary)
+          .padding(.top, 1)
+      } else if let err = light.actionError {
+        Text(err)
+          .font(.callout)
+          .foregroundStyle(.red)
+          .padding(.top, 1)
+      }
       if showsPresets, light.isReachable, !presets.isEmpty, !sync.isOptionHeld {
         PresetChipsRow {
           ForEach(presets) { preset in
@@ -85,16 +96,6 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
           }
         }
         .padding(.top, 6)
-      }
-      if !light.isReachable {
-        Text("Disconnected")
-          .font(.callout)
-          .foregroundStyle(.secondary)
-          .padding(.top, 3)
-      } else if let err = light.actionError {
-        Text(err)
-          .font(.callout)
-          .foregroundStyle(.red)
       }
     }
   }

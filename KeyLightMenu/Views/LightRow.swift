@@ -31,40 +31,33 @@ struct LightRow: View {
         }
       } trailingActions: {
         HStack(spacing: 4) {
-          if light.isReachable {
-          if !sync.isOptionHeld {
-              Menu {
-                Button {
-                  service.selectedIndex = index
-                  activePanel = activePanel == .settings ? nil : .settings
-                } label: {
-                  Label("Settings", systemImage: "gearshape")
-                }
-                Button {
-                  service.selectedIndex = index
-                  activePanel = activePanel == .presets ? nil : .presets
-                } label: {
-                  Label("Presets", systemImage: "star")
-                }
-                Button {
-                  service.selectedIndex = index
-                  activePanel = activePanel == .info ? nil : .info
-                } label: {
-                  Label("Info", systemImage: "info.circle")
-                }
+          if light.isReachable, !sync.isOptionHeld {
+            Menu {
+              Button {
+                service.selectedIndex = index
+                activePanel = activePanel == .settings ? nil : .settings
               } label: {
-                Image(systemName: "ellipsis")
-                  .foregroundStyle(Color.secondary)
+                Label("Settings", systemImage: "gearshape")
               }
-              .menuStyle(.borderlessButton)
-              .menuIndicator(.hidden)
-              .fixedSize()
-            }
-            if let state = light.state {
-              LightPowerButton(isOn: state.isOn) {
-                Task { await service.toggle(at: index) }
+              Button {
+                service.selectedIndex = index
+                activePanel = activePanel == .presets ? nil : .presets
+              } label: {
+                Label("Presets", systemImage: "star")
               }
+              Button {
+                service.selectedIndex = index
+                activePanel = activePanel == .info ? nil : .info
+              } label: {
+                Label("Info", systemImage: "info.circle")
+              }
+            } label: {
+              Image(systemName: "ellipsis")
+                .foregroundStyle(Color.secondary)
             }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
           } else if !sync.isOptionHeld {
             Menu {
               Button {
@@ -81,6 +74,10 @@ struct LightRow: View {
             .menuIndicator(.hidden)
             .fixedSize()
           }
+          LightPowerButton(isOn: light.state?.isOn ?? false) {
+            Task { await service.toggle(at: index) }
+          }
+          .disabled(!light.isReachable || light.state == nil)
         }
       }
     }
