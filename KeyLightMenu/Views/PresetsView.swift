@@ -153,10 +153,12 @@ private struct PresetRow: View {
     ) {
       HStack(spacing: 4) {
         Image(systemName: "sun.max.fill")
+          .tooltip("Brightness")
         Text("\(preset.brightness)%")
           .font(.callout)
         Image(systemName: "thermometer.medium")
           .padding(.leading, 4)
+          .tooltip("Color Temperature")
         Text("\(Int(1_000_000 / Double(preset.temperature).rounded()))K")
           .font(.callout)
       }
