@@ -159,7 +159,7 @@ private struct SceneLightRow: View {
   var body: some View {
     VStack(spacing: 0) {
       PanelSection {
-        LightRowHeader(light: light, index: index, showsPresets: false) {
+        LightRowHeader(light: light, index: index) {
           Toggle("", isOn: $isSelected)
             .labelsHidden()
             .toggleStyle(.checkbox)
