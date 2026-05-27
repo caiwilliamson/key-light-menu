@@ -10,7 +10,6 @@ struct GradientSlider: View {
   @Binding var value: Double
   let range: ClosedRange<Double>
   let gradient: TrackGradient
-  var isActive: Bool = true
   var onEditingChanged: ((Bool) -> Void)?
 
   private static let thumbSize: CGFloat = 16
@@ -30,7 +29,6 @@ struct GradientSlider: View {
             RoundedRectangle(cornerRadius: Self.trackHeight / 2)
               .strokeBorder(.tertiary, lineWidth: 0.5)
           )
-          .opacity(isActive ? 1 : 0.5)
 
         ZStack {
           Circle()

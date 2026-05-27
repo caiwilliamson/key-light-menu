@@ -6,7 +6,6 @@
 import SwiftUI
 
 /// A slider that fires immediately on first move, then throttles to ~100ms during drag.
-/// Pass `nil` for `onCommit` to render a read-only preview slider.
 struct LightSlider: View {
   let icon: String
   let externalValue: Double
@@ -15,7 +14,7 @@ struct LightSlider: View {
   let gradient: TrackGradient
   let onDragStart: (() -> Void)?
   let onDragChange: ((Double) -> Void)?
-  let onCommit: ((Double) -> Void)?
+  let onCommit: (Double) -> Void
   var iconTooltip: String?
 
   @State private var value: Double
@@ -34,7 +33,7 @@ struct LightSlider: View {
     gradient: TrackGradient,
     onDragStart: (() -> Void)? = nil,
     onDragChange: ((Double) -> Void)? = nil,
-    onCommit: ((Double) -> Void)? = nil,
+    onCommit: @escaping (Double) -> Void,
     iconTooltip: String? = nil
   ) {
     self.icon = icon
@@ -50,26 +49,18 @@ struct LightSlider: View {
   }
 
   var body: some View {
-    Group {
-      if let onCommit {
-        SliderRow(icon: icon, value: $value, range: range, label: label, gradient: gradient, iconTooltip: iconTooltip) { editing in
-          if editing, !isDragging { onDragStart?() }
-          isDragging = editing
-          if !editing {
-            onDragChange?(value)
-            pendingTask?.cancel()
-            lastSent = Date()
-            lastDragEnd = Date()
-            onCommit(value)
-          }
-        }
-      } else {
-        SliderRow(icon: icon, value: .constant(externalValue), range: range, label: label, gradient: gradient, isActive: false, iconTooltip: iconTooltip)
-          .allowsHitTesting(false)
+    SliderRow(icon: icon, value: $value, range: range, label: label, gradient: gradient, iconTooltip: iconTooltip) { editing in
+      if editing, !isDragging { onDragStart?() }
+      isDragging = editing
+      if !editing {
+        onDragChange?(value)
+        pendingTask?.cancel()
+        lastSent = Date()
+        lastDragEnd = Date()
+        onCommit(value)
       }
     }
     .onChange(of: value) { _, new in
-      guard let onCommit else { return }
       if isDragging { onDragChange?(new) }
       pendingTask?.cancel()
       let elapsed = Date().timeIntervalSince(lastSent)
