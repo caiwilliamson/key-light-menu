@@ -143,34 +143,24 @@ private struct PresetRow: View {
   let isLast: Bool
 
   var body: some View {
-    PanelSection {
-      HStack {
-        Text(preset.name)
-          .foregroundStyle(.secondary)
-        Spacer()
-        Button { store.move(preset, by: -1) } label: {
-          Image(systemName: "chevron.up")
-            .foregroundStyle(isFirst ? Color.secondary.opacity(0.3) : Color.secondary)
-        }
-        .buttonStyle(.plain)
-        .disabled(isFirst)
-        .tooltip("Move Up")
-        Button { store.move(preset, by: 1) } label: {
-          Image(systemName: "chevron.down")
-            .foregroundStyle(isLast ? Color.secondary.opacity(0.3) : Color.secondary)
-        }
-        .buttonStyle(.plain)
-        .disabled(isLast)
-        .tooltip("Move Down")
-        Button { store.delete(preset) } label: {
-          Image(systemName: "trash")
-            .foregroundStyle(.secondary)
-        }
-        .buttonStyle(.plain)
-        .tooltip("Delete Preset")
+    ManageRow(
+      name: preset.name,
+      isFirst: isFirst,
+      isLast: isLast,
+      onMoveUp: { store.move(preset, by: -1) },
+      onMoveDown: { store.move(preset, by: 1) },
+      onDelete: { store.delete(preset) }
+    ) {
+      HStack(spacing: 4) {
+        Image(systemName: "sun.max.fill")
+        Text("\(preset.brightness)%")
+          .font(.callout)
+        Image(systemName: "thermometer.medium")
+          .padding(.leading, 4)
+        Text("\(Int(1_000_000 / Double(preset.temperature).rounded()))K")
+          .font(.callout)
       }
-      LightSlider(icon: "sun.max.fill", value: Double(preset.brightness), range: 1 ... 100, label: { "\(Int($0))%" }, gradient: .brightness(for: preset.temperature))
-      LightSlider(icon: "thermometer.medium", value: Double(preset.temperature), range: 143 ... 344, label: { "\(Int(1_000_000 / $0.rounded()))K" }, gradient: .temperature)
+      .foregroundStyle(.secondary)
     }
   }
 }

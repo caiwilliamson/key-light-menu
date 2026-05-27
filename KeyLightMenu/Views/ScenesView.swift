@@ -205,37 +205,20 @@ private struct SceneManageRow: View {
   let isLast: Bool
 
   var body: some View {
-    PanelSection {
-      HStack {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-          Text(scene.name)
-            .foregroundStyle(.secondary)
-          Text("\(scene.lights.count) light\(scene.lights.count == 1 ? "" : "s")")
-            .font(.callout)
-            .foregroundStyle(.tertiary)
-        }
-        Spacer()
-        Button { sceneStore.move(scene, by: -1) } label: {
-          Image(systemName: "chevron.up")
-            .foregroundStyle(isFirst ? Color.secondary.opacity(0.3) : Color.secondary)
-        }
-        .buttonStyle(.plain)
-        .disabled(isFirst)
-        .tooltip("Move Up")
-        Button { sceneStore.move(scene, by: 1) } label: {
-          Image(systemName: "chevron.down")
-            .foregroundStyle(isLast ? Color.secondary.opacity(0.3) : Color.secondary)
-        }
-        .buttonStyle(.plain)
-        .disabled(isLast)
-        .tooltip("Move Down")
-        Button { sceneStore.delete(scene) } label: {
-          Image(systemName: "trash")
-            .foregroundStyle(Color.secondary)
-        }
-        .buttonStyle(.plain)
-        .tooltip("Delete Scene")
+    ManageRow(
+      name: scene.name,
+      isFirst: isFirst,
+      isLast: isLast,
+      onMoveUp: { sceneStore.move(scene, by: -1) },
+      onMoveDown: { sceneStore.move(scene, by: 1) },
+      onDelete: { sceneStore.delete(scene) }
+    ) {
+      HStack(spacing: 4) {
+        Image(systemName: "lightbulb.2")
+        Text("\(scene.lights.count) light\(scene.lights.count == 1 ? "" : "s")")
+          .font(.callout)
       }
     }
+    .foregroundStyle(.secondary)
   }
 }
