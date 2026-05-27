@@ -12,11 +12,12 @@ final class SyncCoordinator {
   var isOptionHeld = false {
     didSet { if isOptionHeld { isReordering = false } }
   }
+
   var isReordering = false {
     didSet { if isReordering { isOptionHeld = false; reset() } }
   }
 
-  // Serials explicitly excluded from sync (empty = all included)
+  /// Serials explicitly excluded from sync (empty = all included)
   var excludedSerials: Set<String> = {
     let arr = UserDefaults.standard.stringArray(forKey: "keylight.sync.excludedSerials") ?? []
     return Set(arr)

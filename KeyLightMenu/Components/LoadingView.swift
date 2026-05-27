@@ -7,7 +7,7 @@ import SwiftUI
 
 struct LoadingView: View {
   let label: String
-  var hint: String? = nil
+  var hint: String?
 
   var body: some View {
     VStack(spacing: 0) {

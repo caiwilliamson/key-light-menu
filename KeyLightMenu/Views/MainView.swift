@@ -34,7 +34,6 @@ struct MainView: View {
       }
       .frame(height: min(scrollContentHeight, 500))
       .onPreferenceChange(ScrollContentHeightKey.self) { scrollContentHeight = $0 }
-
     }
     .environment(sync)
     .frame(width: 340)
@@ -161,23 +160,23 @@ struct MainView: View {
               Task { await service.setOn(true, at: i) }
             }
           } label: { Label("Turn All Lights On", systemImage: "power.circle.fill") }
-          .disabled(!service.lights.contains { $0.isReachable && $0.state?.isOn == false })
+            .disabled(!service.lights.contains { $0.isReachable && $0.state?.isOn == false })
           Button {
             for i in service.lights.indices where service.lights[i].isReachable {
               Task { await service.setOn(false, at: i) }
             }
           } label: { Label("Turn All Lights Off", systemImage: "power.circle") }
-          .disabled(!service.lights.contains { $0.isReachable && $0.state?.isOn == true })
+            .disabled(!service.lights.contains { $0.isReachable && $0.state?.isOn == true })
           Toggle(isOn: Binding(
             get: { sync.isOptionHeld },
             set: { on in sync.isOptionHeld = on; if !on { sync.reset() } }
           )) { Label("Sync Sliders ⌥", systemImage: "slider.horizontal.3") }
-          .disabled(service.lights.filter(\.isReachable).count < 2)
+            .disabled(service.lights.filter(\.isReachable).count < 2)
           Toggle(isOn: Binding(
             get: { sync.isReordering },
             set: { sync.isReordering = $0 }
           )) { Label("Reorder Lights", systemImage: "arrow.up.arrow.down") }
-          .disabled(service.lights.count < 2)
+            .disabled(service.lights.count < 2)
           Divider()
           Button("Quit") { NSApplication.shared.terminate(nil) }
         } label: {
@@ -262,7 +261,6 @@ struct MainView: View {
         .environment(store)
     }
   }
-
 }
 
 private struct ScrollContentHeightKey: PreferenceKey {

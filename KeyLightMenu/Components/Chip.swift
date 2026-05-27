@@ -111,7 +111,7 @@ struct SceneChip: View {
     .disabled(isDisabled)
     .tooltip(
       status == .none ? "All lights in this scene are disconnected." :
-      status == .some ? "Some lights in this scene are disconnected.\nOnly connected lights will be applied." : nil
+        status == .some ? "Some lights in this scene are disconnected.\nOnly connected lights will be applied." : nil
     )
   }
 }
@@ -150,10 +150,14 @@ struct ChipRow<Content: View>: View {
 
 struct PresetChipsRow<Content: View>: View {
   @ViewBuilder let content: Content
-  var body: some View { ChipRow(rowHeight: 21) { content } }
+  var body: some View {
+    ChipRow(rowHeight: 21) { content }
+  }
 }
 
 struct SceneChipsRow<Content: View>: View {
   @ViewBuilder let content: Content
-  var body: some View { ChipRow(rowHeight: 25) { content } }
+  var body: some View {
+    ChipRow(rowHeight: 25) { content }
+  }
 }

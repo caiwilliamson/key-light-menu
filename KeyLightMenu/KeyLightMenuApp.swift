@@ -25,8 +25,8 @@ struct KeyLightMenuApp: App {
         .onChange(of: appSettings.appearanceMode, initial: true) { _, mode in
           switch mode {
           case .system: NSApp.appearance = nil
-          case .light:  NSApp.appearance = NSAppearance(named: .aqua)
-          case .dark:   NSApp.appearance = NSAppearance(named: .darkAqua)
+          case .light: NSApp.appearance = NSAppearance(named: .aqua)
+          case .dark: NSApp.appearance = NSAppearance(named: .darkAqua)
           }
         }
     } label: {

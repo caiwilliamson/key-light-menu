@@ -12,20 +12,21 @@ enum AppearanceMode: String, CaseIterable {
 
   var title: String {
     switch self {
-    case .system: return "System"
-    case .light: return "Light"
-    case .dark: return "Dark"
+    case .system: "System"
+    case .light: "Light"
+    case .dark: "Dark"
     }
   }
 
   var colorScheme: ColorScheme? {
     switch self {
-    case .system: return nil
-    case .light: return .light
-    case .dark: return .dark
+    case .system: nil
+    case .light: .light
+    case .dark: .dark
     }
   }
 }
+
 @Observable
 @MainActor
 final class AppSettings {
@@ -82,7 +83,8 @@ final class AppSettings {
       alwaysShowSliders = UserDefaults.standard.bool(forKey: "keylight.settings.alwaysShowSliders")
     }
     if let raw = UserDefaults.standard.string(forKey: "keylight.settings.appearanceMode"),
-       let mode = AppearanceMode(rawValue: raw) {
+       let mode = AppearanceMode(rawValue: raw)
+    {
       appearanceMode = mode
     }
   }
