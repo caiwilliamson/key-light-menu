@@ -49,14 +49,17 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
   var body: some View {
     let presets = store.presets(for: light.accessoryInfo?.serialNumber ?? "")
     let lightState = service.lights.indices.contains(index) ? service.lights[index].state : nil
-    HStack(alignment: .center, spacing: 6) {
-      leadingAccessory
-      VStack(alignment: .leading, spacing: 0) {
-        HStack(alignment: .center, spacing: 6) {
-          HStack(spacing: 6) {
-            Text(light.name)
-              .lineLimit(1)
-            if light.isReachable {
+    VStack(alignment: .leading, spacing: 0) {
+      // Title row: leading accessory + name/indicators + trailing actions
+      HStack(alignment: .center, spacing: 0) {
+        leadingAccessory
+          .padding(.trailing, 3)
+
+        HStack(spacing: 0) {
+          Text(light.name)
+            .lineLimit(1)
+          if light.isReachable, light.accessoryInfo?.wifiInfo != nil || light.batteryInfo != nil {
+            HStack(spacing: 6) {
               if let wifi = light.accessoryInfo?.wifiInfo {
                 wifiIndicator(wifi)
               }
@@ -64,37 +67,50 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
                 batteryIndicator(battery)
               }
             }
+            .fixedSize()
+            .padding(.leading, 12)
           }
-          .frame(maxWidth: .infinity, alignment: .leading)
-          trailingActions
         }
-        if !light.isReachable {
-          Text("Disconnected")
-            .font(.callout)
-            .foregroundStyle(.secondary)
-            .padding(.top, 1)
-        } else if let err = light.actionError {
-          Text(err)
-            .font(.callout)
-            .foregroundStyle(.red)
-            .padding(.top, 1)
+        .frame(maxWidth: .infinity, alignment: .leading)
+
+        trailingActions.padding(.leading, 12)
+      }
+      // Status row: only rendered when disconnected or has an error; invisible leading accessory keeps alignment with title
+      if !light.isReachable || light.actionError != nil {
+        HStack(alignment: .top, spacing: 0) {
+          leadingAccessory
+            .hidden()
+            .padding(.trailing, 3)
+          if !light.isReachable {
+            Text("Disconnected")
+              .font(.callout)
+              .foregroundStyle(.secondary)
+              .padding(.top, 1)
+          } else if let err = light.actionError {
+            Text(err)
+              .font(.callout)
+              .foregroundStyle(.red)
+              .padding(.top, 1)
+              .padding(.bottom, 2)
+          }
         }
-        if showsPresets, light.isReachable, !presets.isEmpty, !sync.isOptionHeld, !sync.isReordering {
-          PresetChipsRow {
-            ForEach(presets) { preset in
-              let active = lightState?.brightness == preset.brightness && lightState?.temperature == preset.temperature
-              PresetChip(label: preset.name, isActive: active) {
-                Task {
-                  if appSettings.turnOnLightWithPreset, service.lights[index].state?.isOn == false {
-                    await service.setOn(true, at: index)
-                  }
-                  await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature, at: index)
+      }
+      // Preset chips: separate from status, not shown in sync or reorder modes
+      if showsPresets, light.isReachable, !presets.isEmpty, !sync.isOptionHeld, !sync.isReordering {
+        PresetChipsRow {
+          ForEach(presets) { preset in
+            let active = lightState?.brightness == preset.brightness && lightState?.temperature == preset.temperature
+            PresetChip(label: preset.name, isActive: active) {
+              Task {
+                if appSettings.turnOnLightWithPreset, service.lights[index].state?.isOn == false {
+                  await service.setOn(true, at: index)
                 }
+                await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature, at: index)
               }
             }
           }
-          .padding(.top, 6)
         }
+        .padding(.top, 6)
       }
     }
   }
