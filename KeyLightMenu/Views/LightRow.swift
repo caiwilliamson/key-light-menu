@@ -20,21 +20,12 @@ struct LightRow: View {
     PanelSection {
       LightRowHeader(light: light, index: index) {
         if sync.isReordering {
-          VStack(spacing: 2) {
-            Button { service.move(from: index, by: -1) } label: {
-              Image(systemName: "chevron.up")
-                .foregroundStyle(index == 0 ? Color.secondary.opacity(0.3) : Color.secondary)
-            }
-            .buttonStyle(.plain)
-            .disabled(index == 0)
-            Button { service.move(from: index, by: 1) } label: {
-              Image(systemName: "chevron.down")
-                .foregroundStyle(index == service.lights.count - 1 ? Color.secondary.opacity(0.3) : Color.secondary)
-            }
-            .buttonStyle(.plain)
-            .disabled(index == service.lights.count - 1)
-          }
-          .padding(.trailing, 4)
+          ReorderChevrons(
+            isFirst: index == 0,
+            isLast: index == service.lights.count - 1,
+            onMoveUp: { service.move(from: index, by: -1) },
+            onMoveDown: { service.move(from: index, by: 1) }
+          )
         } else if sync.isOptionHeld {
           let serial = light.accessoryInfo?.serialNumber ?? "\(light.host):\(light.port)"
           Toggle("", isOn: Binding(
