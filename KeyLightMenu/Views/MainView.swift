@@ -19,10 +19,15 @@ struct MainView: View {
   @State private var sync = SyncCoordinator()
   @State private var eventMonitor: Any?
   @State private var scrollContentHeight: CGFloat = 0
+  @State private var headerHeight: CGFloat = 0
+  @State private var availableScreenHeight: CGFloat = NSScreen.main?.visibleFrame.height ?? 800
 
   var body: some View {
     VStack(spacing: 0) {
       header
+        .background(GeometryReader { geo in
+          Color.clear.preference(key: HeaderHeightKey.self, value: geo.size.height)
+        })
       Divider()
       ScrollView {
         VStack(spacing: 0) {
@@ -32,12 +37,20 @@ struct MainView: View {
           Color.clear.preference(key: ScrollContentHeightKey.self, value: geo.size.height)
         })
       }
-      .frame(height: min(scrollContentHeight, 500))
+      .frame(height: min(scrollContentHeight, max(0, availableScreenHeight - headerHeight - 1 - 12)))
       .onPreferenceChange(ScrollContentHeightKey.self) { scrollContentHeight = $0 }
     }
     .environment(sync)
     .frame(width: 340)
     .tooltipContainer()
+    .onPreferenceChange(HeaderHeightKey.self) { headerHeight = $0 }
+    .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in
+      DispatchQueue.main.async {
+        if let screen = NSApp.keyWindow?.screen {
+          availableScreenHeight = screen.visibleFrame.height
+        }
+      }
+    }
     .task { service.startSession() }
     .onAppear {
       eventMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { event in
@@ -260,6 +273,13 @@ struct MainView: View {
       RemoveLightView(light: light, index: index, activePanel: $activePanel)
         .environment(store)
     }
+  }
+}
+
+private struct HeaderHeightKey: PreferenceKey {
+  static let defaultValue: CGFloat = 0
+  static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+    value = max(value, nextValue())
   }
 }
 
