@@ -219,6 +219,7 @@ struct MainView: View {
           .menuStyle(.borderlessButton)
           .menuIndicator(.hidden)
           .fixedSize()
+          .tooltip("Options")
         }
       }
       .frame(height: 20)

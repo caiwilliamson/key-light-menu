@@ -65,6 +65,7 @@ struct LightRow: View {
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
             .fixedSize()
+            .tooltip("Options")
           } else if !sync.isOptionHeld, !sync.isReordering {
             Menu {
               Button {
@@ -80,6 +81,7 @@ struct LightRow: View {
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
             .fixedSize()
+            .tooltip("Options")
           }
           LightPowerButton(isOn: light.state?.isOn ?? false) {
             Task { await service.toggle(at: index) }
