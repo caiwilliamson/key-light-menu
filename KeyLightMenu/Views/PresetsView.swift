@@ -46,18 +46,7 @@ struct PresetsView: View {
     let hostPresets = store.presets(for: serial)
     return VStack(alignment: .leading, spacing: 0) {
       if hostPresets.isEmpty {
-        PanelSection {
-          Text("No saved Presets.")
-            .foregroundStyle(.tertiary)
-            .frame(maxWidth: .infinity, alignment: .center)
-            .font(.callout)
-            .padding(.top, 30)
-          Text("Press + to create one.")
-            .foregroundStyle(.tertiary)
-            .frame(maxWidth: .infinity, alignment: .center)
-            .font(.callout)
-            .padding(.bottom, 30)
-        }
+        PlaceholderView(label: "No saved presets.", hint: "Press + to create one.")
       } else {
         ScrollView {
           VStack(spacing: 0) {

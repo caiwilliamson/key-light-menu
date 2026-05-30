@@ -46,18 +46,7 @@ struct ScenesView: View {
   private var manageView: some View {
     VStack(alignment: .leading, spacing: 0) {
       if sceneStore.scenes.isEmpty {
-        PanelSection {
-          Text("No saved Scenes.")
-            .foregroundStyle(.tertiary)
-            .frame(maxWidth: .infinity, alignment: .center)
-            .font(.callout)
-            .padding(.top, 30)
-          Text("Press + to create one.")
-            .foregroundStyle(.tertiary)
-            .frame(maxWidth: .infinity, alignment: .center)
-            .font(.callout)
-            .padding(.bottom, 30)
-        }
+        PlaceholderView(label: "No saved scenes.", hint: "Press + to create one.")
       } else {
         ScrollView {
           VStack(spacing: 0) {
@@ -86,13 +75,7 @@ struct ScenesView: View {
     let reachable = service.lights.indices.filter { service.lights[$0].isReachable }
     VStack(alignment: .leading, spacing: 0) {
       if reachable.isEmpty {
-        PanelSection {
-          Text("No lights available")
-            .foregroundStyle(.tertiary)
-            .frame(maxWidth: .infinity, alignment: .center)
-            .font(.callout)
-            .padding(.vertical, 8)
-        }
+        PlaceholderView(label: "No lights connected.")
         SectionDivider()
       } else {
         PanelSection {
