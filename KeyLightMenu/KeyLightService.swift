@@ -52,7 +52,6 @@ final class KeyLightService: NSObject {
                  state: $0.state, accessoryInfo: $0.accessoryInfo, settings: $0.settings,
                  isReachable: $0.isReachable)
       }
-      selectedIndex = 0
     }
     super.init()
     // Start polling immediately so it runs for the app's lifetime,
@@ -518,7 +517,6 @@ extension KeyLightService: NetServiceDelegate {
         self.lights[existing].host = ipAddress
         self.lights[existing].port = port
         if let info = resolvedInfo { self.lights[existing].accessoryInfo = info }
-        if self.selectedIndex == nil { self.selectedIndex = existing }
         await self.fetchStatus(at: existing)
         if resolvedInfo == nil { await self.fetchAccessoryInfo(at: existing) }
         await self.fetchSettings(at: existing)
@@ -527,7 +525,6 @@ extension KeyLightService: NetServiceDelegate {
         self.lights.append(KeyLight(discoveredName: name, host: ipAddress, port: port))
         let newIndex = self.lights.count - 1
         if let info = resolvedInfo { self.lights[newIndex].accessoryInfo = info }
-        if self.selectedIndex == nil { self.selectedIndex = newIndex }
         await self.fetchStatus(at: newIndex)
         if resolvedInfo == nil { await self.fetchAccessoryInfo(at: newIndex) }
         await self.fetchSettings(at: newIndex)
