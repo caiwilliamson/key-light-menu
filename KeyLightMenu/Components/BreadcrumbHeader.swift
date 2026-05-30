@@ -31,21 +31,19 @@ struct BreadcrumbHeader: View {
   var body: some View {
     HStack(spacing: 0) {
       Button(action: homeAction) {
-        Image(systemName: "chevron.left")
+        Image(systemName: "house.fill")
           .foregroundStyle(.secondary)
           .font(.system(size: 16))
+          .padding(.bottom, 2)
       }
       .buttonStyle(.plain)
-      .tooltip("Back")
-      .padding(.trailing, 8)
+      .tooltip("Home")
 
       ForEach(crumbs.indices, id: \.self) { i in
-        if i > 0 {
-          Image(systemName: "chevron.right")
-            .font(.caption2.weight(.semibold))
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, 5)
-        }
+        Image(systemName: "chevron.right")
+          .font(.caption2.weight(.semibold))
+          .foregroundStyle(.secondary)
+          .padding(.horizontal, 5)
 
         let crumb = crumbs[i]
         if let action = crumb.action {
