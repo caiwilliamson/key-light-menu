@@ -32,59 +32,50 @@ struct BatterySettingsView: View {
 
   var body: some View {
     let isPluggedIn = service.lights[index].batteryInfo?.isPluggedIn ?? true
-    VStack(spacing: 0) {
-      PanelSection {
-        SettingToggleRow(
-          label: "Bypass Battery",
-          subtitle: "Bypass the battery so the light only works when connected to power.",
-          isOn: $bypass,
-          onChange: send
-        )
-        .disabled(!isPluggedIn)
-      }
-
+    Group {
+      SettingToggleRow(
+        label: "Bypass Battery",
+        subtitle: "Bypass the battery so the light only works when connected to power.",
+        isOn: $bypass,
+        onChange: send
+      )
+      .disabled(!isPluggedIn)
       if !bypass {
-        SectionDivider()
-
-        PanelSection {
-          SettingToggleRow(label: "Energy Saving Mode", isOn: $energySavingEnabled, onChange: send)
-
-          if energySavingEnabled {
-            HStack {
-              Text("When Battery Level Falls Below")
-              Spacer()
-              Picker("", selection: $minBatteryLevel) {
-                ForEach(stride(from: 5.0, through: 50.0, by: 5.0).map { $0 }, id: \.self) { v in
-                  Text("\(Int(v))%").tag(v)
-                }
+        Divider()
+        SettingToggleRow(label: "Energy Saving Mode", isOn: $energySavingEnabled, onChange: send)
+        if energySavingEnabled {
+          HStack {
+            Text("When Battery Level Falls Below")
+            Spacer()
+            Picker("", selection: $minBatteryLevel) {
+              ForEach(stride(from: 5.0, through: 50.0, by: 5.0).map { $0 }, id: \.self) { v in
+                Text("\(Int(v))%").tag(v)
               }
-              .labelsHidden()
-              .fixedSize()
-              .onChange(of: minBatteryLevel) { _, _ in send() }
             }
-            SettingToggleRow(label: "Disable Wi-Fi", isOn: $disableWifi, onChange: send)
+            .labelsHidden()
+            .fixedSize()
+            .onChange(of: minBatteryLevel) { _, _ in send() }
+          }
+          SettingToggleRow(label: "Disable Wi-Fi", isOn: $disableWifi, onChange: send)
+            .padding(.leading, 16)
+          SettingToggleRow(label: "Adjust Brightness", isOn: $adjustBrightnessEnabled, onChange: send)
+            .padding(.leading, 16)
+          if adjustBrightnessEnabled {
+            SliderRow(
+              icon: "sun.max.fill",
+              value: $adjustBrightnessLevel,
+              range: 1 ... 100,
+              label: { "\(Int($0))%" },
+              gradient: .brightness(for: service.lights[index].state?.temperature ?? 200),
+              iconTooltip: "Brightness"
+            ) { editing in if !editing { send() } }
               .padding(.leading, 16)
-            SettingToggleRow(label: "Adjust Brightness", isOn: $adjustBrightnessEnabled, onChange: send)
-              .padding(.leading, 16)
-            if adjustBrightnessEnabled {
-              SliderRow(
-                icon: "sun.max.fill",
-                value: $adjustBrightnessLevel,
-                range: 1 ... 100,
-                label: { "\(Int($0))%" },
-                gradient: .brightness(for: service.lights[index].state?.temperature ?? 200),
-                iconTooltip: "Brightness"
-              ) { editing in if !editing { send() } }
-                .padding(.leading, 16)
-            }
           }
         }
       }
       if let err = sendError {
-        SectionDivider()
-        PanelSection {
-          Text(err).font(.callout).foregroundStyle(.red)
-        }
+        Divider()
+        Text(err).font(.callout).foregroundStyle(.red)
       }
     }
     .onChange(of: battery) { _, new in

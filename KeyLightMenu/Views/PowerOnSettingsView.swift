@@ -25,7 +25,7 @@ struct PowerOnSettingsView: View {
   }
 
   var body: some View {
-    PanelSection {
+    Group {
       HStack {
         Text("Power On Behaviour")
         Spacer()
@@ -57,6 +57,7 @@ struct PowerOnSettingsView: View {
         ) { editing in if !editing { send() } }
       }
       if let err = sendError {
+        Divider()
         Text(err).font(.callout).foregroundStyle(.red)
       }
     }

@@ -15,59 +15,51 @@ struct SettingsView: View {
   @State private var saveError: String?
 
   var body: some View {
-    VStack(spacing: 0) {
-      PanelSection {
-        HStack {
-          Text("Display Name")
-          TextField("None", text: $displayNameDraft)
-            .textFieldStyle(.roundedBorder)
-            .onSubmit { saveDisplayName() }
-          if displayNameDraft != info.displayName {
-            Button("Save", action: saveDisplayName)
-              .buttonStyle(.borderedProminent)
-          }
-        }
-        if let err = saveError {
-          Text(err).font(.callout).foregroundStyle(.red)
+    PanelSection {
+      HStack {
+        Text("Display Name")
+        TextField("None", text: $displayNameDraft)
+          .textFieldStyle(.roundedBorder)
+          .onSubmit { saveDisplayName() }
+        if displayNameDraft != info.displayName {
+          Button("Save", action: saveDisplayName)
+            .buttonStyle(.borderedProminent)
         }
       }
-
-      SectionDivider()
-
+      if let err = saveError {
+        Text(err).font(.callout).foregroundStyle(.red)
+      }
       if let battery = light.settings?.battery {
+        Divider()
         BatterySettingsView(battery: battery, index: index)
           .environment(service)
-        SectionDivider()
       }
-
       if let settings = light.settings {
+        Divider()
         PowerOnSettingsView(settings: settings, index: index)
           .environment(service)
-        SectionDivider()
       }
-
-      PanelSection {
-        let serial = info.serialNumber
+      Divider()
+      let serial = info.serialNumber
+      SettingToggleRow(
+        label: "Turn Off When Mac Sleeps",
+        subtitle: "Turn the light off when your Mac sleeps or locks.",
+        isOn: Binding(
+          get: { service.lightPrefs.isEnabled(for: serial) },
+          set: { service.lightPrefs.setEnabled($0, for: serial) }
+        ),
+        onChange: {}
+      )
+      if service.lightPrefs.isEnabled(for: serial) {
         SettingToggleRow(
-          label: "Turn Off When Mac Sleeps",
-          subtitle: "Turn the light off when your Mac sleeps or locks.",
+          label: "Turn Back On When Mac Wakes",
+          subtitle: "Turn the light back on when your Mac wakes or unlocks, restoring its previous settings.",
           isOn: Binding(
-            get: { service.lightPrefs.isEnabled(for: serial) },
-            set: { service.lightPrefs.setEnabled($0, for: serial) }
+            get: { service.lightPrefs.isRestoreEnabled(for: serial) },
+            set: { service.lightPrefs.setRestoreEnabled($0, for: serial) }
           ),
           onChange: {}
         )
-        if service.lightPrefs.isEnabled(for: serial) {
-          SettingToggleRow(
-            label: "Turn Back On When Mac Wakes",
-            subtitle: "Turn the light back on when your Mac wakes or unlocks, restoring its previous settings.",
-            isOn: Binding(
-              get: { service.lightPrefs.isRestoreEnabled(for: serial) },
-              set: { service.lightPrefs.setRestoreEnabled($0, for: serial) }
-            ),
-            onChange: {}
-          )
-        }
       }
     }
     .onAppear { displayNameDraft = info.displayName }
