@@ -170,6 +170,10 @@ struct LightControlsSection: View {
 
   var body: some View {
     let brightnessGradient = TrackGradient.brightness(for: state.temperature)
+    let serial = service.lights.indices.contains(index)
+      ? service.lights[index].accessoryInfo?.serialNumber ?? "\(service.lights[index].host):\(service.lights[index].port)"
+      : ""
+    let isSynced = sync.isOptionHeld && sync.isIncluded(serial: serial)
 
     VStack(alignment: .leading, spacing: 8) {
       LightSlider(
@@ -178,6 +182,7 @@ struct LightControlsSection: View {
         range: 1 ... 100,
         label: { "\(Int($0))%" },
         gradient: brightnessGradient,
+        syncKind: isSynced ? .brightness : nil,
         onDragStart: onBrightnessDragStart,
         onDragChange: onBrightnessDragChange,
         onCommit: onBrightnessCommit,
@@ -189,6 +194,7 @@ struct LightControlsSection: View {
         range: 143 ... 344,
         label: { "\(Int(1_000_000 / $0.rounded()))K" },
         gradient: .temperature,
+        syncKind: isSynced ? .temperature : nil,
         onDragStart: onTemperatureDragStart,
         onDragChange: onTemperatureDragChange,
         onCommit: onTemperatureCommit,

@@ -10,12 +10,20 @@ struct GradientSlider: View {
   @Binding var value: Double
   let range: ClosedRange<Double>
   let gradient: TrackGradient
+  var syncKind: SyncSliderKind? = nil
   var onEditingChanged: ((Bool) -> Void)?
+
+  @Environment(SyncCoordinator.self) private var sync
 
   private static let thumbSize: CGFloat = 16
   private static let trackHeight: CGFloat = 8
   private var fraction: Double {
     (value - range.lowerBound) / (range.upperBound - range.lowerBound)
+  }
+
+  /// True when sync is active, something is hovered, but it's a different kind than this slider.
+  private var isKindDimmed: Bool {
+    syncKind != nil && sync.syncHoveredKind != nil && sync.syncHoveredKind != syncKind
   }
 
   var body: some View {
@@ -27,7 +35,7 @@ struct GradientSlider: View {
           .clipShape(RoundedRectangle(cornerRadius: Self.trackHeight / 2))
           .overlay(
             RoundedRectangle(cornerRadius: Self.trackHeight / 2)
-              .strokeBorder(.tertiary, lineWidth: 0.5)
+              .strokeBorder(Color(.tertiaryLabelColor), lineWidth: 0.5)
           )
 
         ZStack {
@@ -40,7 +48,13 @@ struct GradientSlider: View {
         .frame(width: Self.thumbSize, height: Self.thumbSize)
         .offset(x: max(0, min(trackWidth, fraction * trackWidth)))
       }
+      .compositingGroup()
+      .opacity(isKindDimmed ? 0.3 : 1.0)
+      .animation(sync.isOptionHeld ? .spring(duration: 0.1) : nil, value: isKindDimmed)
       .contentShape(Rectangle())
+      .onHover { hovering in
+        if syncKind != nil { sync.syncHoveredKind = hovering ? syncKind : nil }
+      }
       .gesture(
         DragGesture(minimumDistance: 0)
           .onChanged { drag in

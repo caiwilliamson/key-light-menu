@@ -6,16 +6,21 @@
 import Foundation
 import Observation
 
+enum SyncSliderKind { case brightness, temperature }
+
 @Observable
 @MainActor
 final class SyncCoordinator {
   var isOptionHeld = false {
-    didSet { if isOptionHeld { isReordering = false } }
+    didSet { if isOptionHeld { isReordering = false }; syncHoveredKind = nil }
   }
 
   var isReordering = false {
     didSet { if isReordering { isOptionHeld = false; reset() } }
   }
+
+  /// Which slider kind is currently hovered across all synced rows — nil when none.
+  var syncHoveredKind: SyncSliderKind? = nil
 
   /// Serials explicitly excluded from sync (empty = all included)
   var excludedSerials: Set<String> = {

@@ -12,6 +12,7 @@ struct LightSlider: View {
   let range: ClosedRange<Double>
   let label: (Double) -> String
   let gradient: TrackGradient
+  var syncKind: SyncSliderKind? = nil
   let onDragStart: (() -> Void)?
   let onDragChange: ((Double) -> Void)?
   let onCommit: (Double) -> Void
@@ -31,6 +32,7 @@ struct LightSlider: View {
     range: ClosedRange<Double>,
     label: @escaping (Double) -> String,
     gradient: TrackGradient,
+    syncKind: SyncSliderKind? = nil,
     onDragStart: (() -> Void)? = nil,
     onDragChange: ((Double) -> Void)? = nil,
     onCommit: @escaping (Double) -> Void,
@@ -41,6 +43,7 @@ struct LightSlider: View {
     self.range = range
     self.label = label
     self.gradient = gradient
+    self.syncKind = syncKind
     self.onDragStart = onDragStart
     self.onDragChange = onDragChange
     self.onCommit = onCommit
@@ -49,7 +52,7 @@ struct LightSlider: View {
   }
 
   var body: some View {
-    SliderRow(icon: icon, value: $value, range: range, label: label, gradient: gradient, iconTooltip: iconTooltip) { editing in
+    SliderRow(icon: icon, value: $value, range: range, label: label, gradient: gradient, syncKind: syncKind, iconTooltip: iconTooltip) { editing in
       if editing, !isDragging { onDragStart?() }
       isDragging = editing
       if !editing {

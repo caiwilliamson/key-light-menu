@@ -12,6 +12,7 @@ struct SliderRow: View {
   let range: ClosedRange<Double>
   let label: (Double) -> String
   let gradient: TrackGradient
+  var syncKind: SyncSliderKind? = nil
   var iconTooltip: String?
   var onEditingChanged: ((Bool) -> Void)?
 
@@ -21,6 +22,7 @@ struct SliderRow: View {
     range: ClosedRange<Double>,
     label: @escaping (Double) -> String,
     gradient: TrackGradient,
+    syncKind: SyncSliderKind? = nil,
     iconTooltip: String? = nil,
     onEditingChanged: ((Bool) -> Void)? = nil
   ) {
@@ -29,6 +31,7 @@ struct SliderRow: View {
     self.range = range
     self.label = label
     self.gradient = gradient
+    self.syncKind = syncKind
     self.iconTooltip = iconTooltip
     self.onEditingChanged = onEditingChanged
   }
@@ -39,7 +42,7 @@ struct SliderRow: View {
         .frame(width: 16)
         .foregroundStyle(.secondary)
         .tooltip(iconTooltip)
-      GradientSlider(value: $value, range: range, gradient: gradient, onEditingChanged: onEditingChanged)
+      GradientSlider(value: $value, range: range, gradient: gradient, syncKind: syncKind, onEditingChanged: onEditingChanged)
       Text(label(value))
         .frame(width: 40, alignment: .trailing)
         .monospacedDigit()
