@@ -68,6 +68,9 @@ struct MainView: View {
         NSEvent.removeMonitor(monitor)
         eventMonitor = nil
       }
+      sync.isOptionHeld = false
+      sync.reset()
+      sync.isReordering = false
     }
     .onChange(of: service.selectedLight?.host) { _, new in
       if new == nil { activePanel = nil }
@@ -106,16 +109,6 @@ struct MainView: View {
         BreadcrumbHeader(
           homeAction: { showGlobalSettings = false },
           crumbs: [.init(title: "App Settings")]
-        )
-      } else if sync.isOptionHeld {
-        BreadcrumbHeader(
-          homeAction: { sync.isOptionHeld = false; sync.reset() },
-          crumbs: [.init(title: "Sync Sliders")]
-        )
-      } else if sync.isReordering {
-        BreadcrumbHeader(
-          homeAction: { sync.isReordering = false },
-          crumbs: [.init(title: "Reorder Lights")]
         )
       } else if let panel = activePanel, let idx = service.selectedIndex,
                 service.lights.indices.contains(idx)
@@ -156,49 +149,77 @@ struct MainView: View {
         Text("Key Light Menu")
           .font(.headline)
         Spacer()
-        Menu {
+        if sync.isOptionHeld {
+          Image(systemName: "link")
+            .foregroundStyle(.secondary)
+          Text("Sliders Linked (⌥)")
+            .font(.callout)
+            .foregroundStyle(.secondary)
           Button {
-            showGlobalSettings = true
-            showScenes = false
-            isCreatingScene = false
-          } label: { Label("App Settings", systemImage: "gearshape") }
+            sync.isOptionHeld = false; sync.reset()
+          } label: {
+            Image(systemName: "xmark.circle.fill")
+              .foregroundStyle(.secondary)
+          }
+          .buttonStyle(.plain)
+          .tooltip("Exit Mode")
+        } else if sync.isReordering {
+          Image(systemName: "arrow.up.arrow.down")
+            .foregroundStyle(.secondary)
+          Text("Reorder Lights")
+            .font(.callout)
+            .foregroundStyle(.secondary)
           Button {
-            showScenes = true
-            showGlobalSettings = false
-            isCreatingScene = false
-          } label: { Label("Scenes", systemImage: "sparkles") }
-          Divider()
-          Button {
-            for i in service.lights.indices where service.lights[i].isReachable {
-              Task { await service.setOn(true, at: i) }
-            }
-          } label: { Label("Turn All Lights On", systemImage: "power.circle.fill") }
-            .disabled(!service.lights.contains { $0.isReachable && $0.state?.isOn == false })
-          Button {
-            for i in service.lights.indices where service.lights[i].isReachable {
-              Task { await service.setOn(false, at: i) }
-            }
-          } label: { Label("Turn All Lights Off", systemImage: "power.circle") }
-            .disabled(!service.lights.contains { $0.isReachable && $0.state?.isOn == true })
-          Toggle(isOn: Binding(
-            get: { sync.isOptionHeld },
-            set: { on in sync.isOptionHeld = on; if !on { sync.reset() } }
-          )) { Label("Sync Sliders ⌥", systemImage: "slider.horizontal.3") }
-            .disabled(service.lights.filter(\.isReachable).count < 2)
-          Toggle(isOn: Binding(
-            get: { sync.isReordering },
-            set: { sync.isReordering = $0 }
-          )) { Label("Reorder Lights", systemImage: "arrow.up.arrow.down") }
-            .disabled(service.lights.count < 2)
-          Divider()
-          Button("Quit") { NSApplication.shared.terminate(nil) }
-        } label: {
-          Image(systemName: "ellipsis")
-            .foregroundStyle(Color.secondary)
+            sync.isReordering = false
+          } label: {
+            Image(systemName: "xmark.circle.fill")
+              .foregroundStyle(.secondary)
+          }
+          .buttonStyle(.plain)
+          .tooltip("Exit Mode")
+        } else {
+          Menu {
+            Button {
+              showGlobalSettings = true
+              showScenes = false
+              isCreatingScene = false
+            } label: { Label("App Settings", systemImage: "gearshape") }
+            Button {
+              showScenes = true
+              showGlobalSettings = false
+              isCreatingScene = false
+            } label: { Label("Scenes", systemImage: "sparkles") }
+            Divider()
+            Button {
+              for i in service.lights.indices where service.lights[i].isReachable {
+                Task { await service.setOn(true, at: i) }
+              }
+            } label: { Label("Turn All Lights On", systemImage: "power.circle.fill") }
+              .disabled(!service.lights.contains { $0.isReachable && $0.state?.isOn == false })
+            Button {
+              for i in service.lights.indices where service.lights[i].isReachable {
+                Task { await service.setOn(false, at: i) }
+              }
+            } label: { Label("Turn All Lights Off", systemImage: "power.circle") }
+              .disabled(!service.lights.contains { $0.isReachable && $0.state?.isOn == true })
+            Button {
+              sync.isOptionHeld = true
+            } label: { Label("Link Sliders ⌥", systemImage: "link") }
+              .disabled(service.lights.filter(\.isReachable).count < 2)
+            Button {
+              sync.isReordering = true
+            } label: { Label("Reorder Lights", systemImage: "arrow.up.arrow.down") }
+              .disabled(service.lights.count < 2)
+            Divider()
+            Button("Quit") { NSApplication.shared.terminate(nil) }
+          } label: {
+            Image(systemName: "ellipsis")
+              .foregroundStyle(Color.secondary)
+          }
+          .menuStyle(.borderlessButton)
+          .menuIndicator(.hidden)
+          .fixedSize()
         }
-        .menuStyle(.borderlessButton)
-        .menuIndicator(.hidden)
-        .fixedSize()
       }
       .frame(height: 20)
       if !sceneStore.scenes.isEmpty {
