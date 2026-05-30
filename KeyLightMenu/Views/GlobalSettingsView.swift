@@ -27,18 +27,18 @@ struct GlobalSettingsView: View {
       Divider()
       SettingToggleRow(
         label: "Turn On Lights With Scene",
-        subtitle: "When a scene is applied, any lights in the scene that are currently off will be turned on.",
+        subtitle: "Turn on any lights that are off when applying a Scene.",
         isOn: $appSettings.turnOnLightsWithScene
       ) {}
       SettingToggleRow(
         label: "Turn On Light With Preset",
-        subtitle: "When a preset is applied, if the light is currently off it will be turned on.",
+        subtitle: "Turn on the light if it's off when applying a Preset.",
         isOn: $appSettings.turnOnLightWithPreset
       ) {}
       Divider()
       SettingToggleRow(
-        label: "Always Show Sliders",
-        subtitle: "Show sliders for all lights at once.",
+        label: "Expand All Lights",
+        subtitle: "Show expanded controls for all lights at once.",
         isOn: $appSettings.alwaysShowSliders
       ) {}
       SettingToggleRow(

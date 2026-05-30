@@ -49,7 +49,7 @@ struct SettingsView: View {
       PanelSection {
         let serial = info.serialNumber
         SettingToggleRow(
-          label: "Turn Off Automatically",
+          label: "Turn Off When Mac Sleeps",
           subtitle: "Turn the light off when your Mac sleeps or locks.",
           isOn: Binding(
             get: { service.lightPrefs.isEnabled(for: serial) },
@@ -59,8 +59,8 @@ struct SettingsView: View {
         )
         if service.lightPrefs.isEnabled(for: serial) {
           SettingToggleRow(
-            label: "Turn Back On Automatically",
-            subtitle: "Turn the light back on when your Mac wakes or unlocks.",
+            label: "Turn Back On When Mac Wakes",
+            subtitle: "Turn the light back on when your Mac wakes or unlocks, restoring its previous settings.",
             isOn: Binding(
               get: { service.lightPrefs.isRestoreEnabled(for: serial) },
               set: { service.lightPrefs.setRestoreEnabled($0, for: serial) }

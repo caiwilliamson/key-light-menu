@@ -47,12 +47,12 @@ struct PresetsView: View {
     return VStack(alignment: .leading, spacing: 0) {
       if hostPresets.isEmpty {
         PanelSection {
-          Text("No saved presets")
+          Text("No saved Presets.")
             .foregroundStyle(.tertiary)
             .frame(maxWidth: .infinity, alignment: .center)
             .font(.callout)
             .padding(.top, 30)
-          Text("Press + to add one")
+          Text("Press + to create one.")
             .foregroundStyle(.tertiary)
             .frame(maxWidth: .infinity, alignment: .center)
             .font(.callout)
@@ -85,9 +85,9 @@ struct PresetsView: View {
       let serial = light.accessoryInfo?.serialNumber ?? ""
       VStack(alignment: .leading, spacing: 0) {
         PanelSection {
-          Text("Set the sliders to your desired values, then save as a preset.")
-            .font(.callout)
+          Text("Save settings for this light as a named Preset for quick access from the home screen.")
             .foregroundStyle(.secondary)
+            .font(.callout)
         }
         PanelSection {
           LightRowHeader(light: light, index: index, showsPresets: false) {

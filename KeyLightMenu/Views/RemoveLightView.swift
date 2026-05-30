@@ -16,7 +16,7 @@ struct RemoveLightView: View {
     PanelSection {
       Text("Remove \"\(light.name)\"?")
         .font(.headline)
-      Text("This will remove the light from the menu. You can add it again later if you want to.")
+      Text("This will remove it from the list. It will reappear automatically if it comes back online.")
         .foregroundStyle(.secondary)
         .font(.callout)
         .fixedSize(horizontal: false, vertical: true)

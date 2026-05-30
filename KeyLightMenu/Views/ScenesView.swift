@@ -47,12 +47,12 @@ struct ScenesView: View {
     VStack(alignment: .leading, spacing: 0) {
       if sceneStore.scenes.isEmpty {
         PanelSection {
-          Text("No saved scenes")
+          Text("No saved Scenes.")
             .foregroundStyle(.tertiary)
             .frame(maxWidth: .infinity, alignment: .center)
             .font(.callout)
             .padding(.top, 30)
-          Text("Press + to add one")
+          Text("Press + to create one.")
             .foregroundStyle(.tertiary)
             .frame(maxWidth: .infinity, alignment: .center)
             .font(.callout)
@@ -96,9 +96,12 @@ struct ScenesView: View {
         SectionDivider()
       } else {
         PanelSection {
-          Text("Select lights and adjust the sliders to your desired values, then save as a scene.")
-            .font(.callout)
+          Text("Save settings for multiple lights as a named Scene for quick access from the home screen.")
             .foregroundStyle(.secondary)
+            .font(.callout)
+          Text("Pick lights you want to include with the checkboxes. For each light, choose a Preset or adjust the sliders to your liking.")
+            .foregroundStyle(.secondary)
+            .font(.callout)
         }
         ForEach(reachable, id: \.self) { i in
           let light = service.lights[i]
