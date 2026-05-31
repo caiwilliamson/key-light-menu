@@ -143,6 +143,7 @@ struct ChipRow<Content: View>: View {
             .foregroundStyle(.secondary)
         }
         .buttonStyle(.plain)
+        .tooltip(expanded ? "Show Less Presets" : "Show More Presets")
       }
     }
   }
