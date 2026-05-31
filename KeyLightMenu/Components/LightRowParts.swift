@@ -49,7 +49,7 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
     let presets = store.presets(for: light.accessoryInfo?.serialNumber ?? "")
     let lightState = service.lights.indices.contains(index) ? service.lights[index].state : nil
     VStack(alignment: .leading, spacing: 0) {
-      // Title row: leading accessory + name/indicators + trailing actions
+      // Title row: leading accessory + name + indicators + trailing actions
       HStack(alignment: .center, spacing: 0) {
         leadingAccessory.padding(.trailing, 3)
 
@@ -73,39 +73,38 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
 
         trailingActions.padding(.leading, 12)
       }
-      // Status row: only rendered when disconnected or has an error; invisible leading accessory keeps alignment with title
-      if !light.isReachable || light.actionError != nil {
-        HStack(alignment: .top, spacing: 0) {
+      VStack(alignment: .leading, spacing: 2) {
+        // Status row: disconnected/error status
+        if !light.isReachable || light.actionError != nil {
           if !light.isReachable {
             Text("Disconnected")
               .font(.callout)
               .foregroundStyle(.secondary)
+              .padding(.top, 1)
           } else if let err = light.actionError {
             Text(err)
               .font(.callout)
               .foregroundStyle(.red)
+              .padding(.top, 1)
           }
         }
-        .padding(.top, 1)
-        .padding(.bottom, 3)
-      }
-      // Preset chips: separate from status, not shown in sync or reorder modes
-      if showsPresets, light.isReachable, !presets.isEmpty, !sync.isOptionHeld, !sync.isReordering {
-        PresetChipsRow {
-          ForEach(presets) { preset in
-            let active = lightState?.brightness == preset.brightness && lightState?.temperature == preset.temperature
-            PresetChip(label: preset.name, isActive: active) {
-              Task {
-                if appSettings.turnOnLightWithPreset, service.lights[index].state?.isOn == false {
-                  await service.setOn(true, at: index)
+        // Preset chips row
+        if showsPresets, light.isReachable, !presets.isEmpty, !sync.isOptionHeld, !sync.isReordering {
+          PresetChipsRow {
+            ForEach(presets) { preset in
+              let active = lightState?.brightness == preset.brightness && lightState?.temperature == preset.temperature
+              PresetChip(label: preset.name, isActive: active) {
+                Task {
+                  if appSettings.turnOnLightWithPreset, service.lights[index].state?.isOn == false {
+                    await service.setOn(true, at: index)
+                  }
+                  await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature, at: index)
                 }
-                await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature, at: index)
               }
             }
           }
+          .padding(.top, 6)
         }
-        .padding(.top, 6)
-        .padding(.bottom, 4)
       }
     }
   }
@@ -196,7 +195,6 @@ struct LightControlsSection: View {
         iconTooltip: "Color Temperature"
       )
     }
-    .padding(.top, 2)
-    .padding(.bottom, 4)
+    .padding(.top, 6)
   }
 }
