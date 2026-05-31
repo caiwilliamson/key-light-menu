@@ -15,7 +15,6 @@ struct LightPowerButton: View {
       Image(systemName: isOn ? "power.circle.fill" : "power.circle")
         .font(.system(size: 20))
         .foregroundStyle(isOn ? Color.yellow : Color.secondary)
-        .contentTransition(.opacity)
     }
     .buttonStyle(.plain)
   }
@@ -52,8 +51,7 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
     VStack(alignment: .leading, spacing: 0) {
       // Title row: leading accessory + name/indicators + trailing actions
       HStack(alignment: .center, spacing: 0) {
-        leadingAccessory
-          .padding(.trailing, 3)
+        leadingAccessory.padding(.trailing, 3)
 
         HStack(spacing: 0) {
           Text(light.name)
@@ -78,22 +76,18 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
       // Status row: only rendered when disconnected or has an error; invisible leading accessory keeps alignment with title
       if !light.isReachable || light.actionError != nil {
         HStack(alignment: .top, spacing: 0) {
-          leadingAccessory
-            .hidden()
-            .padding(.trailing, 3)
           if !light.isReachable {
             Text("Disconnected")
               .font(.callout)
               .foregroundStyle(.secondary)
-              .padding(.top, 1)
           } else if let err = light.actionError {
             Text(err)
               .font(.callout)
               .foregroundStyle(.red)
-              .padding(.top, 1)
-              .padding(.bottom, 2)
           }
         }
+        .padding(.top, 1)
+        .padding(.bottom, 3)
       }
       // Preset chips: separate from status, not shown in sync or reorder modes
       if showsPresets, light.isReachable, !presets.isEmpty, !sync.isOptionHeld, !sync.isReordering {
@@ -111,6 +105,7 @@ struct LightRowHeader<LeadingAccessory: View, TrailingActions: View>: View {
           }
         }
         .padding(.top, 6)
+        .padding(.bottom, 4)
       }
     }
   }
@@ -201,8 +196,7 @@ struct LightControlsSection: View {
         iconTooltip: "Color Temperature"
       )
     }
-    .padding(.horizontal, 12)
-    .padding(.bottom, 14)
-    .padding(.top, 6)
+    .padding(.top, 14)
+    .padding(.bottom, 4)
   }
 }

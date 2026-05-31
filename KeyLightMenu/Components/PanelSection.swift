@@ -14,7 +14,6 @@ struct PanelSection<Content: View>: View {
     VStack(alignment: .leading, spacing: spacing ?? 12) {
       content()
     }
-    .padding(.horizontal, 12)
-    .padding(.vertical, 12)
+    .padding(12)
   }
 }

@@ -18,101 +18,103 @@ struct LightRow: View {
 
   var body: some View {
     PanelSection {
-      LightRowHeader(light: light, index: index) {
-        if sync.isReordering {
-          ReorderChevrons(
-            isFirst: index == 0,
-            isLast: index == service.lights.count - 1,
-            onMoveUp: { service.move(from: index, by: -1) },
-            onMoveDown: { service.move(from: index, by: 1) }
-          )
-        } else if sync.isOptionHeld {
-          let serial = light.accessoryInfo?.serialNumber ?? "\(light.host):\(light.port)"
-          Toggle("", isOn: Binding(
-            get: { sync.isIncluded(serial: serial) },
-            set: { sync.setIncluded($0, for: serial) }
-          ))
-          .labelsHidden()
-          .toggleStyle(.checkbox)
-          .padding(.trailing, 5)
+      VStack(spacing: 0) {
+        LightRowHeader(light: light, index: index) {
+          if sync.isReordering {
+            ReorderChevrons(
+              isFirst: index == 0,
+              isLast: index == service.lights.count - 1,
+              onMoveUp: { service.move(from: index, by: -1) },
+              onMoveDown: { service.move(from: index, by: 1) }
+            )
+          } else if sync.isOptionHeld {
+            let serial = light.accessoryInfo?.serialNumber ?? "\(light.host):\(light.port)"
+            Toggle("", isOn: Binding(
+              get: { sync.isIncluded(serial: serial) },
+              set: { sync.setIncluded($0, for: serial) }
+            ))
+            .labelsHidden()
+            .toggleStyle(.checkbox)
+            .padding(.trailing, 5)
+          }
+        } trailingActions: {
+          HStack(spacing: 4) {
+            if light.isReachable, !sync.isOptionHeld, !sync.isReordering {
+              Menu {
+                Button {
+                  service.selectedIndex = index
+                  activePanel = activePanel == .settings ? nil : .settings
+                } label: {
+                  Label("Settings", systemImage: "gearshape")
+                }
+                Button {
+                  service.selectedIndex = index
+                  activePanel = activePanel == .presets ? nil : .presets
+                } label: {
+                  Label("Presets", systemImage: "star")
+                }
+                Button {
+                  service.selectedIndex = index
+                  activePanel = activePanel == .info ? nil : .info
+                } label: {
+                  Label("Info", systemImage: "info.circle")
+                }
+              } label: {
+                Image(systemName: "ellipsis")
+                  .foregroundStyle(Color.secondary)
+              }
+              .menuStyle(.borderlessButton)
+              .menuIndicator(.hidden)
+              .fixedSize()
+              .tooltip("Options")
+            } else if !sync.isOptionHeld, !sync.isReordering {
+              Menu {
+                Button {
+                  service.selectedIndex = index
+                  activePanel = .remove
+                } label: {
+                  Label("Remove Light", systemImage: "trash")
+                }
+              } label: {
+                Image(systemName: "ellipsis")
+                  .foregroundStyle(Color.secondary)
+              }
+              .menuStyle(.borderlessButton)
+              .menuIndicator(.hidden)
+              .fixedSize()
+              .tooltip("Options")
+            }
+            LightPowerButton(isOn: light.state?.isOn ?? false) {
+              Task { await service.toggle(at: index) }
+            }
+            .disabled(!light.isReachable || light.state == nil)
+          }
         }
-      } trailingActions: {
-        HStack(spacing: 4) {
-          if light.isReachable, !sync.isOptionHeld, !sync.isReordering {
-            Menu {
-              Button {
-                service.selectedIndex = index
-                activePanel = activePanel == .settings ? nil : .settings
-              } label: {
-                Label("Settings", systemImage: "gearshape")
-              }
-              Button {
-                service.selectedIndex = index
-                activePanel = activePanel == .presets ? nil : .presets
-              } label: {
-                Label("Presets", systemImage: "star")
-              }
-              Button {
-                service.selectedIndex = index
-                activePanel = activePanel == .info ? nil : .info
-              } label: {
-                Label("Info", systemImage: "info.circle")
-              }
-            } label: {
-              Image(systemName: "ellipsis")
-                .foregroundStyle(Color.secondary)
-            }
-            .menuStyle(.borderlessButton)
-            .menuIndicator(.hidden)
-            .fixedSize()
-            .tooltip("Options")
-          } else if !sync.isOptionHeld, !sync.isReordering {
-            Menu {
-              Button {
-                service.selectedIndex = index
-                activePanel = .remove
-              } label: {
-                Label("Remove Light", systemImage: "trash")
-              }
-            } label: {
-              Image(systemName: "ellipsis")
-                .foregroundStyle(Color.secondary)
-            }
-            .menuStyle(.borderlessButton)
-            .menuIndicator(.hidden)
-            .fixedSize()
-            .tooltip("Options")
+        if light.isReachable, !sync.isReordering, let state = light.state {
+          let serial = light.accessoryInfo?.serialNumber ?? "\(light.host):\(light.port)"
+          let isSyncParticipant = sync.isOptionHeld && sync.isIncluded(serial: serial)
+          if sync.isOptionHeld ? isSyncParticipant : (service.selectedIndex == index || appSettings.alwaysShowSliders) {
+            controlsSection(state: state)
           }
-          LightPowerButton(isOn: light.state?.isOn ?? false) {
-            Task { await service.toggle(at: index) }
-          }
-          .disabled(!light.isReachable || light.state == nil)
         }
       }
-    }
-    .contentShape(Rectangle())
-    .onHover { if light.isReachable, !appSettings.alwaysShowSliders, !sync.isReordering { isHovered = $0 } }
-    .onChange(of: light.isReachable) { _, reachable in if !reachable { isHovered = false } }
-    .onChange(of: appSettings.alwaysShowSliders) { _, expand in if expand { isHovered = false } }
-    .onChange(of: sync.isReordering) { _, reordering in if reordering { isHovered = false } }
-    .onTapGesture {
-      guard light.isReachable, !sync.isOptionHeld, !sync.isReordering, !appSettings.alwaysShowSliders else { return }
-      if service.selectedIndex == index {
-        service.selectedIndex = nil
-        activePanel = nil
-      } else {
-        service.selectedIndex = index
-        activePanel = nil
+      .contentShape(Rectangle())
+      .onHover { if light.isReachable, !appSettings.alwaysShowSliders, !sync.isReordering { isHovered = $0 } }
+      .onChange(of: light.isReachable) { _, reachable in if !reachable { isHovered = false } }
+      .onChange(of: appSettings.alwaysShowSliders) { _, expand in if expand { isHovered = false } }
+      .onChange(of: sync.isReordering) { _, reordering in if reordering { isHovered = false } }
+      .onTapGesture {
+        guard light.isReachable, !sync.isOptionHeld, !sync.isReordering, !appSettings.alwaysShowSliders else { return }
+        if service.selectedIndex == index {
+          service.selectedIndex = nil
+          activePanel = nil
+        } else {
+          service.selectedIndex = index
+          activePanel = nil
+        }
       }
     }
     .background(Color.primary.opacity(isHovered && service.selectedIndex != index && !sync.isOptionHeld && !sync.isReordering ? 0.04 : 0))
-    if light.isReachable, !sync.isReordering, let state = light.state {
-      let serial = light.accessoryInfo?.serialNumber ?? "\(light.host):\(light.port)"
-      let isSyncParticipant = sync.isOptionHeld && sync.isIncluded(serial: serial)
-      if sync.isOptionHeld ? isSyncParticipant : (service.selectedIndex == index || appSettings.alwaysShowSliders) {
-        controlsSection(state: state)
-      }
-    }
   }
 
   @ViewBuilder

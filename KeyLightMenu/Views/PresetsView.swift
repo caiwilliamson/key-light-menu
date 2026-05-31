@@ -77,31 +77,30 @@ struct PresetsView: View {
           Text("Save settings for this light as a named Preset for quick access from the home screen.")
             .foregroundStyle(.secondary)
             .font(.callout)
-        }
-        PanelSection {
-          LightRowHeader(light: light, index: index, showsPresets: false) {
-            EmptyView()
-          } trailingActions: {
-            LightPowerButton(isOn: state.isOn) {
-              Task { await service.toggle(at: index) }
+          Divider()
+          VStack(spacing: 0) {
+            LightRowHeader(light: light, index: index, showsPresets: false) {
+              EmptyView()
+            } trailingActions: {
+              LightPowerButton(isOn: state.isOn) {
+                Task { await service.toggle(at: index) }
+              }
             }
+            LightControlsSection(
+              light: light,
+              index: index,
+              state: state,
+              brightnessValue: Double(state.brightness),
+              temperatureValue: Double(state.temperature),
+              onBrightnessDragStart: nil,
+              onBrightnessDragChange: nil,
+              onBrightnessCommit: { v in Task { await service.setBrightness(Int(v), at: index) } },
+              onTemperatureDragStart: nil,
+              onTemperatureDragChange: nil,
+              onTemperatureCommit: { v in Task { await service.setTemperature(Int(v), at: index) } }
+            )
           }
-        }
-        LightControlsSection(
-          light: light,
-          index: index,
-          state: state,
-          brightnessValue: Double(state.brightness),
-          temperatureValue: Double(state.temperature),
-          onBrightnessDragStart: nil,
-          onBrightnessDragChange: nil,
-          onBrightnessCommit: { v in Task { await service.setBrightness(Int(v), at: index) } },
-          onTemperatureDragStart: nil,
-          onTemperatureDragChange: nil,
-          onTemperatureCommit: { v in Task { await service.setTemperature(Int(v), at: index) } }
-        )
-        SectionDivider()
-        PanelSection {
+          Divider()
           HStack(spacing: 8) {
             TextField("Preset Name", text: $presetName)
               .textFieldStyle(.roundedBorder)

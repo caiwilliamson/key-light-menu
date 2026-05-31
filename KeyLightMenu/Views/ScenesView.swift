@@ -73,19 +73,17 @@ struct ScenesView: View {
   @ViewBuilder
   private var createView: some View {
     let reachable = service.lights.indices.filter { service.lights[$0].isReachable }
-    VStack(alignment: .leading, spacing: 0) {
+    PanelSection {
       if reachable.isEmpty {
         PlaceholderView(label: "No lights connected.")
-        SectionDivider()
       } else {
-        PanelSection {
-          Text("Save settings for multiple lights as a named Scene for quick access from the home screen.")
-            .foregroundStyle(.secondary)
-            .font(.callout)
-          Text("Pick lights you want to include with the checkboxes. For each light, choose a Preset or adjust the sliders to your liking.")
-            .foregroundStyle(.secondary)
-            .font(.callout)
-        }
+        Text("Save settings for multiple lights as a named Scene for quick access from the home screen.")
+          .foregroundStyle(.secondary)
+          .font(.callout)
+        Text("Pick lights you want to include with the checkboxes. For each light, choose a Preset or adjust the sliders to your liking.")
+          .foregroundStyle(.secondary)
+          .font(.callout)
+        Divider()
         ForEach(reachable, id: \.self) { i in
           let light = service.lights[i]
           let serial = light.accessoryInfo?.serialNumber ?? "\(i)"
@@ -99,17 +97,18 @@ struct ScenesView: View {
               }
             )
           )
-          SectionDivider()
+          if i != reachable.last {
+            Divider()
+          }
         }
       }
-      PanelSection {
-        HStack(spacing: 8) {
-          TextField("Scene Name", text: $sceneName)
-            .textFieldStyle(.roundedBorder)
-          Button("Save") { saveScene() }
-            .disabled(sceneName.trimmingCharacters(in: .whitespaces).isEmpty || selectedSerials.isEmpty)
-            .buttonStyle(.borderedProminent)
-        }
+      Divider()
+      HStack(spacing: 8) {
+        TextField("Scene Name", text: $sceneName)
+          .textFieldStyle(.roundedBorder)
+        Button("Save") { saveScene() }
+          .disabled(sceneName.trimmingCharacters(in: .whitespaces).isEmpty || selectedSerials.isEmpty)
+          .buttonStyle(.borderedProminent)
       }
     }
   }
@@ -144,17 +143,15 @@ private struct SceneLightRow: View {
 
   var body: some View {
     VStack(spacing: 0) {
-      PanelSection {
-        LightRowHeader(light: light, index: index, showsPresets: isSelected) {
-          Toggle("", isOn: $isSelected)
-            .labelsHidden()
-            .toggleStyle(.checkbox)
-            .padding(.trailing, 5)
-        } trailingActions: {
-          if let state = light.state {
-            LightPowerButton(isOn: state.isOn) {
-              Task { await service.toggle(at: index) }
-            }
+      LightRowHeader(light: light, index: index, showsPresets: isSelected) {
+        Toggle("", isOn: $isSelected)
+          .labelsHidden()
+          .toggleStyle(.checkbox)
+          .padding(.trailing, 5)
+      } trailingActions: {
+        if let state = light.state {
+          LightPowerButton(isOn: state.isOn) {
+            Task { await service.toggle(at: index) }
           }
         }
       }
