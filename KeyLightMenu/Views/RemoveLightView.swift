@@ -20,6 +20,7 @@ struct RemoveLightView: View {
         .foregroundStyle(.secondary)
         .font(.callout)
         .fixedSize(horizontal: false, vertical: true)
+      Divider()
       HStack {
         Button("Cancel") {
           activePanel = nil
