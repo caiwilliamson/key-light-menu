@@ -49,7 +49,7 @@ struct PresetsView: View {
         PlaceholderView(label: "No saved presets.", hint: "Press + to create one.")
       } else {
         ScrollView {
-          VStack(spacing: 0) {
+          PanelSection {
             ForEach(hostPresets) { preset in
               PresetRow(
                 preset: preset,
@@ -57,7 +57,7 @@ struct PresetsView: View {
                 isLast: preset.id == hostPresets.last?.id
               )
               if preset.id != hostPresets.last?.id {
-                SectionDivider()
+                Divider()
               }
             }
           }

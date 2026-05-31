@@ -15,7 +15,7 @@ struct ManageRow<Info: View>: View {
   @ViewBuilder let info: () -> Info
 
   var body: some View {
-    PanelSection {
+    VStack(spacing: 0) {
       HStack(spacing: 0) {
         ReorderChevrons(
           isFirst: isFirst,

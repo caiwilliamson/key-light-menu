@@ -49,7 +49,7 @@ struct ScenesView: View {
         PlaceholderView(label: "No saved scenes.", hint: "Press + to create one.")
       } else {
         ScrollView {
-          VStack(spacing: 0) {
+          PanelSection {
             ForEach(sceneStore.scenes) { scene in
               SceneManageRow(
                 scene: scene,
@@ -57,7 +57,7 @@ struct ScenesView: View {
                 isLast: scene.id == sceneStore.scenes.last?.id
               )
               if scene.id != sceneStore.scenes.last?.id {
-                SectionDivider()
+                Divider()
               }
             }
           }
