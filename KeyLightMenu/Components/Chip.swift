@@ -135,7 +135,7 @@ struct ChipRow<Content: View>: View {
         content
       }
       .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { flowHeight = $0 }
-      .frame(maxWidth: .infinity, maxHeight: isMultiRow && !expanded ? rowHeight : nil, alignment: .topLeading)
+      .frame(maxHeight: isMultiRow && !expanded ? rowHeight : nil, alignment: .topLeading)
       .clipped()
       if isMultiRow {
         Button { expanded.toggle() } label: {
