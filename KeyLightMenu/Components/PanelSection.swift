@@ -7,11 +7,10 @@ import SwiftUI
 
 /// Wraps rows in a consistent vertical stack with horizontal inset.
 struct PanelSection<Content: View>: View {
-  var spacing: CGFloat?
   @ViewBuilder let content: () -> Content
 
   var body: some View {
-    VStack(alignment: .leading, spacing: spacing ?? 12) {
+    VStack(alignment: .leading, spacing: 12) {
       content()
     }
     .padding(12)
