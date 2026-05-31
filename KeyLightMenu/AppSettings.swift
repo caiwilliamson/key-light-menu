@@ -54,9 +54,9 @@ final class AppSettings {
     }
   }
 
-  var alwaysShowSliders: Bool = false {
+  var expandAllLights: Bool = false {
     didSet {
-      UserDefaults.standard.set(alwaysShowSliders, forKey: "keylight.settings.alwaysShowSliders")
+      UserDefaults.standard.set(expandAllLights, forKey: "keylight.settings.expandAllLights")
     }
   }
 
@@ -79,8 +79,8 @@ final class AppSettings {
     if UserDefaults.standard.object(forKey: "keylight.settings.showWifiSignalPercentage") != nil {
       showWifiSignalPercentage = UserDefaults.standard.bool(forKey: "keylight.settings.showWifiSignalPercentage")
     }
-    if UserDefaults.standard.object(forKey: "keylight.settings.alwaysShowSliders") != nil {
-      alwaysShowSliders = UserDefaults.standard.bool(forKey: "keylight.settings.alwaysShowSliders")
+    if UserDefaults.standard.object(forKey: "keylight.settings.expandAllLights") != nil {
+      expandAllLights = UserDefaults.standard.bool(forKey: "keylight.settings.expandAllLights")
     }
     if let raw = UserDefaults.standard.string(forKey: "keylight.settings.appearanceMode"),
        let mode = AppearanceMode(rawValue: raw)

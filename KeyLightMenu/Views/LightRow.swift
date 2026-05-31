@@ -91,12 +91,12 @@ struct LightRow: View {
       }
       .padding(12)
       .contentShape(Rectangle())
-      .onHover { if light.isReachable, !appSettings.alwaysShowSliders, !sync.isReordering { isHovered = $0 } }
+      .onHover { if light.isReachable, !appSettings.expandAllLights, !sync.isReordering { isHovered = $0 } }
       .onChange(of: light.isReachable) { _, reachable in if !reachable { isHovered = false } }
-      .onChange(of: appSettings.alwaysShowSliders) { _, expand in if expand { isHovered = false } }
+      .onChange(of: appSettings.expandAllLights) { _, expand in if expand { isHovered = false } }
       .onChange(of: sync.isReordering) { _, reordering in if reordering { isHovered = false } }
       .onTapGesture {
-        guard light.isReachable, !sync.isOptionHeld, !sync.isReordering, !appSettings.alwaysShowSliders else { return }
+        guard light.isReachable, !sync.isOptionHeld, !sync.isReordering, !appSettings.expandAllLights else { return }
         if service.selectedIndex == index {
           service.selectedIndex = nil
           activePanel = nil
@@ -110,7 +110,7 @@ struct LightRow: View {
       if light.isReachable, !sync.isReordering, let state = light.state {
         let serial = light.accessoryInfo?.serialNumber ?? "\(light.host):\(light.port)"
         let isSyncParticipant = sync.isOptionHeld && sync.isIncluded(serial: serial)
-        if sync.isOptionHeld ? isSyncParticipant : (service.selectedIndex == index || appSettings.alwaysShowSliders) {
+        if sync.isOptionHeld ? isSyncParticipant : (service.selectedIndex == index || appSettings.expandAllLights) {
           controlsSection(state: state)
             .padding(.horizontal, 12)
             .padding(.bottom, 12)

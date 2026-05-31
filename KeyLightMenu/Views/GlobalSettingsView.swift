@@ -39,7 +39,7 @@ struct GlobalSettingsView: View {
       SettingToggleRow(
         label: "Expand All Lights",
         subtitle: "Show expanded controls for all lights at once.",
-        isOn: $appSettings.alwaysShowSliders
+        isOn: $appSettings.expandAllLights
       ) {}
       SettingToggleRow(
         label: "Show Battery Percentage",
