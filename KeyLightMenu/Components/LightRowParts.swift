@@ -196,7 +196,7 @@ struct LightControlsSection: View {
         iconTooltip: "Color Temperature"
       )
     }
-    .padding(.top, 14)
+    .padding(.top, 2)
     .padding(.bottom, 4)
   }
 }

@@ -78,7 +78,7 @@ struct PresetsView: View {
             .foregroundStyle(.secondary)
             .font(.callout)
           Divider()
-          VStack(spacing: 0) {
+          VStack(spacing: 12) {
             LightRowHeader(light: light, index: index, showsPresets: false) {
               EmptyView()
             } trailingActions: {

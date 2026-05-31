@@ -142,7 +142,7 @@ private struct SceneLightRow: View {
   @Binding var isSelected: Bool
 
   var body: some View {
-    VStack(spacing: 0) {
+    VStack(spacing: 12) {
       LightRowHeader(light: light, index: index, showsPresets: isSelected) {
         Toggle("", isOn: $isSelected)
           .labelsHidden()
