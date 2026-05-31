@@ -12,7 +12,7 @@ struct LightSlider: View {
   let range: ClosedRange<Double>
   let label: (Double) -> String
   let gradient: TrackGradient
-  var syncKind: SyncSliderKind? = nil
+  var syncKind: SyncSliderKind?
   let onDragStart: (() -> Void)?
   let onDragChange: ((Double) -> Void)?
   let onCommit: (Double) -> Void

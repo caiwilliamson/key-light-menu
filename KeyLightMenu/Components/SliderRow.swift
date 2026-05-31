@@ -12,7 +12,7 @@ struct SliderRow: View {
   let range: ClosedRange<Double>
   let label: (Double) -> String
   let gradient: TrackGradient
-  var syncKind: SyncSliderKind? = nil
+  var syncKind: SyncSliderKind?
   var iconTooltip: String?
   var onEditingChanged: ((Bool) -> Void)?
 

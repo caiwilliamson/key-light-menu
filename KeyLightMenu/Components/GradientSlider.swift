@@ -10,7 +10,7 @@ struct GradientSlider: View {
   @Binding var value: Double
   let range: ClosedRange<Double>
   let gradient: TrackGradient
-  var syncKind: SyncSliderKind? = nil
+  var syncKind: SyncSliderKind?
   var onEditingChanged: ((Bool) -> Void)?
 
   @Environment(SyncCoordinator.self) private var sync

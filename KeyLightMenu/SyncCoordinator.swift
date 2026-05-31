@@ -20,7 +20,7 @@ final class SyncCoordinator {
   }
 
   /// Which slider kind is currently hovered across all synced rows — nil when none.
-  var syncHoveredKind: SyncSliderKind? = nil
+  var syncHoveredKind: SyncSliderKind?
 
   /// Serials explicitly excluded from sync (empty = all included)
   var excludedSerials: Set<String> = {
