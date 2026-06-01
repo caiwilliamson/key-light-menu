@@ -77,7 +77,7 @@ struct ScenesView: View {
       if reachable.isEmpty {
         PlaceholderView(label: "No lights connected.")
       } else {
-        Text("Save settings for multiple lights as a named Scene for quick access from the home screen.")
+        Text("Save settings for a combination of lights as a named Scene for quick access from the home screen.")
           .foregroundStyle(.secondary)
           .font(.callout)
         Text("Pick lights you want to include with the checkboxes. For each light, choose a Preset or adjust the sliders to your liking.")
