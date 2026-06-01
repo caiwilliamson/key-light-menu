@@ -254,12 +254,15 @@ struct MainView: View {
           hint: "To connect a new light, open the Wi-Fi menu, choose it under \"New Accessories\", and follow the steps in AirPort Utility."
         ) { ProgressView().controlSize(.small) }
       } else {
-        ForEach(service.lights.indices, id: \.self) { i in
-          let light = service.lights[i]
+        ForEach(service.lights) { light in
+          let i = service.lights.firstIndex(where: { $0.id == light.id }) ?? 0
           if !sync.isOptionHeld || light.isReachable {
             if i > 0 {
               let precedingVisible = !sync.isOptionHeld || service.lights[0 ..< i].contains { $0.isReachable }
-              if precedingVisible { Divider() }
+              if precedingVisible {
+                Divider()
+                  .transaction { $0.animation = nil }
+              }
             }
             LightRow(light: light, index: i, activePanel: $activePanel)
               .grayscale(!sync.isOptionHeld && activePanel != nil && service.selectedIndex != i ? 1 : 0)

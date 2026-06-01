@@ -58,6 +58,7 @@ struct ScenesView: View {
               )
               if scene.id != sceneStore.scenes.last?.id {
                 Divider()
+                  .transaction { $0.animation = nil }
               }
             }
           }

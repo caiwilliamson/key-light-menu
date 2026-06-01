@@ -58,6 +58,7 @@ struct PresetsView: View {
               )
               if preset.id != hostPresets.last?.id {
                 Divider()
+                  .transaction { $0.animation = nil }
               }
             }
           }
