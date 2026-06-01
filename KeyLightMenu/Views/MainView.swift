@@ -150,33 +150,13 @@ struct MainView: View {
           .font(.headline)
         Spacer()
         if sync.isOptionHeld {
-          Image(systemName: "link")
-            .foregroundStyle(.secondary)
-          Text("Sliders Linked (⌥)")
-            .font(.callout)
-            .foregroundStyle(.secondary)
-          Button {
+          ModeStatusBadge(icon: "link", label: "Sliders Linked (⌥)") {
             sync.isOptionHeld = false; sync.reset()
-          } label: {
-            Image(systemName: "xmark.circle.fill")
-              .foregroundStyle(.secondary)
           }
-          .buttonStyle(.plain)
-          .tooltip("Exit Mode")
         } else if sync.isReordering {
-          Image(systemName: "arrow.up.arrow.down")
-            .foregroundStyle(.secondary)
-          Text("Reorder Lights")
-            .font(.callout)
-            .foregroundStyle(.secondary)
-          Button {
+          ModeStatusBadge(icon: "arrow.up.arrow.down", label: "Reorder Lights") {
             sync.isReordering = false
-          } label: {
-            Image(systemName: "xmark.circle.fill")
-              .foregroundStyle(.secondary)
           }
-          .buttonStyle(.plain)
-          .tooltip("Exit Mode")
         } else {
           Menu {
             Button {
@@ -222,6 +202,8 @@ struct MainView: View {
           .tooltip("Options")
         }
       }
+      .animation(.spring(response: 0.3, dampingFraction: 0.5), value: sync.isOptionHeld)
+      .animation(.spring(response: 0.3, dampingFraction: 0.5), value: sync.isReordering)
       .frame(height: 20)
       if !sceneStore.scenes.isEmpty, !sync.isOptionHeld {
         SceneChipsRow {
