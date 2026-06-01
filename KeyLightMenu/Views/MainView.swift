@@ -3,8 +3,9 @@
 //  KeyLightMenu
 //
 
-import Flow
 import SwiftUI
+
+enum ActiveSection { case globalSettings, scenes }
 
 struct MainView: View {
   @Environment(KeyLightService.self) private var service
@@ -12,8 +13,7 @@ struct MainView: View {
   @Environment(SceneStore.self) private var sceneStore
 
   @State private var activePanel: Panel?
-  @State private var showGlobalSettings = false
-  @State private var showScenes = false
+  @State private var activeSection: ActiveSection?
   @State private var isCreatingScene = false
   @State private var isCreatingPreset = false
   @State private var sync = SyncCoordinator()
@@ -52,26 +52,8 @@ struct MainView: View {
       }
     }
     .task { service.startSession() }
-    .onAppear {
-      eventMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { event in
-        // Only act on the key-down transition (option becoming pressed)
-        guard event.modifierFlags.contains(.option) else { return event }
-        guard activePanel == nil, !showGlobalSettings, !showScenes else { return event }
-        guard service.lights.filter(\.isReachable).count >= 2 else { return event }
-        sync.isOptionHeld.toggle()
-        if !sync.isOptionHeld { sync.reset() }
-        return event
-      }
-    }
-    .onDisappear {
-      if let monitor = eventMonitor {
-        NSEvent.removeMonitor(monitor)
-        eventMonitor = nil
-      }
-      sync.isOptionHeld = false
-      sync.reset()
-      sync.isReordering = false
-    }
+    .onAppear { setupEventMonitor() }
+    .onDisappear { teardownEventMonitor() }
     .onChange(of: service.selectedLight?.host) { _, new in
       if new == nil { activePanel = nil }
     }
@@ -84,135 +66,39 @@ struct MainView: View {
     }
   }
 
+  // MARK: - Event Monitor
+
+  private func setupEventMonitor() {
+    eventMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { event in
+      guard event.modifierFlags.contains(.option) else { return event }
+      guard activePanel == nil, activeSection == nil else { return event }
+      guard service.lights.filter(\.isReachable).count >= 2 else { return event }
+      sync.isOptionHeld.toggle()
+      if !sync.isOptionHeld { sync.reset() }
+      return event
+    }
+  }
+
+  private func teardownEventMonitor() {
+    if let monitor = eventMonitor {
+      NSEvent.removeMonitor(monitor)
+      eventMonitor = nil
+    }
+    sync.isOptionHeld = false
+    sync.reset()
+    sync.isReordering = false
+  }
+
   // MARK: - Header
 
   private var header: some View {
     PanelSection {
-      if showScenes {
-        BreadcrumbHeader(
-          homeAction: { showScenes = false; isCreatingScene = false },
-          crumbs: isCreatingScene
-            ? [.init(title: "Scenes", action: { isCreatingScene = false }), .init(title: "New Scene")]
-            : [.init(title: "Scenes")]
-        ) {
-          if !isCreatingScene {
-            Button { isCreatingScene = true } label: {
-              Image(systemName: "plus")
-                .font(.system(size: 16))
-                .foregroundStyle(.secondary)
-            }
-            .buttonStyle(.plain)
-            .tooltip("New Scene")
-          }
-        }
-      } else if showGlobalSettings {
-        BreadcrumbHeader(
-          homeAction: { showGlobalSettings = false },
-          crumbs: [.init(title: "App Settings")]
-        )
-      } else if let panel = activePanel, let idx = service.selectedIndex,
-                service.lights.indices.contains(idx)
-      {
-        let lightName = service.lights[idx].name
-        BreadcrumbHeader(
-          homeAction: { activePanel = nil; service.selectedIndex = nil },
-          crumbs: panel == .presets && isCreatingPreset
-            ? [
-              .init(title: lightName, action: { activePanel = nil }),
-              .init(title: panel.title, action: { isCreatingPreset = false }),
-              .init(title: "New Preset"),
-            ]
-            : [
-              .init(title: lightName, action: { activePanel = nil }),
-              .init(title: panel.title),
-            ]
-        ) {
-          if panel == .presets, !isCreatingPreset {
-            Button { isCreatingPreset = true } label: {
-              Image(systemName: "plus")
-                .font(.system(size: 16))
-                .foregroundStyle(.secondary)
-            }
-            .tooltip("New Preset")
-            .buttonStyle(.plain)
-          }
-        }
-      } else {
-        defaultHeader
-      }
-    }
-  }
-
-  private var defaultHeader: some View {
-    VStack(alignment: .leading, spacing: 0) {
-      HStack(spacing: 4) {
-        Text("Key Light Menu")
-          .font(.headline)
-        Spacer()
-        if sync.isOptionHeld {
-          ModeStatusBadge(icon: "link", label: "Sliders Linked (⌥)") {
-            sync.isOptionHeld = false; sync.reset()
-          }
-        } else if sync.isReordering {
-          ModeStatusBadge(icon: "arrow.up.arrow.down", label: "Reorder Lights") {
-            sync.isReordering = false
-          }
-        } else {
-          Menu {
-            Button {
-              showGlobalSettings = true
-              showScenes = false
-              isCreatingScene = false
-            } label: { Label("App Settings", systemImage: "gearshape") }
-            Button {
-              showScenes = true
-              showGlobalSettings = false
-              isCreatingScene = false
-            } label: { Label("Scenes", systemImage: "sparkles") }
-            Divider()
-            Button {
-              for i in service.lights.indices where service.lights[i].isReachable {
-                Task { await service.setOn(true, at: i) }
-              }
-            } label: { Label("Turn All Lights On", systemImage: "power.circle.fill") }
-              .disabled(!service.lights.contains { $0.isReachable && $0.state?.isOn == false })
-            Button {
-              for i in service.lights.indices where service.lights[i].isReachable {
-                Task { await service.setOn(false, at: i) }
-              }
-            } label: { Label("Turn All Lights Off", systemImage: "power.circle") }
-              .disabled(!service.lights.contains { $0.isReachable && $0.state?.isOn == true })
-            Button {
-              sync.isOptionHeld = true
-            } label: { Label("Link Sliders ⌥", systemImage: "link") }
-              .disabled(service.lights.filter(\.isReachable).count < 2)
-            Button {
-              sync.isReordering = true
-            } label: { Label("Reorder Lights", systemImage: "arrow.up.arrow.down") }
-              .disabled(service.lights.count < 2)
-            Divider()
-            Button("Quit") { NSApplication.shared.terminate(nil) }
-          } label: {
-            Image(systemName: "ellipsis")
-              .foregroundStyle(Color.secondary)
-          }
-          .menuStyle(.borderlessButton)
-          .menuIndicator(.hidden)
-          .fixedSize()
-          .tooltip("Options")
-        }
-      }
-      .animation(.spring(response: 0.3, dampingFraction: 0.5), value: sync.isOptionHeld)
-      .animation(.spring(response: 0.3, dampingFraction: 0.5), value: sync.isReordering)
-      .frame(height: 20)
-      if !sceneStore.scenes.isEmpty, !sync.isOptionHeld {
-        SceneChipsRow {
-          ForEach(sceneStore.scenes) { scene in
-            SceneChip(scene: scene)
-          }
-        }
-        .padding(.top, 6)
-      }
+      MainHeader(
+        activeSection: $activeSection,
+        activePanel: $activePanel,
+        isCreatingScene: $isCreatingScene,
+        isCreatingPreset: $isCreatingPreset
+      )
     }
   }
 
@@ -220,10 +106,10 @@ struct MainView: View {
 
   @ViewBuilder
   private var mainContent: some View {
-    if showScenes {
+    if activeSection == .scenes {
       ScenesView(isCreating: $isCreatingScene)
         .fixedSize(horizontal: false, vertical: true)
-    } else if showGlobalSettings {
+    } else if activeSection == .globalSettings {
       GlobalSettingsView()
     } else if let panel = activePanel, let idx = service.selectedIndex,
               service.lights.indices.contains(idx)
@@ -261,17 +147,9 @@ struct MainView: View {
     let light = service.lights[index]
     switch panel {
     case .info:
-      if let info = light.accessoryInfo {
-        InfoView(light: light, info: info, index: index)
-      } else {
-        PlaceholderView(label: "Loading…") { ProgressView().controlSize(.small) }
-      }
+      withAccessoryInfo(light) { InfoView(light: light, info: $0, index: index) }
     case .settings:
-      if let info = light.accessoryInfo {
-        SettingsView(light: light, info: info, index: index)
-      } else {
-        PlaceholderView(label: "Loading…") { ProgressView().controlSize(.small) }
-      }
+      withAccessoryInfo(light) { SettingsView(light: light, info: $0, index: index) }
     case .presets:
       PresetsView(light: light, index: index, isCreating: $isCreatingPreset)
         .environment(store)
@@ -281,18 +159,24 @@ struct MainView: View {
         .environment(store)
     }
   }
+
+  @ViewBuilder
+  private func withAccessoryInfo<V: View>(_ light: KeyLight, @ViewBuilder content: (AccessoryInfo) -> V) -> some View {
+    if let info = light.accessoryInfo {
+      content(info)
+    } else {
+      PlaceholderView(label: "Loading…") { ProgressView().controlSize(.small) }
+    }
+  }
 }
 
-private struct HeaderHeightKey: PreferenceKey {
-  static let defaultValue: CGFloat = 0
+private protocol MaxCGFloatPreferenceKey: PreferenceKey where Value == CGFloat {}
+extension MaxCGFloatPreferenceKey {
+  static var defaultValue: CGFloat { 0 }
   static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
     value = max(value, nextValue())
   }
 }
 
-private struct ScrollContentHeightKey: PreferenceKey {
-  static let defaultValue: CGFloat = 0
-  static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-    value = max(value, nextValue())
-  }
-}
+private struct HeaderHeightKey: MaxCGFloatPreferenceKey {}
+private struct ScrollContentHeightKey: MaxCGFloatPreferenceKey {}
