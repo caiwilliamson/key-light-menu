@@ -16,7 +16,7 @@ struct ManageRow<Info: View>: View {
 
   var body: some View {
     HStack(spacing: 0) {
-      ReorderChevrons(
+      ReorderButtons(
         isFirst: isFirst,
         isLast: isLast,
         onMoveUp: onMoveUp,

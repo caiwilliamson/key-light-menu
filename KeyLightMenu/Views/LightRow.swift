@@ -20,7 +20,7 @@ struct LightRow: View {
     VStack(spacing: 0) {
       LightRowHeader(light: light, index: index) {
         if sync.isReordering {
-          ReorderChevrons(
+          ReorderButtons(
             isFirst: index == 0,
             isLast: index == service.lights.count - 1,
             onMoveUp: { service.move(from: index, by: -1) },

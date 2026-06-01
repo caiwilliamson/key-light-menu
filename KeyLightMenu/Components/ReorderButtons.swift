@@ -1,11 +1,11 @@
 //
-//  ReorderChevrons.swift
+//  ReorderButtons.swift
 //  KeyLightMenu
 //
 
 import SwiftUI
 
-struct ReorderChevrons: View {
+struct ReorderButtons: View {
   let isFirst: Bool
   let isLast: Bool
   let onMoveUp: () -> Void
@@ -15,14 +15,14 @@ struct ReorderChevrons: View {
 
   var body: some View {
     VStack(spacing: 2) {
-      chevron("chevron.up", disabled: isFirst, tooltip: "Move Up", action: onMoveUp)
-      chevron("chevron.down", disabled: isLast, tooltip: "Move Down", action: onMoveDown)
+      button("chevron.up", disabled: isFirst, tooltip: "Move Up", action: onMoveUp)
+      button("chevron.down", disabled: isLast, tooltip: "Move Down", action: onMoveDown)
     }
     .padding(.trailing, 5)
   }
 
   @ViewBuilder
-  private func chevron(_ icon: String, disabled: Bool, tooltip: String, action: @escaping () -> Void) -> some View {
+  private func button(_ icon: String, disabled: Bool, tooltip: String, action: @escaping () -> Void) -> some View {
     Button { withAnimation(animation) { action() } } label: {
       Image(systemName: icon)
         .foregroundStyle(disabled ? Color.secondary.opacity(0.3) : Color.secondary)
