@@ -51,7 +51,7 @@ struct PowerOnSettingsView: View {
           icon: "thermometer.medium",
           value: $temperature,
           range: 143 ... 344,
-          label: { "\(Int(1_000_000 / $0.rounded()))K" },
+          label: \.kelvinLabel,
           gradient: .temperature,
           iconTooltip: "Color Temperature"
         ) { editing in if !editing { send() } }

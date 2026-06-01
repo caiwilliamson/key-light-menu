@@ -164,9 +164,7 @@ struct LightControlsSection: View {
 
   var body: some View {
     let brightnessGradient = TrackGradient.brightness(for: state.temperature)
-    let serial = service.lights.indices.contains(index)
-      ? service.lights[index].accessoryInfo?.serialNumber ?? "\(service.lights[index].host):\(service.lights[index].port)"
-      : ""
+    let serial = service.lights.indices.contains(index) ? service.lights[index].serial : ""
     let isSynced = sync.isOptionHeld && sync.isIncluded(serial: serial)
 
     VStack(alignment: .leading, spacing: 8) {
@@ -186,7 +184,7 @@ struct LightControlsSection: View {
         icon: "thermometer.medium",
         value: temperatureValue,
         range: 143 ... 344,
-        label: { "\(Int(1_000_000 / $0.rounded()))K" },
+        label: \.kelvinLabel,
         gradient: .temperature,
         syncKind: isSynced ? .temperature : nil,
         onDragStart: onTemperatureDragStart,

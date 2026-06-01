@@ -87,7 +87,7 @@ struct ScenesView: View {
         Divider()
         ForEach(reachable, id: \.self) { i in
           let light = service.lights[i]
-          let serial = light.accessoryInfo?.serialNumber ?? "\(i)"
+          let serial = light.serial
           SceneLightRow(
             light: light,
             index: i,

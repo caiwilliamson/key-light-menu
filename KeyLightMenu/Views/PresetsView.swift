@@ -148,7 +148,7 @@ private struct PresetRow: View {
         Image(systemName: "thermometer.medium")
           .padding(.leading, 4)
           .tooltip("Color Temperature")
-        Text("\(Int(1_000_000 / Double(preset.temperature).rounded()))K")
+        Text(Double(preset.temperature).kelvinLabel)
           .font(.callout)
       }
       .foregroundStyle(.secondary)

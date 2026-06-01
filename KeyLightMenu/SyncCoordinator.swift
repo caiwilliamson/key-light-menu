@@ -73,8 +73,7 @@ final class SyncCoordinator {
     // floor matches Int($0) truncation used in the brightness label
     let delta = floor(value) - Double(startBrightnesses[fromIndex])
     for j in startBrightnesses.indices {
-      let serial = lights[j].accessoryInfo?.serialNumber ?? "\(lights[j].host):\(lights[j].port)"
-      guard isIncluded(serial: serial) else { continue }
+      guard isIncluded(serial: lights[j].serial) else { continue }
       syncedBrightnesses[j] = max(1, min(100, Double(startBrightnesses[j]) + delta))
     }
   }
@@ -84,8 +83,7 @@ final class SyncCoordinator {
     // rounded matches $0.rounded() used before the Kelvin conversion in the temperature label
     let delta = value.rounded() - Double(startTemperatures[fromIndex])
     for j in startTemperatures.indices {
-      let serial = lights[j].accessoryInfo?.serialNumber ?? "\(lights[j].host):\(lights[j].port)"
-      guard isIncluded(serial: serial) else { continue }
+      guard isIncluded(serial: lights[j].serial) else { continue }
       syncedTemperatures[j] = max(143, min(344, Double(startTemperatures[j]) + delta))
     }
   }

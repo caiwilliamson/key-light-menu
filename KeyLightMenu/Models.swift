@@ -28,6 +28,14 @@ struct KeyLight: Identifiable {
   func url(_ path: String) -> URL? {
     URL(string: "http://\(host):\(port)/elgato/\(path)")
   }
+
+  var serial: String { accessoryInfo?.serialNumber ?? "\(host):\(port)" }
+}
+
+// MARK: - Helpers
+
+extension Double {
+  var kelvinLabel: String { "\(Int(1_000_000 / rounded()))K" }
 }
 
 // MARK: - Light State
