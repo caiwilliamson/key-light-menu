@@ -28,10 +28,7 @@ struct PresetsView: View {
             guard let snap = snapshot else { return }
             snapshot = nil
             guard service.lights.indices.contains(index), service.lights[index].isReachable else { return }
-            Task {
-              await service.setBrightness(snap.brightness, at: index)
-              await service.setTemperature(snap.temperature, at: index)
-            }
+            Task { await service.applyPreset(brightness: snap.brightness, temperature: snap.temperature, at: index) }
           }
       } else {
         manageView

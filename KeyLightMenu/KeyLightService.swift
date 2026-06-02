@@ -76,6 +76,9 @@ final class KeyLightService: NSObject {
   private var browser: NetServiceBrowser?
   private var resolving: [NetService] = []
   private var pollTask: Task<Void, Never>?
+  private var writeGeneration: [UUID: Int] = [:]
+
+  private static let pollInterval: TimeInterval = 2
 
   var selectedLight: KeyLight? {
     guard let i = selectedIndex, lights.indices.contains(i) else { return nil }
@@ -92,7 +95,7 @@ final class KeyLightService: NSObject {
     pollTask?.cancel()
     pollTask = Task { [weak self] in
       while !Task.isCancelled {
-        try? await Task.sleep(for: .seconds(2))
+        try? await Task.sleep(for: .seconds(Self.pollInterval))
         guard !Task.isCancelled else { break }
         await self?.pollAllLights()
       }
@@ -110,12 +113,16 @@ final class KeyLightService: NSObject {
 
   private func pollLight(at i: Int) async {
     guard lights.indices.contains(i), let url = lights[i].url("lights") else { return }
+    let id = lights[i].id
+    let genAtDispatch = writeGeneration[id, default: 0]
     do {
       let (data, response) = try await pollSession.data(from: url)
       guard (response as? HTTPURLResponse)?.statusCode == 200 else { return }
-      guard lights.indices.contains(i) else { return }
+      guard lights.indices.contains(i), lights[i].id == id else { return }
       if let state = try? JSONDecoder().decode(LightsResponse.self, from: data).lights.first {
-        lights[i].state = state
+        if writeGeneration[id, default: 0] == genAtDispatch {
+          lights[i].state = state
+        }
         lights[i].isReachable = true
         saveCache()
       }
@@ -233,6 +240,8 @@ final class KeyLightService: NSObject {
 
   private func apply(_ state: LightState, at index: Int) async {
     guard let url = url(for: index, path: "lights") else { return }
+    let id = lights[index].id
+    writeGeneration[id, default: 0] += 1
     do {
       let req = try putRequest(url: url, body: LightsResponse(numberOfLights: 1, lights: [state]))
       let (data, response) = try await actionSession.data(for: req)
@@ -240,7 +249,7 @@ final class KeyLightService: NSObject {
         if lights.indices.contains(index) { lights[index].actionError = "Couldn't apply — try again" }
         return
       }
-      guard lights.indices.contains(index) else { return }
+      guard lights.indices.contains(index), lights[index].id == id else { return }
       if let newState = try JSONDecoder().decode(LightsResponse.self, from: data).lights.first {
         lights[index].state = newState
         lights[index].actionError = nil
@@ -298,6 +307,7 @@ final class KeyLightService: NSObject {
 
   func remove(at index: Int) {
     guard lights.indices.contains(index) else { return }
+    writeGeneration.removeValue(forKey: lights[index].id)
     lights.remove(at: index)
     if selectedIndex == index {
       selectedIndex = lights.isEmpty ? nil : max(0, index - 1)

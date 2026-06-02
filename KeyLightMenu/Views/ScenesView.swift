@@ -31,10 +31,7 @@ struct ScenesView: View {
                 guard service.lights[i].isReachable,
                       let serial = service.lights[i].accessoryInfo?.serialNumber,
                       let sl = scene.lights.first(where: { $0.serialNumber == serial }) else { continue }
-                Task {
-                  await service.setBrightness(sl.brightness, at: i)
-                  await service.setTemperature(sl.temperature, at: i)
-                }
+                Task { await service.applyPreset(brightness: sl.brightness, temperature: sl.temperature, at: i) }
               }
             }
           }
@@ -43,10 +40,7 @@ struct ScenesView: View {
             lightSnapshots = []
             for snap in snaps {
               guard service.lights.indices.contains(snap.index), service.lights[snap.index].isReachable else { continue }
-              Task {
-                await service.setBrightness(snap.brightness, at: snap.index)
-                await service.setTemperature(snap.temperature, at: snap.index)
-              }
+              Task { await service.applyPreset(brightness: snap.brightness, temperature: snap.temperature, at: snap.index) }
             }
           }
       } else {
