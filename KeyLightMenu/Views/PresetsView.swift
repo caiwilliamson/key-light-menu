@@ -75,7 +75,7 @@ struct PresetsView: View {
       let serial = light.accessoryInfo?.serialNumber ?? ""
       VStack(alignment: .leading, spacing: 0) {
         PanelSection {
-          Text("Save settings for this light as a named Preset for quick access from the home screen.")
+          Text("Save settings for this light as a named Preset with quick access from the home screen.")
             .foregroundStyle(.secondary)
             .font(.callout)
           Divider()
