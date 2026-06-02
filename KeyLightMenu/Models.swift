@@ -29,13 +29,17 @@ struct KeyLight: Identifiable {
     URL(string: "http://\(host):\(port)/elgato/\(path)")
   }
 
-  var serial: String { accessoryInfo?.serialNumber ?? "\(host):\(port)" }
+  var serial: String {
+    accessoryInfo?.serialNumber ?? "\(host):\(port)"
+  }
 }
 
 // MARK: - Helpers
 
 extension Double {
-  var kelvinLabel: String { "\(Int(1_000_000 / rounded()))K" }
+  var kelvinLabel: String {
+    "\(Int(1_000_000 / rounded()))K"
+  }
 }
 
 // MARK: - Light State

@@ -161,7 +161,7 @@ struct MainView: View {
   }
 
   @ViewBuilder
-  private func withAccessoryInfo<V: View>(_ light: KeyLight, @ViewBuilder content: (AccessoryInfo) -> V) -> some View {
+  private func withAccessoryInfo(_ light: KeyLight, @ViewBuilder content: (AccessoryInfo) -> some View) -> some View {
     if let info = light.accessoryInfo {
       content(info)
     } else {
@@ -172,7 +172,10 @@ struct MainView: View {
 
 private protocol MaxCGFloatPreferenceKey: PreferenceKey where Value == CGFloat {}
 extension MaxCGFloatPreferenceKey {
-  static var defaultValue: CGFloat { 0 }
+  static var defaultValue: CGFloat {
+    0
+  }
+
   static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
     value = max(value, nextValue())
   }

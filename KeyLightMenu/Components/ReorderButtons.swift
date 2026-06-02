@@ -21,7 +21,6 @@ struct ReorderButtons: View {
     .padding(.trailing, 5)
   }
 
-  @ViewBuilder
   private func button(_ icon: String, disabled: Bool, tooltip: String, action: @escaping () -> Void) -> some View {
     Button { withAnimation(animation) { action() } } label: {
       Image(systemName: icon)
