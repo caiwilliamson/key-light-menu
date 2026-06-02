@@ -226,7 +226,7 @@ private struct SceneManageRow: View {
         Text("\(scene.lights.count) light\(scene.lights.count == 1 ? "" : "s")")
           .font(.callout)
       }
+      .foregroundStyle(.secondary)
     }
-    .foregroundStyle(.secondary)
   }
 }
