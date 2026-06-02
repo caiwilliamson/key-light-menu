@@ -113,6 +113,7 @@ struct ScenesView: View {
       HStack(spacing: 8) {
         TextField("Scene Name", text: $sceneName)
           .textFieldStyle(.roundedBorder)
+          .onChange(of: sceneName) { _, new in if new.count > 20 { sceneName = String(new.prefix(20)) } }
         Button("Save") { saveScene() }
           .disabled(sceneName.trimmingCharacters(in: .whitespaces).isEmpty || selectedSerials.isEmpty)
           .buttonStyle(.borderedProminent)

@@ -20,6 +20,7 @@ struct SettingsView: View {
         Text("Display Name")
         TextField("None", text: $displayNameDraft)
           .textFieldStyle(.roundedBorder)
+          .onChange(of: displayNameDraft) { _, new in if new.count > 20 { displayNameDraft = String(new.prefix(20)) } }
           .onSubmit { saveDisplayName() }
         if displayNameDraft != info.displayName {
           Button("Save", action: saveDisplayName)

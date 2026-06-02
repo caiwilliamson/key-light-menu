@@ -110,6 +110,7 @@ struct PresetsView: View {
           HStack(spacing: 8) {
             TextField("Preset Name", text: $presetName)
               .textFieldStyle(.roundedBorder)
+              .onChange(of: presetName) { _, new in if new.count > 20 { presetName = String(new.prefix(20)) } }
             Button("Save") {
               guard !presetName.isEmpty else { return }
               if var preset = editingPreset {
