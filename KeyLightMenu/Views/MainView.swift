@@ -88,6 +88,11 @@ struct MainView: View {
     sync.isOptionHeld = false
     sync.reset()
     sync.isReordering = false
+    activePanel = nil
+    activeSection = nil
+    isCreatingScene = false
+    editingScene = nil
+    isCreatingPreset = false
   }
 
   // MARK: - Header
