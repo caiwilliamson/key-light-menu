@@ -17,6 +17,7 @@ struct MainView: View {
   @State private var isCreatingScene = false
   @State private var editingScene: LightScene?
   @State private var isCreatingPreset = false
+  @State private var editingPreset: Preset?
   @State private var sync = SyncCoordinator()
   @State private var eventMonitor: Any?
   @State private var scrollContentHeight: CGFloat = 0
@@ -93,6 +94,7 @@ struct MainView: View {
     isCreatingScene = false
     editingScene = nil
     isCreatingPreset = false
+    editingPreset = nil
   }
 
   // MARK: - Header
@@ -104,7 +106,8 @@ struct MainView: View {
         activePanel: $activePanel,
         isCreatingScene: $isCreatingScene,
         isCreatingPreset: $isCreatingPreset,
-        editingScene: $editingScene
+        editingScene: $editingScene,
+        editingPreset: $editingPreset
       )
     }
   }
@@ -158,7 +161,7 @@ struct MainView: View {
     case .settings:
       withAccessoryInfo(light) { SettingsView(light: light, info: $0, index: index) }
     case .presets:
-      PresetsView(light: light, index: index, isCreating: $isCreatingPreset)
+      PresetsView(light: light, index: index, isCreating: $isCreatingPreset, editingPreset: $editingPreset)
         .environment(store)
         .fixedSize(horizontal: false, vertical: true)
     case .remove:

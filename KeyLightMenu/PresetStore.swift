@@ -40,6 +40,12 @@ struct Preset: Codable, Identifiable, Equatable {
     save()
   }
 
+  func update(_ preset: Preset) {
+    guard let i = presets.firstIndex(where: { $0.id == preset.id }) else { return }
+    presets[i] = preset
+    save()
+  }
+
   func move(_ preset: Preset, by offset: Int) {
     guard let i = presets.firstIndex(where: { $0.id == preset.id }) else { return }
     let j = i + offset

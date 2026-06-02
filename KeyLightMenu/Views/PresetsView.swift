@@ -11,6 +11,7 @@ struct PresetsView: View {
   let light: KeyLight
   let index: Int
   @Binding var isCreating: Bool
+  @Binding var editingPreset: Preset?
 
   @State private var presetName = ""
   @State private var snapshot: (brightness: Int, temperature: Int)?
@@ -23,10 +24,16 @@ struct PresetsView: View {
             if let state = light.state {
               snapshot = (state.brightness, state.temperature)
             }
+            if let preset = editingPreset {
+              presetName = preset.name
+              guard service.lights.indices.contains(index), service.lights[index].isReachable else { return }
+              Task { await service.applyPreset(brightness: preset.brightness, temperature: preset.temperature, at: index) }
+            }
           }
           .onDisappear {
             guard let snap = snapshot else { return }
             snapshot = nil
+            editingPreset = nil
             guard service.lights.indices.contains(index), service.lights[index].isReachable else { return }
             Task { await service.applyPreset(brightness: snap.brightness, temperature: snap.temperature, at: index) }
           }
@@ -51,7 +58,8 @@ struct PresetsView: View {
               PresetRow(
                 preset: preset,
                 isFirst: preset.id == hostPresets.first?.id,
-                isLast: preset.id == hostPresets.last?.id
+                isLast: preset.id == hostPresets.last?.id,
+                onEdit: { editingPreset = preset; isCreating = true }
               )
               if preset.id != hostPresets.last?.id {
                 Divider()
@@ -104,12 +112,20 @@ struct PresetsView: View {
               .textFieldStyle(.roundedBorder)
             Button("Save") {
               guard !presetName.isEmpty else { return }
-              store.add(
-                name: presetName,
-                brightness: state.brightness,
-                temperature: state.temperature,
-                lightSerial: serial
-              )
+              if var preset = editingPreset {
+                preset.name = presetName
+                preset.brightness = state.brightness
+                preset.temperature = state.temperature
+                store.update(preset)
+                editingPreset = nil
+              } else {
+                store.add(
+                  name: presetName,
+                  brightness: state.brightness,
+                  temperature: state.temperature,
+                  lightSerial: serial
+                )
+              }
               presetName = ""
               isCreating = false
             }
@@ -124,9 +140,15 @@ struct PresetsView: View {
 
 private struct PresetRow: View {
   @Environment(PresetStore.self) private var store
+  @Environment(KeyLightService.self) private var service
   let preset: Preset
   let isFirst: Bool
   let isLast: Bool
+  let onEdit: () -> Void
+
+  private var isLightReachable: Bool {
+    service.lights.first { $0.serial == preset.lightSerial }?.isReachable == true
+  }
 
   var body: some View {
     ManageRow(
@@ -136,7 +158,8 @@ private struct PresetRow: View {
       onMoveUp: { store.move(preset, by: -1) },
       onMoveDown: { store.move(preset, by: 1) },
       onDelete: { store.delete(preset) },
-      onEdit: nil
+      onEdit: onEdit,
+      editDisabledReason: isLightReachable ? nil : "Light is disconnected.\nConnect the light to edit this Preset."
     ) {
       HStack(spacing: 4) {
         Image(systemName: "sun.max.fill")

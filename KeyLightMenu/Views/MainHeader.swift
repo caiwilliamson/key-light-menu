@@ -15,6 +15,7 @@ struct MainHeader: View {
   @Binding var isCreatingScene: Bool
   @Binding var isCreatingPreset: Bool
   @Binding var editingScene: LightScene?
+  @Binding var editingPreset: Preset?
 
   var body: some View {
     if activeSection == .scenes {
@@ -48,8 +49,8 @@ struct MainHeader: View {
         crumbs: panel == .presets && isCreatingPreset
           ? [
             .init(title: lightName, action: { activePanel = nil }),
-            .init(title: panel.title, action: { isCreatingPreset = false }),
-            .init(title: "New Preset"),
+            .init(title: panel.title, action: { isCreatingPreset = false; editingPreset = nil }),
+            .init(title: editingPreset != nil ? "Edit Preset" : "New Preset"),
           ]
           : [
             .init(title: lightName, action: { activePanel = nil }),
