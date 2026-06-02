@@ -224,7 +224,7 @@ private struct SceneManageRow: View {
       onMoveDown: { sceneStore.move(scene, by: 1) },
       onDelete: { sceneStore.delete(scene) },
       onEdit: onEdit,
-      editDisabledReason: canEdit ? nil : "Some lights in this scene are disconnected"
+      editDisabledReason: canEdit ? nil : "Some lights in this Scene are disconnected.\nConnect all lights to edit Scene."
     ) {
       HStack(spacing: 4) {
         Image(systemName: "lightbulb.2")
