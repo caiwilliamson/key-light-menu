@@ -27,6 +27,8 @@ struct ManageRow<Info: View>: View {
       .padding(.trailing, 3)
       HStack(alignment: .firstTextBaseline, spacing: 12) {
         Text(name)
+          .lineLimit(1)
+          .truncationMode(.tail)
         info()
       }
       Spacer()
