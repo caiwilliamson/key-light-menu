@@ -138,7 +138,8 @@ private struct PresetRow: View {
       isLast: isLast,
       onMoveUp: { store.move(preset, by: -1) },
       onMoveDown: { store.move(preset, by: 1) },
-      onDelete: { store.delete(preset) }
+      onDelete: { store.delete(preset) },
+      onEdit: nil
     ) {
       HStack(spacing: 4) {
         Image(systemName: "sun.max.fill")

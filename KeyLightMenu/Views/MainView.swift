@@ -15,6 +15,7 @@ struct MainView: View {
   @State private var activePanel: Panel?
   @State private var activeSection: ActiveSection?
   @State private var isCreatingScene = false
+  @State private var editingScene: LightScene?
   @State private var isCreatingPreset = false
   @State private var sync = SyncCoordinator()
   @State private var eventMonitor: Any?
@@ -97,7 +98,8 @@ struct MainView: View {
         activeSection: $activeSection,
         activePanel: $activePanel,
         isCreatingScene: $isCreatingScene,
-        isCreatingPreset: $isCreatingPreset
+        isCreatingPreset: $isCreatingPreset,
+        editingScene: $editingScene
       )
     }
   }
@@ -107,7 +109,7 @@ struct MainView: View {
   @ViewBuilder
   private var mainContent: some View {
     if activeSection == .scenes {
-      ScenesView(isCreating: $isCreatingScene)
+      ScenesView(isCreating: $isCreatingScene, editingScene: $editingScene)
         .fixedSize(horizontal: false, vertical: true)
     } else if activeSection == .globalSettings {
       GlobalSettingsView()

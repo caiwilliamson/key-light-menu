@@ -14,13 +14,14 @@ struct MainHeader: View {
   @Binding var activePanel: Panel?
   @Binding var isCreatingScene: Bool
   @Binding var isCreatingPreset: Bool
+  @Binding var editingScene: LightScene?
 
   var body: some View {
     if activeSection == .scenes {
       BreadcrumbHeader(
-        homeAction: { activeSection = nil; isCreatingScene = false },
+        homeAction: { activeSection = nil; isCreatingScene = false; editingScene = nil },
         crumbs: isCreatingScene
-          ? [.init(title: "Scenes", action: { isCreatingScene = false }), .init(title: "New Scene")]
+          ? [.init(title: "Scenes", action: { isCreatingScene = false; editingScene = nil }), .init(title: editingScene != nil ? "Edit Scene" : "New Scene")]
           : [.init(title: "Scenes")]
       ) {
         if !isCreatingScene {

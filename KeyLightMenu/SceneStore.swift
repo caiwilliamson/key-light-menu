@@ -33,6 +33,12 @@ final class SceneStore {
     save()
   }
 
+  func update(_ scene: LightScene) {
+    guard let i = scenes.firstIndex(where: { $0.id == scene.id }) else { return }
+    scenes[i] = scene
+    save()
+  }
+
   func delete(_ scene: LightScene) {
     scenes.removeAll { $0.id == scene.id }
     save()
