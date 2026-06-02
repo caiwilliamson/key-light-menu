@@ -12,8 +12,6 @@ import Observation
 /// when the caller guarantees the access is serialised (e.g. moved to @MainActor).
 private struct Unchecked<T>: @unchecked Sendable { let value: T }
 
-// MARK: - Service
-
 @Observable
 @MainActor
 final class KeyLightService: NSObject {
@@ -42,6 +40,8 @@ final class KeyLightService: NSObject {
   }()
 
   private static let cacheKey = "cachedLights"
+
+  // MARK: - Lifecycle
 
   override init() {
     if let data = UserDefaults.standard.data(forKey: Self.cacheKey),
@@ -85,6 +85,8 @@ final class KeyLightService: NSObject {
   var isOn: Bool {
     lights.contains { $0.state?.isOn == true }
   }
+
+  // MARK: - Polling
 
   func startPolling() {
     pollTask?.cancel()
@@ -436,9 +438,9 @@ extension KeyLightService {
   }
 }
 
-// MARK: - NetServiceBrowserDelegate
+// MARK: - Discovery Callbacks
 
-extension KeyLightService: NetServiceBrowserDelegate {
+extension KeyLightService: NetServiceBrowserDelegate, NetServiceDelegate {
   nonisolated func netServiceBrowser(
     _: NetServiceBrowser,
     didFind service: NetService,
@@ -460,11 +462,7 @@ extension KeyLightService: NetServiceBrowserDelegate {
       self.stopDiscovery()
     }
   }
-}
 
-// MARK: - NetServiceDelegate
-
-extension KeyLightService: NetServiceDelegate {
   nonisolated func netServiceDidResolveAddress(_ sender: NetService) {
     guard let addresses = sender.addresses, !addresses.isEmpty else { return }
     // Extract the IPv4 address from the socket address data
