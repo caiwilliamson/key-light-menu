@@ -31,22 +31,25 @@ struct ManageRow<Info: View>: View {
             .lineLimit(1)
             .truncationMode(.tail)
           info()
+            .fixedSize()
         }
-        Spacer()
-        Button(action: onEdit) {
-          Image(systemName: "square.and.pencil")
-            .foregroundStyle(editDisabledReason == nil ? .secondary : Color.secondary.opacity(0.3))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        HStack(spacing: 6) {
+          Button(action: onEdit) {
+            Image(systemName: "square.and.pencil")
+              .foregroundStyle(editDisabledReason == nil ? .secondary : Color.secondary.opacity(0.3))
+          }
+          .buttonStyle(.plain)
+          .disabled(editDisabledReason != nil)
+          .tooltip(editDisabledReason ?? "Edit")
+          Button(action: onDelete) {
+            Image(systemName: "trash")
+              .foregroundStyle(.secondary)
+          }
+          .buttonStyle(.plain)
+          .tooltip("Delete")
         }
-        .buttonStyle(.plain)
-        .disabled(editDisabledReason != nil)
-        .tooltip(editDisabledReason ?? "Edit")
-        .padding(.trailing, 8)
-        Button(action: onDelete) {
-          Image(systemName: "trash")
-            .foregroundStyle(.secondary)
-        }
-        .buttonStyle(.plain)
-        .tooltip("Delete")
+        .padding(.leading, 12)
       }
     }
   }

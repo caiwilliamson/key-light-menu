@@ -162,16 +162,19 @@ private struct PresetRow: View {
       onEdit: onEdit,
       editDisabledReason: isLightReachable ? nil : "Light is disconnected.\nConnect the light to edit this Preset."
     ) {
-      HStack(spacing: 4) {
-        Image(systemName: "sun.max.fill")
-          .tooltip("Brightness")
-        Text("\(preset.brightness)%")
-          .font(.callout)
-        Image(systemName: "thermometer.medium")
-          .padding(.leading, 4)
-          .tooltip("Color Temperature")
-        Text(Double(preset.temperature).kelvinLabel)
-          .font(.callout)
+      HStack(spacing: 8) {
+        HStack(spacing: 3) {
+          Image(systemName: "sun.max.fill")
+            .tooltip("Brightness")
+          Text("\(preset.brightness)%")
+            .font(.callout)
+        }
+        HStack(spacing: 3) {
+          Image(systemName: "thermometer.medium")
+            .tooltip("Color Temperature")
+          Text(Double(preset.temperature).kelvinLabel)
+            .font(.callout)
+        }
       }
       .foregroundStyle(.secondary)
     }
