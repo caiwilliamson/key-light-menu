@@ -30,7 +30,7 @@ struct KeyLightMenuApp: App {
           }
         }
     } label: {
-      Image(systemName: service.isOn ? "lightbulb.fill" : "lightbulb")
+      Image(systemName: service.isOn ? "rectangle.inset.fill" : "rectangle")
     }
     .menuBarExtraStyle(.window)
   }

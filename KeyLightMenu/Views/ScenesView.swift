@@ -222,7 +222,7 @@ private struct SceneManageRow: View {
       editDisabledReason: canEdit ? nil : "Some lights in this Scene are disconnected.\nConnect all lights to edit Scene."
     ) {
       HStack(spacing: 3) {
-        Image(systemName: "lightbulb.2")
+        Image(systemName: "rectangle.on.rectangle")
         Text("\(scene.lights.count) light\(scene.lights.count == 1 ? "" : "s")")
           .font(.callout)
       }
