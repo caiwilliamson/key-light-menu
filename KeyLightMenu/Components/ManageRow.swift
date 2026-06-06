@@ -13,7 +13,7 @@ struct ManageRow<Info: View>: View {
   let onMoveDown: () -> Void
   let onDelete: () -> Void
   let onEdit: () -> Void
-  var editDisabledReason: String? = nil
+  var editDisabledReason: String?
   @ViewBuilder let info: () -> Info
 
   var body: some View {
