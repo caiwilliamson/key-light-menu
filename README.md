@@ -35,13 +35,13 @@ Key Light Menu should work with the following Elgato lights:
 
 ## Download & Install
 
-Download the [latest release](../../releases/latest).
+Download the [latest release](https://github.com/caiwilliamson/key-light-menu/releases/latest).
 
 When prompted, allow Key Light Menu permission to scan your local network so it can find and communicate with your Elgato Key Lights. It scans continuously for lights on your network and adds them automatically.
 
 ## Issues & Feedback
 
-If you'd like to report an issue, request a feature or give feedback please [open a new issue](../../issues/new).
+If you'd like to report an issue, request a feature or give feedback please [open a new issue](https://github.com/caiwilliamson/key-light-menu/issues/new).
 
 ## Screenshots
 
