@@ -11,7 +11,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		229F83732F9FFA7200CD8A09 /* KeyLightMenu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KeyLightMenu.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		229F83732F9FFA7200CD8A09 /* Key Light Menu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Key Light Menu.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -45,7 +45,7 @@
 		229F83742F9FFA7200CD8A09 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				229F83732F9FFA7200CD8A09 /* KeyLightMenu.app */,
+				229F83732F9FFA7200CD8A09 /* Key Light Menu.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -53,9 +53,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		229F83722F9FFA7200CD8A09 /* KeyLightMenu */ = {
+		229F83722F9FFA7200CD8A09 /* Key Light Menu */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 229F837E2F9FFA7300CD8A09 /* Build configuration list for PBXNativeTarget "KeyLightMenu" */;
+			buildConfigurationList = 229F837E2F9FFA7300CD8A09 /* Build configuration list for PBXNativeTarget "Key Light Menu" */;
 			buildPhases = (
 				229F836F2F9FFA7200CD8A09 /* Sources */,
 				229F83702F9FFA7200CD8A09 /* Frameworks */,
@@ -68,12 +68,12 @@
 			fileSystemSynchronizedGroups = (
 				229F83752F9FFA7200CD8A09 /* KeyLightMenu */,
 			);
-			name = KeyLightMenu;
+			name = "Key Light Menu";
 			packageProductDependencies = (
 				228C30612FA40D8C00D7889E /* Flow */,
 			);
 			productName = KeyLightMenu;
-			productReference = 229F83732F9FFA7200CD8A09 /* KeyLightMenu.app */;
+			productReference = 229F83732F9FFA7200CD8A09 /* Key Light Menu.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -108,7 +108,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				229F83722F9FFA7200CD8A09 /* KeyLightMenu */,
+				229F83722F9FFA7200CD8A09 /* Key Light Menu */,
 			);
 		};
 /* End PBXProject section */
@@ -368,7 +368,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		229F837E2F9FFA7300CD8A09 /* Build configuration list for PBXNativeTarget "KeyLightMenu" */ = {
+		229F837E2F9FFA7300CD8A09 /* Build configuration list for PBXNativeTarget "Key Light Menu" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				229F837F2F9FFA7300CD8A09 /* Debug */,
